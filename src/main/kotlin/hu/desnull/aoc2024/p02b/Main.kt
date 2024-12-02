@@ -15,12 +15,7 @@ fun check(list: List<Int>): Boolean {
     a, b ->
     a - b
   }
-  return diffs.all {
-    when (it) { in (1..3) -> true else -> false }
-  } ||
-    diffs.all {
-      when (it) { in (-3..-1) -> true else -> false }
-    }
+  return diffs.all { it in 1..3 } || diffs.all { it in -3..-1 }
 }
 
 fun main() {
