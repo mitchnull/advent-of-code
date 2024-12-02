@@ -1,4 +1,4 @@
-package hu.desnull.aoc2024.p02a
+package hu.desnull.aoc2024.p02b
 
 import kotlin.math.abs
 
@@ -28,6 +28,12 @@ fun check(list: List<Int>): Boolean {
 }
 
 fun main() {
-  val res = readLines().map { it.split("\\s+".toRegex()).map(String::toInt) }.map(::check).count { it }
+  val res = readLines()
+    .map { it.split("\\s+".toRegex()).map(String::toInt) }
+    .map {
+      (0..it.size).map { d ->
+        check(it.filterIndexed { i, _ -> i != d })
+      }.any { it }
+    }.count { it }
   println(res)
 }
