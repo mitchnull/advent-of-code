@@ -1,4 +1,6 @@
 code.txt
+input/*/input.txt
+input/*/gh.txt
 ### IntelliJ IDEA ###
 .idea
 *.iws
