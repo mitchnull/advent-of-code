@@ -16,9 +16,6 @@ fun main() {
   val left = ArrayList<Int>()
   val right = ArrayList<Int>()
   readLines().forEach {
-    if (it.isEmpty()) {
-      return
-    }
     val (l, r) = it.split("\\s+".toRegex(), 2)
     left.add(l.toInt())
     right.add(r.toInt())
