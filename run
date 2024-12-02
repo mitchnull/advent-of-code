@@ -19,7 +19,7 @@ if [ -f "src/main/cpp/$1/main.cpp" ]; then
   make -C build -f ../Makefile cpp/$1/main >/dev/null &&
   time build/cpp/$1/main < $d/$input
 fi
-if [ -f "src/main/kotlin/hu/desnull/aoc2022/p$1/Main.kt" ]; then
+if [ -f "src/main/kotlin/hu/desnull/aoc2024/p$1/Main.kt" ]; then
   echo "Kotlin verion:"
-  time gradle --console=plain -q -PmainClassName=hu.desnull.aoc2022.p$p.MainKt run < $d/$input
+  time gradle --console=plain -q -PmainClassName=hu.desnull.aoc2024.p$p.MainKt run < $d/$input
 fi
