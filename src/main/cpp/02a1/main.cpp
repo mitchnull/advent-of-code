@@ -28,11 +28,9 @@ static bool
 check(const std::string& line) {
   auto ss = std::stringstream(line);
   auto nums = Nums(std::istream_iterator<int>(ss), std::istream_iterator<int>());
-  if (!std::is_sorted(nums.begin(), nums.end()) && !std::is_sorted(nums.begin(), nums.end(), std::greater<>())) {
-    return false;
-  }
   std::adjacent_difference(nums.begin(), nums.end(), nums.begin());
-  return std::find_if(++nums.begin(), nums.end(), [](auto a) { return a == 0 || std::abs(a) > 3; }) == nums.end();
+  return std::find_if(nums.begin() + 1, nums.end(), [](auto a) { return a <= 0 || 3 < a; }) == nums.end() ||
+    std::find_if(nums.begin() + 1, nums.end(), [](auto a) { return a < -3 || 0 <= a; }) == nums.end();
 }
 
 int
