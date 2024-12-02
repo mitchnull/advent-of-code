@@ -1,7 +1,5 @@
 package hu.desnull.aoc2024.p02b
 
-import kotlin.math.abs
-
 private fun isWhiteSpace(c: Char) = c in " \r\n\t"
 private fun readString() = generateSequence {
   val c = System.`in`.read()
@@ -13,18 +11,16 @@ fun readLines() = generateSequence {
 }
 
 fun check(list: List<Int>): Boolean {
-  return (
-    list.zipWithNext() {
-      a, b ->
-      a < b
-    }.all { it } || list.zipWithNext() {
-      a, b ->
-      a > b
-    }.all { it }
-    ) && list.zipWithNext() {
+  val diffs = list.zipWithNext() {
     a, b ->
-    abs(a - b) <= 3
-  }.all { it }
+    a - b
+  }
+  return diffs.all {
+    when (it) { in (1..3) -> true else -> false }
+  } ||
+    diffs.all {
+      when (it) { in (-3..-1) -> true else -> false }
+    }
 }
 
 fun main() {
