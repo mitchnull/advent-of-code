@@ -1,15 +1,10 @@
 #include <iostream>
 #include <cstdint>
-#include <numeric>
 #include <regex>
 #include <string>
-#include <vector>
-#include <sstream>
 #include <iterator>
 
 using uint = std::uint32_t;
-using Strings = std::vector<std::string>;
-using Nums = std::vector<int>;
 
 
 int
