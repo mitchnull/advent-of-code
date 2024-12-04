@@ -10,7 +10,6 @@ using uint = std::uint32_t;
 int
 main() {
   auto text = std::string(std::istreambuf_iterator<char>(std::cin), {});
-  std::transform(text.begin(), text.end(), text.begin(), [](auto c) { return std::isspace(c) ? ' ' : c; });
 
   auto r = std::regex("mul[(]([0-9]{1,3}),([0-9]{1,3})[)]");
 
@@ -22,7 +21,7 @@ main() {
 
   // ------------------------------------------------------------------------ //
 
-  auto dr = std::regex("don't[(][)].*?(do[(][)]|$)");
+  auto dr = std::regex("don't[(][)][^]*?(do[(][)]|$)");
   std::string text2 = std::regex_replace(text, dr, "");
 
   int res2 = 0;
