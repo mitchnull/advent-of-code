@@ -2,16 +2,29 @@ package hu.desnull.aoc2024.p05
 
 import java.util.Collections
 
-fun check1(list: List<String>, rules: Set<String>): Boolean =
-  list.zipWithNext {
-    a, b ->
-    rules.contains("$b|$a")
-  }.none { it }
+fun check1(list: List<String>, rules: Set<String>): Boolean {
+  for ((i, v) in list.withIndex()) {
+    for (j in i + 1 until list.size) {
+      if (rules.contains(list[j] + "|" + v)) {
+        return false
+      }
+    }
+  }
+  return true
+}
 
 fun sort(list: List<String>, rules: Set<String>): List<String> {
-  Collections.sort(list) {
-    a, b ->
-    if (rules.contains("$a|$b")) -1 else if (rules.contains("$b|$a")) 1 else 0
+  var needCheck = true
+  while (needCheck) {
+    needCheck = false
+    for (i in list.indices) {
+      for (j in i + 1 until list.size) {
+        if (rules.contains(list[j] + "|" + list[i])) {
+          Collections.swap(list, i, j)
+          needCheck = true
+        }
+      }
+    }
   }
   return list
 }
