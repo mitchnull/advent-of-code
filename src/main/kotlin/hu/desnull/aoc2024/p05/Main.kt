@@ -3,23 +3,16 @@ package hu.desnull.aoc2024.p05
 import java.util.Collections
 
 fun check1(rules: Set<String>, list: List<String>): Boolean {
-  for ((i, v) in list.withIndex()) {
-    for (j in i + 1 until list.size) {
-      if (rules.contains(list[j] + "|" + v)) {
-        return false
-      }
-    }
-  }
-  return true
+  return list.zipWithNext {
+    a, b ->
+    rules.contains("$b|$a")
+  }.none { it }
 }
 
 fun order(rules: Set<String>, list: List<String>): List<String> {
-  for (i in list.indices) {
-    for (j in i + 1 until list.size) {
-      if (rules.contains(list[j] + "|" + list[i])) {
-        Collections.swap(list, i, j)
-      }
-    }
+  Collections.sort(list) {
+    a, b ->
+    if (rules.contains("$a|$b")) -1 else if (rules.contains("$b|$a")) 1 else 0
   }
   return list
 }
