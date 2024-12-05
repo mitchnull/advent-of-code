@@ -9,12 +9,11 @@ fun check(list: List<Int>): Boolean {
 }
 
 fun main() {
-  val lines = generateSequence{ readlnOrNull() }.toList()
+  val lines = generateSequence { readlnOrNull() }.toList()
 
   val res1 = lines
     .map { it.split("\\s+".toRegex()).map(String::toInt) }
-    .map{ check(it) }
-    .count { it }
+    .count { check(it) }
   println("1: $res1")
 
   // ------------------------------------------------------------------------ //
