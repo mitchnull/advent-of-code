@@ -2,7 +2,6 @@
 #include <cstdint>
 #include <string>
 #include <sstream>
-#include <functional>
 
 using Num = std::uint64_t;
 
@@ -11,48 +10,30 @@ struct Data {
   std::vector<Num> nums;
 };
 
-using Ops = std::vector<std::function<Num(Num, Num)>>;
-
-auto add = [](Num a, Num b) { return a + b; };
-auto mul = [](Num a, Num b) { return a * b; };
-auto concat = [](Num a, Num b) { return std::stol(std::to_string(a) + std::to_string(b)); };
-
-const auto OPS1 = Ops{ add, mul };
-const auto OPS2 = Ops{ add, mul, concat };
-
 static bool
-inc(auto b, auto e, std::size_t numOps) {
+check1(Num res, auto b, auto e) {
+  Num n = *b++;
   if (b == e) {
-    return false;
+    return res == n;
   }
-  if (++(*b) < numOps) {
-    return true;
-  }
-  *b = 0;
-  return inc(++b, e, numOps);
+  return
+    (res >= n && check1(res - n, b, e)) ||
+    (res % n == 0 && check1(res / n, b, e));
 }
 
 static bool
-check(const Data& d, const Ops& ops, const std::vector<Num> sel) {
-  auto nb = d.nums.begin();
-  auto res = *nb++;
-  for (auto b = sel.begin(), e = sel.end(); b != e; ++b, ++nb) {
-    res = ops[*b](res, *nb);
+check2(Num res, auto b, auto e) {
+  Num n = *b++;
+  if (b == e) {
+    return res == n;
   }
-  return res == d.res;
-}
+  Num mask = std::pow(10, std::floor(std::log10(n)) + 1);
+  return
+    (res >= n && check2(res - n, b, e)) ||
+    (res % n == 0 && check2(res / n, b, e)) ||
+    (res % mask == n && check2(res / mask, b, e));
 
-static bool
-check(const Data& d, const Ops& ops) {
-  std::vector<Num> sel(d.nums.size() - 1);
-  do {
-    if (check(d, ops, sel)) {
-      return true;
-    }
-  } while (inc(sel.begin(), sel.end(), ops.size()));
-  return false;
 }
-
 
 // ------------------------------------------------------------------------ //
 
@@ -76,10 +57,10 @@ main() {
   Num res1 = 0;
   Num res2 = 0;
   for (const auto& d: input) {
-    if (check(d, OPS1)) {
+    if (check1(d.res, d.nums.rbegin(), d.nums.rend())) {
       res1 += d.res;
     }
-    if (check(d, OPS2)) {
+    if (check2(d.res, d.nums.rbegin(), d.nums.rend())) {
       res2 += d.res;
     }
   }
