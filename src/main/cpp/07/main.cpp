@@ -11,40 +11,45 @@ struct Data {
   std::vector<Num> nums;
 };
 
+using Ops = std::vector<std::function<Num(Num, Num)>>;
+
 auto add = [](Num a, Num b) { return a + b; };
 auto mul = [](Num a, Num b) { return a * b; };
-const auto OPS = std::vector<std::function<Num(Num, Num)>>{ add, mul };
+auto concat = [](Num a, Num b) { return std::stol(std::to_string(a) + std::to_string(b)); };
+
+const auto OPS1 = Ops{ add, mul };
+const auto OPS2 = Ops{ add, mul, concat };
 
 static bool
-inc(auto b, auto e) {
+inc(auto b, auto e, std::size_t numOps) {
   if (b == e) {
     return false;
   }
-  if (++(*b) < OPS.size()) {
+  if (++(*b) < numOps) {
     return true;
   }
   *b = 0;
-  return inc(++b, e);
+  return inc(++b, e, numOps);
 }
 
 static bool
-check(const Data& d, const std::vector<Num> sel) {
+check(const Data& d, const Ops& ops, const std::vector<Num> sel) {
   auto nb = d.nums.begin();
   auto res = *nb++;
   for (auto b = sel.begin(), e = sel.end(); b != e; ++b, ++nb) {
-    res = OPS[*b](res, *nb);
+    res = ops[*b](res, *nb);
   }
   return res == d.res;
 }
 
 static bool
-check1(const Data& d) {
+check(const Data& d, const Ops& ops) {
   std::vector<Num> sel(d.nums.size() - 1);
   do {
-    if (check(d, sel)) {
+    if (check(d, ops, sel)) {
       return true;
     }
-  } while (inc(sel.begin(), sel.end()));
+  } while (inc(sel.begin(), sel.end(), ops.size()));
   return false;
 }
 
@@ -69,14 +74,16 @@ main() {
   }
 
   Num res1 = 0;
+  Num res2 = 0;
   for (const auto& d: input) {
-    if (check1(d)) {
+    if (check(d, OPS1)) {
       res1 += d.res;
+    }
+    if (check(d, OPS2)) {
+      res2 += d.res;
     }
   }
   std::cout << "1: " << res1 << "\n";
-
-  Num res2 = 0;
   std::cout << "2: " << res2 << "\n";
 
   return 0;
