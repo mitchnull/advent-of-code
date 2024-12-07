@@ -57,12 +57,8 @@ main() {
   Num res1 = 0;
   Num res2 = 0;
   for (const auto& d: input) {
-    if (check1(d.res, d.nums.rbegin(), d.nums.rend())) {
-      res1 += d.res;
-    }
-    if (check2(d.res, d.nums.rbegin(), d.nums.rend())) {
-      res2 += d.res;
-    }
+    res1 += d.res * check1(d.res, d.nums.rbegin(), d.nums.rend());
+    res2 += d.res * check2(d.res, d.nums.rbegin(), d.nums.rend());
   }
   std::cout << "1: " << res1 << "\n";
   std::cout << "2: " << res2 << "\n";
