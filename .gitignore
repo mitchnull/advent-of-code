@@ -1,5 +1,5 @@
 code.txt
-input/*/*.txt
+*/input/*/*.txt
 ### IntelliJ IDEA ###
 .idea
 *.iws
