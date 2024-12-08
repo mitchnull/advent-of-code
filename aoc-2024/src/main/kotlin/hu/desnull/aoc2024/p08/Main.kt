@@ -26,11 +26,11 @@ fun main() {
 fun solve1(map: Map<Char, List<Pos>>, w: Int, h: Int): Int {
   val antiNodes = HashSet<Pos>()
   map.forEach {
-    for ((i, a) in it.value.withIndex()) {
-      for (j in i + 1 until it.value.size) {
-        val b = it.value[j]
-        addNode(Pos(a.x - (b.x - a.x), a.y - (b.y - a.y)), antiNodes, w, h)
-        addNode(Pos(b.x + (b.x - a.x), b.y + (b.y - a.y)), antiNodes, w, h)
+    for (a in it.value) {
+      for (b in it.value) {
+        if (a != b) {
+          addNode(Pos(b.x + (b.x - a.x), b.y + (b.y - a.y)), antiNodes, w, h)
+        }
       }
     }
   }
@@ -40,11 +40,11 @@ fun solve1(map: Map<Char, List<Pos>>, w: Int, h: Int): Int {
 fun solve2(map: Map<Char, List<Pos>>, w: Int, h: Int): Int {
   val antiNodes = HashSet<Pos>()
   map.forEach {
-    for ((i, a) in it.value.withIndex()) {
-      for (j in i + 1 until it.value.size) {
-        val b = it.value[j]
-        addNodes(a, b.x - a.x, b.y - a.y, antiNodes, w, h)
-        addNodes(a, a.x - b.x, a.y - b.y, antiNodes, w, h)
+    for (a in it.value) {
+      for (b in it.value) {
+        if (a != b) {
+          addNodes(b, b.x - a.x, b.y - a.y, antiNodes, w, h)
+        }
       }
     }
   }
