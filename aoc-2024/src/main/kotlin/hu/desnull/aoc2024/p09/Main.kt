@@ -5,50 +5,39 @@ data class Block(val id: Int, val len: Int)
 fun main() {
   val line = readln()
 
-  val res1 = solve1(line.toCharArray())
+  val res1 = solve1(line)
   println("1: $res1")
 
-  val res2 = solve2(line.toCharArray())
+  val res2 = solve2(line)
   println("2: $res2")
 }
 
-fun solve1(line: CharArray): Long {
-  val compressed = ArrayList<Int>()
-  var b = 0
-  var e = ((line.size - 1)/ 2) * 2
-  while (b <= e) {
-    val id = b / 2
-    var len = line[b++] - '0'
-    while (len-- > 0) {
-      compressed.add(id)
-    }
-    if (b >= e) {
-      break
-    }
-    var free = line[b++] - '0'
-    while (free > 0 && b < e) {
-      val id2 = e / 2
-      var len2 = line[e] - '0'
-      while (len2 > 0 && free > 0) {
-        --len2
-        --free
-        compressed.add(id2)
-      }
-      if (len2 > 0) {
-        line[e] = '0' + len2
-      } else {
-        e -= 2
-      }
+fun solve1(line: String) : Long {
+  val disk = ArrayList<Int>()
+  for ((i, v) in line.withIndex()) {
+    for (j in 1..v - '0') {
+      disk.add(if (i % 2 == 0) i / 2 else -1)
     }
   }
-  var res : Long = 0
-  for ((i, v) in compressed.withIndex()) {
-    res += i * v
+  var b = 0
+  var e = disk.size - 1
+  while (b < e) {
+    if (disk[b] >= 0) {
+      ++b
+    } else if (disk[e] < 0) {
+      --e
+    } else {
+      disk[b++] = disk[e--]
+    }
+  }
+  var res = 0L
+  for (i in 0 until b) {
+    res += i * disk[i]
   }
   return res
 }
 
-fun solve2(line: CharArray): Long {
+fun solve2(line: String): Long {
   val blocks = ArrayList<Block>()
   for ((i, v) in line.withIndex()) {
     blocks.add(Block(if (i % 2 == 0) i / 2 else -1, v - '0'))
