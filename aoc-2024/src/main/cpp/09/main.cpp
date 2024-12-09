@@ -11,7 +11,6 @@ struct Block {
 
 static Num
 solve1(std::string_view line) {
-
   auto disk = std::vector<int>();
   for (auto i = 0Z; i < line.size(); ++i) {
     for (auto j = 0Z; j < line[i] - '0'; ++j) {
@@ -38,16 +37,6 @@ solve1(std::string_view line) {
 
 // ------------------------------------------------------------------------ //
 
-static std::size_t
-findFreePos(const std::vector<Block>& blocks, std::size_t e, uint len) {
-  for (auto i = 1Z; i < e; ++i) {
-    if (blocks[i].id < 0 && blocks[i].len >= len) {
-      return i;
-    }
-  }
-  return e;
-}
-
 static Num
 solve2(std::string_view line) {
   auto blocks = std::vector<Block>();
@@ -55,28 +44,23 @@ solve2(std::string_view line) {
     blocks.emplace_back(i % 2 == 0 ? i / 2 : -1, line[i] - '0');
   }
 
-  auto e = blocks.size() - 1;
-  while (e > 1) {
-    auto block = blocks[e];
-    if (block.id < 0) {
-      --e;
+  for (auto b = blocks.begin(), e = blocks.end() - 1; e != b; --e) {
+    if (e->id < 0) {
       continue;
     }
-    auto pos = findFreePos(blocks, e, block.len);
-    if (pos < e) {
-      blocks[e].id = -1;
-      auto free = blocks[pos];
-      blocks[pos] = block;
-      if (free.len > block.len) {
-        blocks.emplace(blocks.begin() + pos + 1, -1, free.len - block.len);
+    auto pos = std::find_if(b, e, [&e](auto bl) { return bl.id < 0 && bl.len >= e->len; });
+    if (pos != e) {
+      std::iter_swap(pos, e);
+      if (e->len > pos->len) {
+        blocks.emplace(pos + 1, -1, e->len - pos->len);
+        (e + 1)->len = pos->len;
       }
     }
-    --e;
   }
 
   auto pos = 0Z;
   Num res = 0;
-  for (const auto& b: blocks) {
+  for (auto b: blocks) {
     Num id = (b.id > 0) ?  b.id : 0;
     res += id * (b.len * (2 * pos + b.len - 1) / 2);
     pos += b.len;
