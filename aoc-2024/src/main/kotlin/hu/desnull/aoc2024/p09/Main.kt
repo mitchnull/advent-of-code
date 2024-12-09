@@ -12,7 +12,7 @@ fun main() {
   println("2: $res2")
 }
 
-fun solve1(line: String) : Long {
+fun solve1(line: String): Long {
   val disk = ArrayList<Int>()
   for ((i, v) in line.withIndex()) {
     for (j in 1..v - '0') {
@@ -21,18 +21,15 @@ fun solve1(line: String) : Long {
   }
   var b = 0
   var e = disk.size - 1
+  var res = 0L
   while (b < e) {
     if (disk[b] >= 0) {
-      ++b
+      res += disk[b] * b++
     } else if (disk[e] < 0) {
       --e
     } else {
-      disk[b++] = disk[e--]
+      res += disk[e--] * b++
     }
-  }
-  var res = 0L
-  for (i in 0 until b) {
-    res += i * disk[i]
   }
   return res
 }
@@ -73,7 +70,7 @@ fun solve2(line: String): Long {
 }
 
 fun findFreePos(blocks: ArrayList<Block>, e: Int, len: Int): Int {
-  for (i in 1 until e ) {
+  for (i in 1 until e) {
     if (blocks[i].id < 0 && blocks[i].len >= len) {
       return i
     }
