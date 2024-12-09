@@ -40,7 +40,6 @@ fun solve2(line: String): Long {
     blocks.add(Block(if (i % 2 == 0) i / 2 else -1, v - '0'))
   }
   var e = blocks.size - 1
-  blocks.add(Block(-1, 0))
   while (e > 1) {
     val block = blocks[e]
     if (block.id < 0) {
@@ -50,11 +49,11 @@ fun solve2(line: String): Long {
     val pos = findFreePos(blocks, e, block.len)
     if (pos < e) {
       blocks[e] = Block(-1, block.len)
-      val free = blocks.removeAt(pos)
+      val free = blocks[pos]
+      blocks[pos] = block
       if (free.len > block.len) {
-        blocks.add(pos, Block(-1, free.len - block.len))
+        blocks.add(pos + 1, Block(-1, free.len - block.len))
       }
-      blocks.add(pos, block)
     }
     --e
   }
