@@ -4,25 +4,17 @@
 
 using Num = std::uint64_t;
 
-struct Block {
-  int id;
-  uint len;
-};
-
 static Num
 solve1(std::string_view line) {
   auto disk = std::vector<int>();
-  for (auto i = 0Z; i < line.size(); ++i) {
-    for (auto j = 0Z; j < line[i] - '0'; ++j) {
+  for (auto i = 0UZ; i < line.size(); ++i) {
+    for (auto j = 0UZ; j < line[i] - '0'; ++j) {
       disk.push_back(i % 2 == 0 ? i / 2 : -1);
     }
   }
 
-  auto b = 0Z;
-  auto e = disk.size() - 1;
-
   Num res = 0;
-  while (b < e) {
+  for (auto b = 0UZ, e = disk.size() - 1; b < e; ) {
     if (disk[b] >= 0) {
       res += disk[b] * b;
       ++b;
@@ -37,10 +29,15 @@ solve1(std::string_view line) {
 
 // ------------------------------------------------------------------------ //
 
+struct Block {
+  int id;
+  uint len;
+};
+
 static Num
 solve2(std::string_view line) {
   auto blocks = std::vector<Block>();
-  for (auto i = 0Z; i < line.size(); ++i) {
+  for (auto i = 0UZ; i < line.size(); ++i) {
     blocks.emplace_back(i % 2 == 0 ? i / 2 : -1, line[i] - '0');
   }
 
@@ -58,12 +55,59 @@ solve2(std::string_view line) {
     }
   }
 
-  auto pos = 0Z;
+  auto pos = 0UZ;
   Num res = 0;
   for (auto b: blocks) {
     Num id = (b.id > 0) ?  b.id : 0;
     res += id * (b.len * (2 * pos + b.len - 1) / 2);
     pos += b.len;
+  }
+  return res;
+}
+
+// ------------------------------------------------------------------------ //
+// Baltazar's version
+
+struct FileBlock {
+  int id;
+  uint pos;
+  uint len;
+};
+
+struct FreeBlock {
+  uint pos;
+  uint len;
+};
+
+static Num
+solve2b(std::string_view line) {
+  auto files = std::vector<FileBlock>();
+  auto frees = std::vector<FreeBlock>();
+  auto pos = 0U;
+  for (auto i = 0UZ; i < line.size(); ++i) {
+    auto len = line[i] - '0';
+    if (i % 2 == 0) {
+      files.emplace_back(i / 2, pos, len);
+    } else {
+      frees.emplace_back(pos, len);
+    }
+    pos += len;
+  }
+
+  auto firsts = std::vector<decltype(frees.begin())>(10, frees.begin());
+  Num res = 0;
+  for (auto it = files.rbegin(), rend = files.rend(); it != rend; ++it) {
+    auto pos = std::find_if(firsts[it->len], frees.end(), [it](auto fb) {
+        return fb.pos >= it->pos || fb.len >= it->len;
+      });
+    firsts[it->len] = pos;
+    if (pos != frees.end() && pos->pos < it->pos) {
+      res += it->id * (it->len * (2 * pos->pos + it->len - 1) / 2);
+      pos->len -= it->len;
+      pos->pos += it->len;
+    } else {
+      res += it->id * (it->len * (2 * it->pos + it->len - 1) / 2);
+    }
   }
   return res;
 }
@@ -75,8 +119,9 @@ main() {
   std::string line;
   std::cin >> line;
 
-  std::cout << "1: " << solve1(line) << "\n";
-  std::cout << "2: " << solve2(line) << "\n";
+  std::cout << "1:  " << solve1(line) << "\n";
+  std::cout << "2:  " << solve2(line) << "\n";
+  std::cout << "2b: " << solve2b(line) << "\n";
 
   return 0;
 }
