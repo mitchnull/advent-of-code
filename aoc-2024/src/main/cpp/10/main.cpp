@@ -3,7 +3,9 @@
 #include <string>
 #include <functional>
 #include <set>
+#include <ranges>
 
+namespace views = std::views;
 using uint = std::uint32_t;
 
 template<typename T>
@@ -12,6 +14,16 @@ class Map {
   int w_, h_;
   std::vector<value_type> data_;
   value_type off_;
+
+  template <typename V>
+  struct Iter {
+    int x, y;
+    V v;
+  };
+  template <typename M>
+  static auto iter_(M& map) {
+    return views::iota(0UZ, map.data_.size()) | views::transform([&map](int i) { return Iter<decltype(map[0,0])>{i % map.w_, i / map.w_, map.data_[i]}; });
+  }
 public:
   template<typename Tr = std::identity>
   Map(std::vector<std::string> lines, Tr tr = {}, value_type off = {}) : w_(lines[0].size()), h_(lines.size()), data_{}, off_(off) {
@@ -40,6 +52,9 @@ public:
   }
   int w() const { return w_; }
   int h() const { return h_; };
+
+  auto iter() { return iter_(*this); }
+  auto iter() const { return iter_(*this); }
 };
 
 struct Dir {
@@ -71,41 +86,32 @@ using Num = int;
 
 static std::pair<Num, Num>
 solve(PlaceMap& map) {
-  for (int x = 0; x < map.w(); ++x) {
-    for (int y = 0; y < map.h(); ++y) {
-      auto& p = map[x, y];
-      if (p.h == 0) {
-        p.origins.emplace(x, y);
-        p.ways = 1;
-      }
+  for (auto [x, y, p] : map.iter()) {
+    if (p.h == 0) {
+      p.origins.emplace(x, y);
+      p.ways = 1;
     }
   }
   for (int h = 0; h < 9; ++h) {
-    for (int x = 0; x < map.w(); ++x) {
-      for (int y = 0; y < map.h(); ++y) {
-        auto& p = map[x, y];
-        if (p.h == h) {
-          for (auto d: DIRS) {
-            auto xx = x + d.dx;
-            auto yy = y + d.dy;
-            auto& pp = map[xx, yy];
-            if (pp.h == h + 1) {
-              pp.origins.insert(p.origins.begin(), p.origins.end());
-              pp.ways += p.ways;
-            }
+    for (auto [x, y, p] : map.iter()) {
+      if (p.h == h) {
+        for (auto d: DIRS) {
+          auto xx = x + d.dx;
+          auto yy = y + d.dy;
+          auto& pp = map[xx, yy];
+          if (pp.h == h + 1) {
+            pp.origins.insert(p.origins.begin(), p.origins.end());
+            pp.ways += p.ways;
           }
         }
       }
     }
   }
   Num res1 = 0, res2 = 0;
-  for (int x = 0; x < map.w(); ++x) {
-    for (int y = 0; y < map.h(); ++y) {
-      auto& p = map[x, y];
-      if (p.h == 9) {
-        res1 += p.origins.size();
-        res2 += p.ways;
-      }
+  for (const auto [x, y, p] : map.iter()) {
+    if (p.h == 9) {
+      res1 += p.origins.size();
+      res2 += p.ways;
     }
   }
   return {res1, res2};
