@@ -1,20 +1,13 @@
 #include <iostream>
 #include <cstdint>
-#include <vector>
 #include <algorithm>
 #include <unordered_map>
-#include <ranges>
-
-namespace views = std::views;
-namespace ranges = std::ranges;
 
 using Num = std::uint64_t;
-using Nums = std::vector<Num>;
 using Counts = std::unordered_map<Num, Num>;
 
 static Num
-solve(Nums nums, int rounds) {
-  auto counts = nums | views::transform([](auto n) { return std::make_pair(n, 1UL); }) | ranges::to<Counts>();
+solve(Counts counts, int rounds) {
   for (auto i = 0; i < rounds; ++i) {
     Counts next;
     for (auto [n, c] : counts) {
@@ -35,13 +28,13 @@ solve(Nums nums, int rounds) {
 
 int
 main() {
-  std::vector<Num> nums;
+  Counts counts;
   Num n;
   while (std::cin >> n) {
-    nums.push_back(n);
+    ++counts[n];
   }
   
-  std::cout << "1: " << solve(nums, 25) << "\n";
-  std::cout << "2: " << solve(nums, 75) << "\n";
+  std::cout << "1: " << solve(counts, 25) << "\n";
+  std::cout << "2: " << solve(counts, 75) << "\n";
   return 0;
 }
