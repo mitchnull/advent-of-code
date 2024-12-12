@@ -5,14 +5,62 @@
 
 namespace views = std::views;
 
-// ------------------------------------------------------------------------ //
+/* ------------------------------------------------------------------------ */
+
+struct Dir {
+  int dx, dy;
+
+  Dir& operator*=(auto n) {
+    dx *= n;
+    dy *= n;
+    return *this;
+  }
+  friend Dir operator*(Dir d, auto n) {
+    return d *= n;
+  }
+  Dir operator-() {
+    return Dir{-dx, -dy};
+  }
+};
+
+static const auto DIRS = std::vector<Dir> {
+  { 0, -1},
+  { 1, 0},
+  { 0, 1},
+  { -1, 0},
+};
+
+/* ------------------------------------------------------------------------ */
+
+struct Pos {
+  int x, y;
+
+  Pos& operator+=(Dir d) {
+    x += d.dx;
+    y += d.dy;
+    return *this;
+  }
+  friend Pos operator+(Pos p, Dir d) {
+    return p += d;
+  }
+  Pos& operator-=(Dir d) {
+    return (*this) += -d;
+  }
+  friend Pos operator-(Pos p, Dir d) {
+    return p -= d;
+  }
+
+  inline auto friend operator<=>(const Pos& a, const Pos& b) = default;
+};
+
+/* ------------------------------------------------------------------------ */
 
 template<typename T>
 class Map {
   using value_type = std::conditional<std::is_same<T, bool>::value, char, T>::type;
   int w_, h_;
   std::vector<value_type> data_;
-  value_type off_;
+  const value_type off_;
 
   template <typename V>
   struct Iter {
@@ -36,11 +84,11 @@ public:
 
   Map(int w, int h, T init = {}, T off = {}) : w_(w), h_(h), data_(w * h, init), off_(off) {}
 
-  value_type operator[](int x, int y) const {
+  const value_type& operator[](int x, int y) const {
     if (0 <= x && x < w_ && 0 <= y && y < h_) {
       return data_[y * w_ + x];
     }
-    return 0;
+    return off_;
   }
   value_type& operator[](int x, int y) {
     static value_type off;
@@ -49,6 +97,9 @@ public:
     }
     return off = off_;
   }
+  const value_type& operator[](Pos pos) const { return (*this)[pos.x, pos.y]; }
+  value_type& operator[](Pos pos) { return (*this)[pos.x, pos.y]; }
+
   int w() const { return w_; }
   int h() const { return h_; };
 
@@ -56,36 +107,5 @@ public:
   auto iter() const { return iter_(*this); }
 };
 
-// ------------------------------------------------------------------------ //
-
-struct Dir {
-  int dx, dy;
-};
-
-static const auto DIRS = std::vector<Dir> {
-  { 0, -1},
-  { 1, 0},
-  { 0, 1},
-  { -1, 0},
-};
-
-// ------------------------------------------------------------------------ //
-
-struct Pos {
-  int x, y;
-
-  Pos& operator+=(Dir d) {
-    x += d.dx;
-    y += d.dy;
-    return *this;
-  }
-
-  Pos operator+(Dir d) {
-    return Pos(*this) += d;
-  }
-
-  inline auto friend operator<=>(const Pos& a, const Pos& b) = default;
-};
-
-// ------------------------------------------------------------------------ //
+/* ------------------------------------------------------------------------ */
 
