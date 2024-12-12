@@ -23,10 +23,10 @@ struct Dir {
 };
 
 static const auto DIRS = std::vector<Dir> {
-  { 0, -1},
-  { 1, 0},
-  { 0, 1},
-  { -1, 0},
+  {0, -1},
+  {1, 0},
+  {0, 1},
+  {-1, 0},
 };
 
 /* ------------------------------------------------------------------------ */
@@ -145,26 +145,27 @@ solve(const Plants& plants) {
   int id = 0;
   for (int x = 0; x < plants.w(); ++x) {
     for (int y = 0; y < plants.h(); ++y) {
-      if (visited[x, y]) {
+      Pos p0{x, y};
+      if (visited[p0]) {
         continue;
       }
-      char plant = plants[x, y];
+      char plant = plants[p0];
       Num area = 0, perimiter = 0;
-      std::deque<Pos> queue{ {x, y} };
+      std::deque<Pos> queue{p0};
       ++id;
       while (!queue.empty()) {
         auto p = pop_front(queue);
-        if (visited[p.x, p.y]) {
+        if (visited[p]) {
           continue;
         }
-        visited[p.x, p.y] = true;
-        ids[p.x, p.y] = id;
+        visited[p] = true;
+        ids[p] = id;
         ++area;
         for (auto d: DIRS) {
           auto pp = p + d;
-          if (plants[pp.x, pp.y] != plant) {
+          if (plants[pp] != plant) {
             ++perimiter;
-          } else if (!visited[pp.x, pp.y]) {
+          } else if (!visited[pp]) {
             queue.push_back(pp);
           }
         }
