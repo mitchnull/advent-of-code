@@ -1,7 +1,7 @@
 #include <string>
 #include <functional>
-#include <ranges>
 #include <vector>
+#include <ranges>
 
 namespace views = std::views;
 
@@ -105,6 +105,19 @@ public:
 
   auto iter() { return iter_(*this); }
   auto iter() const { return iter_(*this); }
+};
+
+/* ------------------------------------------------------------------------ */
+
+#include <gmpxx.h>
+
+using Num = mpz_class;   
+
+template <>
+struct std::hash<mpz_class> {
+  std::size_t operator()(const mpz_class& k) const {
+    return k.get_ui();
+  }
 };
 
 /* ------------------------------------------------------------------------ */
