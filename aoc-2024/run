@@ -1,7 +1,19 @@
 #!/bin/sh
+if [ "$1" = "--asan" ]; then
+  KIND=.asan
+  export CXXFLAGS="-Og -g -fsanitize=address"
+  shift
+  rm -f build/cpp/$1/main
+elif [ "$1" = "--debug" ]; then
+  KIND=.debug
+  export CXXFLAGS="-g -D_GLIBCXX_DEBUG"
+  shift
+  rm -f build/cpp/$1/main
+fi
+
 p=${1:-<id>}
 if [ -z "$1" ]; then
-  echo "usage: ./run <id>"
+  echo "usage: ./run [--asan|--debug] <id>"
   echo "$cmd"
   exit 1
 fi
@@ -18,6 +30,9 @@ if [ -f "src/main/cpp/$1/main.cpp" ]; then
   mkdir -p build/cpp/$1 >/dev/null
   make -C build -f ../Makefile cpp/$1/main >/dev/null &&
   time build/cpp/$1/main < $d/$input
+  if [ -n "$KIND" ]; then
+    mv build/cpp/$1/main{,$KIND}
+  fi
 fi
 if [ -f "src/main/kotlin/hu/desnull/aoc2024/p$1/Main.kt" ]; then
   echo "Kotlin verion:"
