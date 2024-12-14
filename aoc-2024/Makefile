@@ -1,8 +1,9 @@
 VPATH=../src/main
-#CXXFLAGS?=-std=c++23 -Wall -Og -g -D_GLIBCXX_DEBUG
-#CXXFLAGS?=-std=c++23 -Wall -Og -g -fsanitize=address
+#CXXFLAGS?=-Og -g -D_GLIBCXX_DEBUG
+#CXXFLAGS?=-Og -g -fsanitize=address
 CXXFLAGS?=-std=c++23 -Wall -O3
-CXXFLAGS+="-I/opt/homebrew/include"
+
+CXXFLAGS+=-std=c++23 -Wall -I/opt/homebrew/include
 LDFLAGS=-lgmpxx -lgmp -L/opt/homebrew/lib
 
 clean:
