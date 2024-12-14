@@ -126,10 +126,9 @@ render(const Robots& robots, int w, int h) {
 static bool
 isTree(const Map& map, int w, int h) {
   constexpr const int len = 22;
-  constexpr const Row mask((1UL << (len + 1)) - 1);
-  for (int y = 0; y < h; ++y) {
-    auto row = map[y];
-    for (int i = 0; i < w - len; ++i, row >>= 1) {
+  for (auto row: map) {
+    Row mask((1UL << (len + 1)) - 1);
+    for (int i = 0; i < w - len; ++i, mask <<= 1) {
       if ((row & mask) == mask) {
         return true;
       }
