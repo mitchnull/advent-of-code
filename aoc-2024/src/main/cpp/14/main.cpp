@@ -88,7 +88,7 @@ quad(const Pos& p, int w, int h) {
       return 3;
     }
   }
-  return 5;
+  return 4;
 }
 
 /* ------------------------------------------------------------------------ */
@@ -99,12 +99,12 @@ render(const Map& map, int w, int h, int i) {
   for (int y = 0; y < h; y += 2) {
     for (int x = 0; x < w; ++x) {
       if (map[y][x]) {
-        if (y < h && map[y + 1][x]) {
+        if ((y + 1) < h && map[y + 1][x]) {
           std::cout << "█";
         } else {
           std::cout << "▀";
         }
-      } else if (y < h && map[y + 1][x]) {
+      } else if ((y + 1) < h && map[y + 1][x]) {
         std::cout << "▄";
       } else {
         std::cout << " ";
