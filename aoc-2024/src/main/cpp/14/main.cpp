@@ -96,10 +96,16 @@ quad(const Pos& p, int w, int h) {
 static void
 render(const Map& map, int w, int h, int i) {
   std::cout << i << ":\n";
-  for (int x = 0; x < w; ++x) {
-    for (int y = 0; y < h; ++y) {
+  for (int y = 0; y < h; y += 2) {
+    for (int x = 0; x < w; ++x) {
       if (map[y][x]) {
-        std::cout << "#";
+        if (y < h && map[y + 1][x]) {
+          std::cout << "█";
+        } else {
+          std::cout << "▀";
+        }
+      } else if (y < h && map[y + 1][x]) {
+        std::cout << "▄";
       } else {
         std::cout << " ";
       }
