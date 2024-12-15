@@ -208,14 +208,8 @@ move2(Board& board, Pos p, Dir d) {
     return pn;
   }
   Board save = board;
-  if (p == po) {
-    if (move2(board, pn, d) != pn) {
-      return move2(board, p, d);
-    }
-  } else {
-    if ((board[pn] == '.' || move2(board, pn, d) != pn) && (board[pon] == '.' || move2(board, pon, d) != pon)) {
-      return move2(board, p, d);
-    }
+  if ((board[pn] == '.' || move2(board, pn, d) != pn) && (board[pon] == '.' || move2(board, pon, d) != pon)) {
+    return move2(board, p, d);
   }
   board = save;
   return p;
