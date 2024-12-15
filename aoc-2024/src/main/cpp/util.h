@@ -2,6 +2,7 @@
 #include <functional>
 #include <vector>
 #include <ranges>
+#include <iostream>
 
 namespace views = std::views;
 
@@ -20,6 +21,11 @@ struct Dir {
   }
   Dir operator-() {
     return Dir{-dx, -dy};
+  }
+  auto friend operator<=>(const Dir& a, const Dir& b) = default;
+
+  friend std::ostream& operator<<(std::ostream& os, const Dir& d) {
+    return os << "{" << d.dx << ", " << d.dy << "}";
   }
 };
 
@@ -50,7 +56,11 @@ struct Pos {
     return p -= d;
   }
 
-  inline auto friend operator<=>(const Pos& a, const Pos& b) = default;
+  auto friend operator<=>(const Pos& a, const Pos& b) = default;
+
+  friend std::ostream& operator<<(std::ostream& os, const Pos& p) {
+    return os << "{" << p.x << ", " << p.y << "}";
+  }
 };
 
 /* ------------------------------------------------------------------------ */
@@ -60,7 +70,7 @@ class Map {
   using value_type = std::conditional<std::is_same<T, bool>::value, char, T>::type;
   int w_, h_;
   std::vector<value_type> data_;
-  const value_type off_;
+  value_type off_;
 
   template <typename V>
   struct Iter {
@@ -105,13 +115,23 @@ public:
 
   auto iter() { return iter_(*this); }
   auto iter() const { return iter_(*this); }
+
+  friend std::ostream& operator<<(std::ostream& os, const Map& m) {
+    for (int y = 0; y < m.h(); ++y) {
+      for (int x = 0; x < m.w(); ++x) {
+        os << m[x, y];
+      }
+      os << "\n";
+    }
+    return os;
+  }
 };
 
 /* ------------------------------------------------------------------------ */
 
 #include <gmpxx.h>
 
-using Num = mpz_class;   
+using Num = mpz_class;
 
 template <>
 struct std::hash<mpz_class> {
