@@ -36,6 +36,13 @@ static const auto DIRS = std::vector<Dir> {
   {-1, 0},
 };
 
+template <>
+struct std::hash<Dir> {
+  std::size_t operator()(const Dir& d) const {
+    return d.dx * 11 + d.dy;
+  }
+};
+
 /* ------------------------------------------------------------------------ */
 
 struct Pos {
@@ -60,6 +67,13 @@ struct Pos {
 
   friend std::ostream& operator<<(std::ostream& os, const Pos& p) {
     return os << "{" << p.x << ", " << p.y << "}";
+  }
+};
+
+template <>
+struct std::hash<Pos> {
+  std::size_t operator()(const Pos& p) const {
+    return p.x * 11 + p.y;
   }
 };
 
