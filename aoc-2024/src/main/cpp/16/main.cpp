@@ -163,20 +163,12 @@ using Num = int;
 
 struct Node {
   PosDir v;
-  PosDir prev;
   Num cost;
 
   friend bool operator<(const Node&a, const Node&b) { return a.cost > b.cost; };
 };
 
 using Queue = std::priority_queue<Node>;
-
-static auto
-pop(Queue& queue) {
-  auto res = queue.top();
-  queue.pop();
-  return res;
-}
 
 /* ------------------------------------------------------------------------ */
 
@@ -186,9 +178,20 @@ findBestPlaces(const std::unordered_map<PosDir, std::unordered_set<PosDir>>& pre
     return;
   }
   bestPlaces.insert(pd);
-  for (auto pd : prevs.at(pd)) {
+
+  auto pp = prevs.find(pd);
+  if (pp == prevs.end()) {
+    return;
+  }
+  for (auto pd : pp->second) {
     findBestPlaces(prevs, pd, bestPlaces);
   }
+}
+
+static Num
+findCost(const auto& costs, const PosDir& v) {
+  auto cp = costs.find(v);
+  return cp != costs.end() ? cp->second : std::numeric_limits<Num>::max();
 }
 
 static std::pair<Num, Num>
@@ -196,26 +199,29 @@ solve(const Board& board, PosDir start, Pos end) {
   auto costs = std::unordered_map<PosDir, Num>();
   auto prevs = std::unordered_map<PosDir, std::unordered_set<PosDir>>();
   auto queue = Queue();
-  queue.emplace(start, start, 0);
+  queue.emplace(start, 0);
   while (!queue.empty()) {
-    Node n = pop(queue);
-    auto cp = costs.find(n.v);
-    if (cp != costs.end() && n.cost > cp->second) {
+    Node n = queue.top();
+    queue.pop();
+    if (n.cost != costs[n.v]) {
       continue;
     }
-    if (cp == costs.end() || n.cost < cp->second) {
-      costs[n.v] = n.cost;
-      prevs[n.v] = {n.prev};
-    } else if (n.prev != n.v) {
-      prevs[n.v].insert(n.prev);
+    for (Node nn : {
+        Node{PosDir{n.v.pos + n.v.dir, n.v.dir}, n.cost + 1},
+        Node{PosDir{n.v.pos, Dir{n.v.dir.dy, n.v.dir.dx}}, n.cost + 1000},
+        Node{PosDir{n.v.pos, Dir{-n.v.dir.dy, -n.v.dir.dx}}, n.cost + 1000}}) {
+      auto cc = findCost(costs, nn.v);
+      if (board[nn.v.pos] == '#' || nn.cost > cc) {
+        continue;
+      }
+      if (nn.cost < cc) {
+        costs[nn.v] = nn.cost;
+        prevs[nn.v] = {n.v};
+      } else {
+        prevs[nn.v].insert(n.v);
+      }
+      queue.push(nn);
     }
-    auto np = n.v.pos + n.v.dir;
-    if (board[np] != '#') {
-      queue.emplace(PosDir{np, n.v.dir}, n.v, n.cost + 1);
-    }
-    Dir rot = Dir{n.v.dir.dy, n.v.dir.dx};
-    queue.emplace(PosDir{n.v.pos, rot}, n.v, n.cost + 1000);
-    queue.emplace(PosDir{n.v.pos, -rot}, n.v, n.cost + 1000);
   }
 
   Num minCost = std::numeric_limits<Num>::max();
