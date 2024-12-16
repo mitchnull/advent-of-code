@@ -1,7 +1,8 @@
 #include <iostream>
 #include <string>
 #include <ranges>
-#include <map>
+#include <unordered_map>
+#include <unordered_set>
 
 namespace views = std::views;
 
@@ -28,6 +29,20 @@ struct Dir {
   }
 };
 
+template <>
+struct std::hash<Dir> {
+  std::size_t operator()(const Dir& d) const {
+    return d.dx * 11 + d.dy;
+  }
+};
+
+static const auto DIRS = std::vector<Dir> {
+  {0, -1},
+  {1, 0},
+  {0, 1},
+  {-1, 0},
+};
+
 /* ------------------------------------------------------------------------ */
 
 struct Pos {
@@ -52,6 +67,29 @@ struct Pos {
 
   friend std::ostream& operator<<(std::ostream& os, const Pos& p) {
     return os << "{" << p.x << ", " << p.y << "}";
+  }
+};
+
+template <>
+struct std::hash<Pos> {
+  std::size_t operator()(const Pos& p) const {
+    return p.x * 11 + p.y;
+  }
+};
+
+/* ------------------------------------------------------------------------ */
+
+struct PosDir {
+  Pos pos;
+  Dir dir;
+
+  auto friend operator<=>(const PosDir& a, const PosDir& b) = default;
+};
+
+template <>
+struct std::hash<PosDir> {
+  std::size_t operator()(const PosDir& pd) const {
+    return std::hash<Pos>()(pd.pos) * 11 + std::hash<Dir>()(pd.dir);
   }
 };
 
@@ -122,15 +160,10 @@ public:
 using Board = Map<char>;
 using Num = int;
 
-struct PosDir {
-  Pos pos;
-  Dir dir;
-
-  auto friend operator<=>(const PosDir& a, const PosDir& b) = default;
-};
 
 struct Node {
   PosDir v;
+  PosDir prev;
   Num cost;
 
   friend bool operator<(const Node&a, const Node&b) { return a.cost > b.cost; };
@@ -147,30 +180,59 @@ pop(Queue& queue) {
 
 /* ------------------------------------------------------------------------ */
 
-static Num
-solve1(const Board& board, PosDir start) {
-  auto costs = std::map<PosDir, Num>();
+static void
+findBestPlaces(const std::unordered_map<PosDir, std::unordered_set<PosDir>>& prevs, PosDir pd, std::unordered_set<PosDir>& bestPlaces) {
+  if (bestPlaces.contains(pd)) {
+    return;
+  }
+  bestPlaces.insert(pd);
+  for (auto pd : prevs.at(pd)) {
+    findBestPlaces(prevs, pd, bestPlaces);
+  }
+}
+
+static std::pair<Num, Num>
+solve(const Board& board, PosDir start, Pos end) {
+  auto costs = std::unordered_map<PosDir, Num>();
+  auto prevs = std::unordered_map<PosDir, std::unordered_set<PosDir>>();
   auto queue = Queue();
-  queue.push(Node{{start}, 0});
+  queue.emplace(start, start, 0);
   while (!queue.empty()) {
     Node n = pop(queue);
     auto cp = costs.find(n.v);
-    if (cp != costs.end() && n.cost >= cp->second) {
+    if (cp != costs.end() && n.cost > cp->second) {
       continue;
     }
-    costs[n.v] = n.cost;
-    if (board[n.v.pos] == 'E') {
-      return n.cost;
+    if (cp == costs.end() || n.cost < cp->second) {
+      costs[n.v] = n.cost;
+      prevs[n.v] = {n.prev};
+    } else if (n.prev != n.v) {
+      prevs[n.v].insert(n.prev);
     }
     auto np = n.v.pos + n.v.dir;
     if (board[np] != '#') {
-      queue.emplace(PosDir{np, n.v.dir}, n.cost + 1);
+      queue.emplace(PosDir{np, n.v.dir}, n.v, n.cost + 1);
     }
     Dir rot = Dir{n.v.dir.dy, n.v.dir.dx};
-    queue.emplace(PosDir{n.v.pos, rot}, n.cost + 1000);
-    queue.emplace(PosDir{n.v.pos, -rot}, n.cost + 1000);
+    queue.emplace(PosDir{n.v.pos, rot}, n.v, n.cost + 1000);
+    queue.emplace(PosDir{n.v.pos, -rot}, n.v, n.cost + 1000);
   }
-  return 0;
+
+  Num minCost = std::numeric_limits<Num>::max();
+  auto bestPlaces = std::unordered_set<PosDir>{};
+  for (auto dir : DIRS) {
+    auto endDir = PosDir{end, dir};
+    auto cp = costs.find(endDir);
+    if (cp != costs.end() && cp->second < minCost) {
+      minCost = cp->second;
+      bestPlaces.clear();
+    }
+    if (cp->second == minCost) {
+      findBestPlaces(prevs, endDir, bestPlaces);
+    }
+  }
+  auto numBestPlaces = (bestPlaces | views::transform([](auto pd) { return pd.pos; }) | std::ranges::to<std::unordered_set<Pos>>()).size();
+  return {minCost, numBestPlaces};
 }
 
 /* ------------------------------------------------------------------------ */
@@ -184,12 +246,12 @@ main() {
   }
   Board board = Board(lines);
   Pos start = (board.iter() | views::filter([](auto i) { return i.v == 'S'; }) | views::transform([](auto i) { return Pos{i.x, i.y}; })).front();
+  Pos end = (board.iter() | views::filter([](auto i) { return i.v == 'E'; }) | views::transform([](auto i) { return Pos{i.x, i.y}; })).front();
 
-  auto res1 = solve1(board, {start, {1, 0}});
-  // auto res2 = solve2(lines, moves);
+  auto [res1, res2] = solve(board, {start, {1, 0}}, end);
 
   std::cout << "1: " << res1 << "\n";
-  // std::cout << "2: " << res2 << "\n";
+  std::cout << "2: " << res2 << "\n";
 
   return 0;
 }
