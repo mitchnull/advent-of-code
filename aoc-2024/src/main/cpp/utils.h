@@ -1,3 +1,6 @@
+#ifndef AOC_UTILS_H
+#define AOC_UTILS_H
+
 #include <string>
 #include <functional>
 #include <vector>
@@ -79,8 +82,8 @@ struct std::hash<Pos> {
 
 /* ------------------------------------------------------------------------ */
 
-template<typename T>
-class Map {
+template<typename T = char>
+class Grid {
   using value_type = std::conditional<std::is_same<T, bool>::value, char, T>::type;
   int w_, h_;
   std::vector<value_type> data_;
@@ -97,7 +100,7 @@ class Map {
   }
 public:
   template<typename Tr = std::identity>
-  Map(std::vector<std::string> lines, value_type off = {}, Tr tr = {}) : w_(lines[0].size()), h_(lines.size()), data_{}, off_(off) {
+  Grid(std::vector<std::string> lines, value_type off = {}, Tr tr = {}) : w_(lines[0].size()), h_(lines.size()), data_{}, off_(off) {
     data_.reserve(w_ * h_);
     for (const auto& line: lines) {
       for (char c: line) {
@@ -106,7 +109,7 @@ public:
     }
   }
 
-  Map(int w, int h, T init = {}, T off = {}) : w_(w), h_(h), data_(w * h, init), off_(off) {}
+  Grid(int w, int h, T init = {}, T off = {}) : w_(w), h_(h), data_(w * h, init), off_(off) {}
 
   const value_type& operator[](int x, int y) const {
     if (0 <= x && x < w_ && 0 <= y && y < h_) {
@@ -130,7 +133,7 @@ public:
   auto iter() { return iter_(*this); }
   auto iter() const { return iter_(*this); }
 
-  friend std::ostream& operator<<(std::ostream& os, const Map& m) {
+  friend std::ostream& operator<<(std::ostream& os, const Grid& m) {
     for (int y = 0; y < m.h(); ++y) {
       for (int x = 0; x < m.w(); ++x) {
         os << m[x, y];
@@ -143,16 +146,4 @@ public:
 
 /* ------------------------------------------------------------------------ */
 
-#include <gmpxx.h>
-
-using Num = mpz_class;
-
-template <>
-struct std::hash<mpz_class> {
-  std::size_t operator()(const mpz_class& k) const {
-    return k.get_ui();
-  }
-};
-
-/* ------------------------------------------------------------------------ */
-
+#endif /* AOC_UTILS_H */

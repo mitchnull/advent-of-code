@@ -1,17 +1,9 @@
 #include <iostream>
 #include <algorithm>
 #include <unordered_map>
-#include <gmpxx.h>
+#include "../gmpxx.h"
 
 using Num = mpz_class;
-
-template <>
-struct std::hash<mpz_class> {
-  std::size_t operator()(const mpz_class& k) const {
-    return k.get_ui();
-  }
-};
-
 using Counts = std::unordered_map<Num, Num>;
 
 static auto

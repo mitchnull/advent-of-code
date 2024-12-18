@@ -3,51 +3,10 @@
 #include <sstream>
 #include <numeric>
 #include <bitset>
+#include "../utils.h"
 
 using Row = std::bitset<128>;
 using Map = std::vector<Row>;
-
-/* ------------------------------------------------------------------------ */
-
-struct Dir {
-  int dx, dy;
-
-  Dir& operator*=(auto n) {
-    dx *= n;
-    dy *= n;
-    return *this;
-  }
-  friend Dir operator*(Dir d, auto n) {
-    return d *= n;
-  }
-  Dir operator-() {
-    return Dir{-dx, -dy};
-  }
-  inline auto friend operator<=>(const Dir& a, const Dir& b) = default;
-};
-
-/* ------------------------------------------------------------------------ */
-
-struct Pos {
-  int x, y;
-
-  Pos& operator+=(Dir d) {
-    x += d.dx;
-    y += d.dy;
-    return *this;
-  }
-  friend Pos operator+(Pos p, Dir d) {
-    return p += d;
-  }
-  Pos& operator-=(Dir d) {
-    return (*this) += -d;
-  }
-  friend Pos operator-(Pos p, Dir d) {
-    return p -= d;
-  }
-
-  inline auto friend operator<=>(const Pos& a, const Pos& b) = default;
-};
 
 /* ------------------------------------------------------------------------ */
 
