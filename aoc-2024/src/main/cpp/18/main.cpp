@@ -2,7 +2,7 @@
 #include <string>
 #include <ranges>
 
-namespace views = std::views;
+namespace views = std::ranges::views;
 
 /* ------------------------------------------------------------------------ */
 
@@ -77,8 +77,6 @@ struct std::hash<Pos> {
 
 /* ------------------------------------------------------------------------ */
 
-/* ------------------------------------------------------------------------ */
-
 template<typename T>
 class Map {
   using value_type = std::conditional<std::is_same<T, bool>::value, char, T>::type;
@@ -141,9 +139,10 @@ public:
   }
 };
 
+/* ------------------------------------------------------------------------ */
+
 using Board = Map<char>;
 using Num = int;
-
 
 struct Node {
   Pos pos;
@@ -156,10 +155,11 @@ using Queue = std::priority_queue<Node>;
 
 /* ------------------------------------------------------------------------ */
 
-static Num
+static std::pair<Num, Board>
 solve(const Board& board, Pos start, Pos end) {
+  auto path = Board(board);
   auto costs = Map<Num>(board.w(), board.h(), std::numeric_limits<Num>::max(), std::numeric_limits<Num>::max());
-  // auto prevs = std::unordered_map<Pos, std::unordered_set<Pos>>();
+  auto prevs = Map<Pos>(board.w(), board.h(), {-1, -1});
   auto queue = Queue();
   queue.emplace(start, 0);
   costs[start] = 0;
@@ -167,7 +167,10 @@ solve(const Board& board, Pos start, Pos end) {
     Node n = queue.top();
     queue.pop();
     if (n.pos == end) {
-      return n.cost;
+      for (Pos p = n.pos; p != Pos{-1, -1}; p = prevs[p]) {
+        path[p] = 'O';
+      }
+      return {n.cost, path};
     }
     if (n.cost != costs[n.pos]) {
       continue;
@@ -179,43 +182,46 @@ solve(const Board& board, Pos start, Pos end) {
         continue;
       }
       costs[nn.pos] = nn.cost;
-      // if (nn.cost < cc) {
-      //   costs[nn.v] = nn.cost;
-      //   prevs[nn.v] = {n.v};
-      // } else {
-      //   prevs[nn.v].insert(n.v);
-      // }
+      prevs[nn.pos] = n.pos;
       queue.push(nn);
     }
   }
-  return -1;
+  return {-1, path};
 }
 
 /* ------------------------------------------------------------------------ */
 
 int
 main() {
+  const Pos startPos = {0, 0};
+  const Pos endPos = {70, 70};
+  const int count = 1024;
+
   std::vector<Pos> blocks;
   Pos p;
   char c;
   while (std::cin >> p.x >> c >>  p.y) {
     blocks.push_back(p);
   }
-  Board board = Board(71, 71, '.', '#');
-  for (auto it = blocks.begin(), end = blocks.begin() + 1024; it != end; ++it) {
+  Board board = Board(endPos.x + 1, endPos.y + 1, '.', '#');
+  for (auto it = blocks.begin(), end = blocks.begin() + count; it != end; ++it) {
     board[*it] = '#';
   }
-  // std::cout << board << "\n";
 
-  auto res1 = solve(board, {0, 0}, {70, 70});
+  auto [res1, path] = solve(board, startPos, endPos);
   std::cout << "1: " << res1 << "\n";
 
-  for (auto it = blocks.begin() + 1024, end = blocks.end(); it != end; ++it) {
+  for (auto it = blocks.begin() + count, end = blocks.end(); it != end; ++it) {
     board[*it] = '#';
-    if (solve(board, {0, 0}, {70, 70}) < 0) {
+    if (path[*it] != 'O') {
+      continue;
+    }
+    auto [cost, pp] = solve(board, startPos, endPos);
+    if (cost < 0) {
       std::cout << it->x << "," << it->y << "\n";
       return 0;
     }
+    std::swap(path, pp);
   }
 
   return 0;
