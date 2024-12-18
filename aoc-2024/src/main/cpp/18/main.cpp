@@ -1,8 +1,6 @@
-#include <string>
-#include <functional>
-#include <vector>
-#include <ranges>
 #include <iostream>
+#include <string>
+#include <ranges>
 
 namespace views = std::views;
 
@@ -29,18 +27,18 @@ struct Dir {
   }
 };
 
-static const auto DIRS = std::vector<Dir> {
-  {0, -1},
-  {1, 0},
-  {0, 1},
-  {-1, 0},
-};
-
 template <>
 struct std::hash<Dir> {
   std::size_t operator()(const Dir& d) const {
     return d.dx * 11 + d.dy;
   }
+};
+
+static const auto DIRS = std::vector<Dir> {
+  {0, -1},
+  {1, 0},
+  {0, 1},
+  {-1, 0},
 };
 
 /* ------------------------------------------------------------------------ */
@@ -79,6 +77,8 @@ struct std::hash<Pos> {
 
 /* ------------------------------------------------------------------------ */
 
+/* ------------------------------------------------------------------------ */
+
 template<typename T>
 class Map {
   using value_type = std::conditional<std::is_same<T, bool>::value, char, T>::type;
@@ -97,7 +97,7 @@ class Map {
   }
 public:
   template<typename Tr = std::identity>
-  Map(std::vector<std::string> lines, value_type off = {}, Tr tr = {}) : w_(lines[0].size()), h_(lines.size()), data_{}, off_(off) {
+  Map(std::vector<std::string> lines, Tr tr = {}, value_type off = {}) : w_(lines[0].size()), h_(lines.size()), data_{}, off_(off) {
     data_.reserve(w_ * h_);
     for (const auto& line: lines) {
       for (char c: line) {
@@ -141,18 +141,82 @@ public:
   }
 };
 
-/* ------------------------------------------------------------------------ */
+using Board = Map<char>;
+using Num = int;
 
-#include <gmpxx.h>
 
-using Num = mpz_class;
+struct Node {
+  Pos pos;
+  Num cost;
 
-template <>
-struct std::hash<mpz_class> {
-  std::size_t operator()(const mpz_class& k) const {
-    return k.get_ui();
-  }
+  friend bool operator<(const Node&a, const Node&b) { return a.cost > b.cost; };
 };
 
+using Queue = std::priority_queue<Node>;
+
 /* ------------------------------------------------------------------------ */
 
+static Num
+solve(const Board& board, Pos start, Pos end) {
+  auto costs = Map<Num>(board.w(), board.h(), std::numeric_limits<Num>::max(), std::numeric_limits<Num>::max());
+  // auto prevs = std::unordered_map<Pos, std::unordered_set<Pos>>();
+  auto queue = Queue();
+  queue.emplace(start, 0);
+  costs[start] = 0;
+  while (!queue.empty()) {
+    Node n = queue.top();
+    queue.pop();
+    if (n.pos == end) {
+      return n.cost;
+    }
+    if (n.cost != costs[n.pos]) {
+      continue;
+    }
+    for (Dir d : DIRS) {
+      auto nn = Node{n.pos + d, n.cost + 1};
+      auto cc = costs[nn.pos];
+      if (board[nn.pos] == '#' || nn.cost >= cc) {
+        continue;
+      }
+      costs[nn.pos] = nn.cost;
+      // if (nn.cost < cc) {
+      //   costs[nn.v] = nn.cost;
+      //   prevs[nn.v] = {n.v};
+      // } else {
+      //   prevs[nn.v].insert(n.v);
+      // }
+      queue.push(nn);
+    }
+  }
+  return -1;
+}
+
+/* ------------------------------------------------------------------------ */
+
+int
+main() {
+  std::vector<Pos> blocks;
+  Pos p;
+  char c;
+  while (std::cin >> p.x >> c >>  p.y) {
+    blocks.push_back(p);
+  }
+  Board board = Board(71, 71, '.', '#');
+  for (auto it = blocks.begin(), end = blocks.begin() + 1024; it != end; ++it) {
+    board[*it] = '#';
+  }
+  // std::cout << board << "\n";
+
+  auto res1 = solve(board, {0, 0}, {70, 70});
+  std::cout << "1: " << res1 << "\n";
+
+  for (auto it = blocks.begin() + 1024, end = blocks.end(); it != end; ++it) {
+    board[*it] = '#';
+    if (solve(board, {0, 0}, {70, 70}) < 0) {
+      std::cout << it->x << "," << it->y << "\n";
+      return 0;
+    }
+  }
+
+  return 0;
+}
