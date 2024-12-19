@@ -4,7 +4,7 @@ VPATH=../src/main
 #CXXFLAGS?=-Og -g -fsanitize=address
 CXXFLAGS?=-O3
 
-CXXFLAGS+=-std=c++23 -stdlib=libc++ -Wall -I/opt/homebrew/include
+CXXFLAGS+=-std=c++23 -stdlib=libc++ -Wall -Wno-deprecated-declarations -I/opt/homebrew/include
 LDFLAGS=-lgmpxx -lgmp -L/opt/homebrew/lib
 
 clean:
