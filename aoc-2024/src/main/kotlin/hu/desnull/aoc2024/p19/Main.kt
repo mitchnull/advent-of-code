@@ -15,13 +15,13 @@ fun countMatches(text: String, patterns: List<String>, cache: MutableMap<String,
 
 fun main() {
   val line = readln()
-  val pattern = ("^(" + line.replace(", ", "|") + ")+$").toRegex()
   val patterns = line.split(", ").toList()
   readln()
   val targets = generateSequence { readlnOrNull() }.toList()
 
-  val res1 = targets.count(pattern::matches)
-  val res2 = targets.sumOf { countMatches(it, patterns, HashMap()) }
+  val counts = targets.map { countMatches(it, patterns, HashMap()) }.toList()
+  val res1 = counts.count { it > 0 }
+  val res2 = counts.sum()
   println("1: $res1")
   println("2: $res2")
 }
