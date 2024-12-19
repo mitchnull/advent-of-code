@@ -1,5 +1,7 @@
-#include <iostream>
 #include <algorithm>
+#include <cmath>
+#include <iostream>
+#include <numeric>
 #include <unordered_map>
 #include "../gmpxx.h"
 

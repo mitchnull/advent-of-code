@@ -1,7 +1,7 @@
-#include <iostream>
-#include <cstdint>
-#include <vector>
 #include <algorithm>
+#include <cstdint>
+#include <iostream>
+#include <vector>
 
 using uint = std::uint32_t;
 

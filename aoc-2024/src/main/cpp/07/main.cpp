@@ -1,7 +1,9 @@
-#include <iostream>
+#include <cmath>
 #include <cstdint>
-#include <string>
+#include <iostream>
 #include <sstream>
+#include <string>
+#include <vector>
 
 using Num = std::uint64_t;
 

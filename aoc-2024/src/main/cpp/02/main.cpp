@@ -1,11 +1,11 @@
-#include <iostream>
+#include <algorithm>
 #include <cstdint>
+#include <iostream>
+#include <iterator>
 #include <numeric>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
-#include <iterator>
-#include <algorithm>
 
 using uint = std::uint32_t;
 using Strings = std::vector<std::string>;

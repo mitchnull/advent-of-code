@@ -1,5 +1,5 @@
-#include <iostream>
 #include <cstdint>
+#include <iostream>
 #include <string>
 
 using uint = std::uint32_t;

@@ -1,11 +1,14 @@
 #include <algorithm>
+#include <cstdint>
 #include <iostream>
-#include <string>
 #include <iterator>
-#include <sstream>
+#include <numeric>
 #include <ranges>
+#include <sstream>
+#include <string>
+#include <vector>
 
-using Num = uint64_t;
+using Num = std::uint64_t;
 using Strings = std::vector<std::string>;
 
 static bool

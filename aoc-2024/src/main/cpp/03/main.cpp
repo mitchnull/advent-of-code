@@ -1,8 +1,8 @@
-#include <iostream>
 #include <cstdint>
+#include <iostream>
+#include <iterator>
 #include <regex>
 #include <string>
-#include <iterator>
 
 using uint = std::uint32_t;
 

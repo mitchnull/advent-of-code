@@ -1,6 +1,6 @@
 #include <iostream>
-#include <string>
 #include <numeric>
+#include <string>
 #include "../utils.h"
 
 using Board = Grid<>;

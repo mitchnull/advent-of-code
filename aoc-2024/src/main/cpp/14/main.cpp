@@ -1,8 +1,8 @@
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <numeric>
 #include <bitset>
+#include <iostream>
+#include <numeric>
+#include <sstream>
+#include <string>
 #include "../utils.h"
 
 using Row = std::bitset<128>;
