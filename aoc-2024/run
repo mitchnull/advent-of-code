@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 if [ "$1" = "--asan" ]; then
   KIND=.asan
   export CXXFLAGS="-Og -g -fsanitize=address"
@@ -37,4 +37,8 @@ fi
 if [ -f "src/main/kotlin/hu/desnull/aoc2024/p$1/Main.kt" ]; then
   echo "Kotlin verion:"
   time gradle --console=plain -q -PmainClassName=hu.desnull.aoc2024.p$p.MainKt run < $d/$input
+fi
+if [ -f "src/main/lua/$1.lua" ]; then
+  echo "Lua verion:"
+  time luajit src/main/lua/$1.lua < $d/$input
 fi
