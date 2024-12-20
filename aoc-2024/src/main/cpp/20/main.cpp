@@ -41,8 +41,7 @@ findPath(const Board& board, Pos start, Pos end) {
     }
     for (Dir d : DIRS) {
       auto nn = Node{n.pos + d, n.cost + 1};
-      auto cc = costs[nn.pos];
-      if (board[nn.pos] == '#' || nn.cost >= cc) {
+      if (board[nn.pos] == '#' || nn.cost >= costs[nn.pos]) {
         continue;
       }
       costs[nn.pos] = nn.cost;
