@@ -53,16 +53,19 @@ findPath(const Board& board, Pos start, Pos end) {
   return path;
 }
 
-static Num
-solve(const Path& path, int maxCheat, int minGain) {
-  Num res = 0;
+static std::pair<Num, Num>
+solve(const Path& path, int maxCheat1, int maxCheat2, int minGain) {
+  Num res1 = 0, res2 = 0;
   for (auto i = path.begin(), end = path.end(); i != end; ++i) {
-    for (auto j = i + 1; j != end; ++j) {
+    for (auto j = i + minGain; j < end; ++j) {
       auto d = std::abs(i->x - j->x) + std::abs(i->y - j->y);
-      res += (d <= maxCheat && ((j - i) - d) >= minGain);
+      if (((j - i) - d) >= minGain) {
+        res1 += d <= maxCheat1;
+        res2 += d <= maxCheat2;
+      }
     }
   }
-  return res;
+  return {res1, res2};
 }
 
 /* ------------------------------------------------------------------------ */
@@ -79,9 +82,10 @@ main() {
   Pos endPos = (board.iter() | views::filter([](auto i) { return i.v == 'E'; }) | views::transform([](auto i) { return Pos{i.x, i.y}; })).front();
 
   auto path = findPath(board, startPos, endPos);
+  auto [res1, res2] = solve(path, 2, 20, 100);
 
-  std::cout << "1: " << solve(path, 2, 100) << "\n";
-  std::cout << "2: " << solve(path, 20, 100) << "\n";
+  std::cout << "1: " << res1 << "\n";
+  std::cout << "2: " << res2 << "\n";
 
   return 0;
 }
