@@ -1,26 +1,12 @@
 #include <iostream>
 #include <queue>
-#include <unordered_map>
 #include "../utils.h"
 
 /* ------------------------------------------------------------------------ */
 
 using Board = Grid<>;
 using Num = int;
-
-struct Cheat {
-  Pos start, end;
-
-  friend bool operator<=>(const Cheat&a, const Cheat&b)  = default;
-};
-
-template <>
-struct std::hash<Cheat> {
-  std::size_t operator()(const Cheat& c) const {
-    return std::hash<Pos>()(c.start) * 11 + std::hash<Pos>()(c.end);
-  }
-};
-
+using Path = std::vector<Pos>;
 
 struct Node {
   Pos pos;
@@ -33,8 +19,9 @@ using Queue = std::priority_queue<Node>;
 
 /* ------------------------------------------------------------------------ */
 
-static std::pair<Num, Pos>
-solve(const Board& board, Pos start, Pos end, Pos cheatStart) {
+static Path
+findPath(const Board& board, Pos start, Pos end) {
+  auto path = Path{};
   auto costs = Grid<Num>(board.w(), board.h(), std::numeric_limits<Num>::max(), std::numeric_limits<Num>::max());
   auto prevs = Grid<Pos>(board.w(), board.h(), {-1, -1});
   auto queue = Queue();
@@ -44,12 +31,10 @@ solve(const Board& board, Pos start, Pos end, Pos cheatStart) {
     Node n = queue.top();
     queue.pop();
     if (n.pos == end) {
-      for (Pos p = n.pos, pp = {}; p != Pos{-1, -1}; pp = p, p = prevs[p]) {
-        if (p == cheatStart) {
-          return {n.cost, pp};
-        }
+      for (Pos p = n.pos; p != Pos{-1, -1}; p = prevs[p]) {
+        path.push_back(p);
       }
-      return {n.cost, {}};
+      return path;
     }
     if (n.cost != costs[n.pos]) {
       continue;
@@ -57,7 +42,7 @@ solve(const Board& board, Pos start, Pos end, Pos cheatStart) {
     for (Dir d : DIRS) {
       auto nn = Node{n.pos + d, n.cost + 1};
       auto cc = costs[nn.pos];
-      if ((board[nn.pos] == '#' && nn.pos != cheatStart) || nn.cost >= cc) {
+      if (board[nn.pos] == '#' || nn.cost >= cc) {
         continue;
       }
       costs[nn.pos] = nn.cost;
@@ -65,7 +50,19 @@ solve(const Board& board, Pos start, Pos end, Pos cheatStart) {
       queue.push(nn);
     }
   }
-  return {-1, {}};
+  return path;
+}
+
+static Num
+solve(const Path& path, int maxCheat, int minGain) {
+  Num res = 0;
+  for (auto i = path.begin(), end = path.end(); i != end; ++i) {
+    for (auto j = i + 1; j != end; ++j) {
+      auto d = std::abs(i->x - j->x) + std::abs(i->y - j->y);
+      res += (d <= maxCheat && ((j - i) - d) >= minGain);
+    }
+  }
+  return res;
 }
 
 /* ------------------------------------------------------------------------ */
@@ -78,24 +75,13 @@ main() {
     lines.push_back(line); 
   }
   Board board = Board(lines, '#');
-
   Pos startPos = (board.iter() | views::filter([](auto i) { return i.v == 'S'; }) | views::transform([](auto i) { return Pos{i.x, i.y}; })).front();
   Pos endPos = (board.iter() | views::filter([](auto i) { return i.v == 'E'; }) | views::transform([](auto i) { return Pos{i.x, i.y}; })).front();
 
-  auto [origCost, ig] = solve(board, startPos, endPos, {});
-  std::unordered_map<Cheat, Num> cheats;
-  for (auto [x, y, v] : board.iter()) {
-    Pos cheatStart = {x, y};
-    if (v == '#') {
-      auto [cost, cheatEnd] = solve(board, startPos, endPos, cheatStart);
-      if (origCost - cost >= 100 && cheatEnd != Pos{}) {
-        Cheat cheat = {cheatStart, cheatEnd};
-        cheats[cheat] = std::max(cheats[cheat], cost);
-      }
-    }
-  }
-  auto res1 = cheats.size();
-  std::cout << "1: " << res1 << "\n";
+  auto path = findPath(board, startPos, endPos);
+
+  std::cout << "1: " << solve(path, 2, 100) << "\n";
+  std::cout << "2: " << solve(path, 20, 100) << "\n";
 
   return 0;
 }
