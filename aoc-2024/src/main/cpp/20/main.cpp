@@ -1,5 +1,4 @@
 #include <iostream>
-#include <queue>
 #include "../utils.h"
 
 /* ------------------------------------------------------------------------ */
@@ -8,45 +7,21 @@ using Board = Grid<>;
 using Num = int;
 using Path = std::vector<Pos>;
 
-struct Node {
-  Pos pos;
-  Num cost;
-
-  friend bool operator<(const Node&a, const Node&b) { return a.cost > b.cost; };
-};
-
-using Queue = std::priority_queue<Node>;
-
 /* ------------------------------------------------------------------------ */
 
 static Path
-findPath(const Board& board, Pos start, Pos end) {
-  auto path = Path{};
-  auto costs = Grid<Num>(board.w(), board.h(), std::numeric_limits<Num>::max(), std::numeric_limits<Num>::max());
-  auto prevs = Grid<Pos>(board.w(), board.h(), {-1, -1});
-  auto queue = Queue();
-  queue.emplace(start, 0);
-  costs[start] = 0;
-  while (!queue.empty()) {
-    Node n = queue.top();
-    queue.pop();
-    if (n.pos == end) {
-      for (Pos p = n.pos; p != Pos{-1, -1}; p = prevs[p]) {
-        path.push_back(p);
-      }
-      return path;
-    }
-    if (n.cost != costs[n.pos]) {
-      continue;
-    }
+findPath(const Board& board, Pos p, Pos end) {
+  auto path = Path{p};
+  auto prev = p;
+  while (p != end) {
     for (Dir d : DIRS) {
-      auto nn = Node{n.pos + d, n.cost + 1};
-      if (board[nn.pos] == '#' || nn.cost >= costs[nn.pos]) {
-        continue;
+      auto pp = p + d;
+      if (pp != prev && board[pp] != '#') {
+        prev = p;
+        p = pp;
+        path.push_back(p);
+        break;
       }
-      costs[nn.pos] = nn.cost;
-      prevs[nn.pos] = n.pos;
-      queue.push(nn);
     }
   }
   return path;
@@ -55,9 +30,9 @@ findPath(const Board& board, Pos start, Pos end) {
 static std::pair<Num, Num>
 solve(const Path& path, int maxCheat1, int maxCheat2, int minGain) {
   Num res1 = 0, res2 = 0;
-  for (auto i = path.begin(), end = path.end(); i != end; ++i) {
+  for (auto i = path.begin(), end = path.end(), endi = end - minGain; i < endi; ++i) {
     for (auto j = i + minGain; j < end; ++j) {
-      auto d = std::abs(i->x - j->x) + std::abs(i->y - j->y);
+      auto d = std::abs(j->x - i->x) + std::abs(j->y - i->y);
       if (((j - i) - d) >= minGain) {
         res1 += d <= maxCheat1;
         res2 += d <= maxCheat2;
