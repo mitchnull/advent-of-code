@@ -3,8 +3,11 @@
 #include <iostream>
 #include <vector>
 #include <iterator>
+#include <unordered_map>
+#include <unordered_set>
 
 using Num = std::uint64_t;
+using String = std::string;
 
 static constexpr const Num MOD = 16777216UL;
 
@@ -23,7 +26,7 @@ toChar(int n) {
 
 struct Buyer {
   std::vector<Num> secrets;
-  std::string changeLog;
+  String changeLog;
 
   Buyer (Num seed, int rounds) : secrets{seed}, changeLog{} {
     int last = seed % 10;
@@ -37,12 +40,20 @@ struct Buyer {
   }
 };
 
-static Num
-monkey(const Buyer buyer, std::string_view pattern) {
-  if (auto p = buyer.changeLog.find(pattern); p != std::string::npos) {
-    return buyer.secrets[p + 4] % 10;
+using Prices = std::unordered_map<String, int>;
+using StringSet = std::unordered_set<String>;
+
+static void
+updatePrices(Prices& prices, const Buyer& buyer) {
+  StringSet visited{};
+  for (int i = 0; i < buyer.changeLog.size() - 4; ++i) {
+    auto pattern = buyer.changeLog.substr(i, 4);
+    if (visited.contains(pattern)) {
+      continue;
+    }
+    visited.insert(pattern);
+    prices[pattern] += buyer.secrets[i + 4] % 10;
   }
-  return 0;
 }
 
 int
@@ -56,15 +67,12 @@ main() {
   Num res1 = std::transform_reduce(buyers.begin(), buyers.end(), Num{}, std::plus<>(), [](auto b) { return b.secrets.back(); });
   std::cout << "1: " << res1 << std::endl;
 
-  Num res2 = 0;
-  for (int a = -9; a <= 9; ++a) {
-  for (int b = -9; b <= 9; ++b) {
-  for (int c = -9; c <= 9; ++c) {
-  for (int d = -9; d <= 9; ++d) {
-    std::string pattern = {toChar(a), toChar(b), toChar(c), toChar(d)};
-    res2 = std::max(res2, std::transform_reduce(buyers.begin(), buyers.end(), Num{}, std::plus<>(), [&pattern](auto& b) { return monkey(b, pattern); }));
-  }}}}
-  std::cout << "2: " << res2 << std::endl;
+  Prices prices;
+  for (const auto& b : buyers) {
+    updatePrices(prices, b);
+  }
+  auto it = std::max_element(prices.begin(), prices.end(), [](auto a, auto b) { return a.second < b.second; });
+  std::cout << "2: " << it->second << std::endl;
 
   return 0;
 }
