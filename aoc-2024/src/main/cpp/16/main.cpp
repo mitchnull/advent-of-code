@@ -18,7 +18,7 @@ struct PosDir {
 template <>
 struct std::hash<PosDir> {
   std::size_t operator()(const PosDir& pd) const {
-    return std::hash<Pos>()(pd.pos) * 11 + std::hash<Dir>()(pd.dir);
+    return hashCombine(std::hash<Pos>{}(pd.pos), pd.dir);
   }
 };
 

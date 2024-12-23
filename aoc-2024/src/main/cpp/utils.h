@@ -11,6 +11,13 @@ namespace views = std::views;
 
 /* ------------------------------------------------------------------------ */
 
+template<typename T>
+std::size_t hashCombine(std::size_t seed, const T& v) {
+  return seed ^ (std::hash<T>{}(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2));
+}
+
+/* ------------------------------------------------------------------------ */
+
 struct Dir {
   int dx, dy;
 
@@ -42,7 +49,7 @@ static const auto DIRS = std::vector<Dir> {
 template <>
 struct std::hash<Dir> {
   std::size_t operator()(const Dir& d) const {
-    return d.dx * 11 + d.dy;
+    return hashCombine(d.dx, d.dy);
   }
 };
 
@@ -76,7 +83,7 @@ struct Pos {
 template <>
 struct std::hash<Pos> {
   std::size_t operator()(const Pos& p) const {
-    return p.x * 11 + p.y;
+    return hashCombine(p.x, p.y);
   }
 };
 
