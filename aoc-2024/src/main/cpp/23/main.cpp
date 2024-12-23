@@ -13,51 +13,20 @@ using Pair = std::pair<String, String>;
 using Pairs = std::vector<Pair>;
 using Neighbors = std::unordered_map<String, Strings>;
 
-template <typename T>
-static std::ostream&
-operator<<(auto& os, const std::vector<T>& v) {
-  os << "{";
-  std::string sep;
-  for (auto e : v) {
-    os << sep << e;
-    sep = ", ";
-  }
-  return os << "}";
-}
-
-static constexpr String
-toEdge(Pair p) {
-  return p.first + p.second;
-}
-
-static constexpr Pair
-rev(Pair p) {
-  return {p.second, p.first};
-}
-
-static constexpr String
-v1(String edge) {
-  return edge.substr(0, 2);
-}
-
-static constexpr String
-v2(String edge) {
-  return edge.substr(2);
-}
+/* ------------------------------------------------------------------------ */
 
 static Num
-solve1(const Strings& edges) {
+solve1(const Neighbors& neighbors) {
   Strings cliques;
-  for (auto a : edges) {
+  for (auto& [a, ats] : neighbors) {
     if (a.front() == 't') {
-      for (auto b : edges) {
-        if (v1(b) == v2(a)) {
-          for (auto c : edges) {
-            if (v1(c) == v2(b) && v2(c) == v1(a)) {
-              std::array<String, 3> clique = {v1(a), v1(b), v1(c)};
-              std::sort(clique.begin(), clique.end());
-              cliques.push_back(clique[0] + clique[1] + clique[2]);
-            }
+      for (auto b : ats) {
+        for (auto c : neighbors.at(b)) {
+          auto& cts = neighbors.at(c);
+          if (std::find(cts.begin(), cts.end(), a) != cts.end()) {
+            std::array<String, 3> clique = {a, b, c};
+            std::sort(clique.begin(), clique.end());
+            cliques.push_back(clique[0] + clique[1] + clique[2]);
           }
         }
       }
@@ -66,6 +35,8 @@ solve1(const Strings& edges) {
   std::sort(cliques.begin(), cliques.end());
   return std::unique(cliques.begin(), cliques.end()) - cliques.begin();
 }
+
+/* ------------------------------------------------------------------------ */
 
 static Strings
 bronKerboschIsh(const Neighbors& neighbors, const Strings& r, const Strings& p, Strings maxClique) {
@@ -87,33 +58,32 @@ bronKerboschIsh(const Neighbors& neighbors, const Strings& r, const Strings& p, 
 }
 
 static String
-solve2(const Strings& edges) {
-  Neighbors neighbors;
-  Strings vertices;
-  for (auto e : edges) {
-    auto v = v1(e);
-    if (vertices.empty() || vertices.back() != v) {
-      vertices.push_back(v);
-    }
-    neighbors[v].push_back(v2(e));
-  }
+solve2(const Strings& vertices, const Neighbors& neighbors) {
   Strings maxClique = bronKerboschIsh(neighbors, {}, vertices, {});
   return std::accumulate(std::next(maxClique.begin()), maxClique.end(), *maxClique.begin(), [](auto s, auto n) { s += ','; return s += n; });
 }
 
+/* ------------------------------------------------------------------------ */
+
 int
 main() {
-  Pairs pairs;
+  Neighbors neighbors;
+  Strings vertices;
   String line;
   while (std::cin >> line) {
-    pairs.emplace_back(line.substr(0, 2), line.substr(3));
+    auto f = line.substr(0, 2);
+    auto t = line.substr(3);
+    vertices.push_back(f);
+    vertices.push_back(t);
+    neighbors[f].push_back(t);
+    neighbors[t].push_back(f);
   }
-  Strings edges;
-  std::transform(pairs.begin(), pairs.end(), std::inserter(edges, edges.begin()), [](auto p) { return toEdge(p); });
-  std::transform(pairs.begin(), pairs.end(), std::inserter(edges, edges.begin()), [](auto p) { return toEdge(rev(p)); });
-  std::sort(edges.begin(), edges.end());
-  edges.erase(std::unique(edges.begin(), edges.end()), edges.end());
+  std::sort(vertices.begin(), vertices.end());
+  vertices.erase(std::unique(vertices.begin(), vertices.end()), vertices.end());
+  for (auto& [f, ts] : neighbors) {
+    std::sort(ts.begin(), ts.end());
+  }
 
-  std::cout << "1: " << solve1(edges) << std::endl;
-  std::cout << "2: " << solve2(edges) << std::endl;
+  std::cout << "1: " << solve1(neighbors) << std::endl;
+  std::cout << "2: " << solve2(vertices, neighbors) << std::endl;
 }
