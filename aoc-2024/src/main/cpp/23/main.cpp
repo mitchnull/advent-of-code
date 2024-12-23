@@ -1,16 +1,17 @@
 #include <iostream>
 #include <algorithm>
+#include <numeric>
 #include <vector>
-#include <unordered_set>
 #include <iterator>
+#include <unordered_map>
 
 using Num = int;
 
 using String = std::string;
 using Strings = std::vector<String>;
 using Pair = std::pair<String, String>;
-using Set = std::unordered_set<String>;
 using Pairs = std::vector<Pair>;
+using Neighbors = std::unordered_map<String, Strings>;
 
 template <typename T>
 static std::ostream&
@@ -44,40 +45,60 @@ v2(String edge) {
   return edge.substr(2);
 }
 
-static void
-findCluster(Strings& cluster, const Set& edges, String from, Set& visited) {
-  cluster.push_back(from);
-  visited.insert(from);
-  for (auto e : edges) {
-    if (e.starts_with(from) && !visited.contains(v2(e))) {
-      findCluster(cluster, edges, v2(e), visited);
-    }
-  }
-}
-
-static std::vector<Strings>
-findClustersWithT(const Set& edges) {
-  Set visited;
-  std::vector<Strings> clusters;
-  for (auto eb = edges.begin(), ee = edges.end(); eb != ee; ++eb) {
-    if (eb->front() == 't' && !visited.contains(v1(*eb))) {
-      Strings cluster;
-      findCluster(cluster, edges, v1(*eb), visited);
-      clusters.push_back(cluster);
-    }
-  }
-  return clusters;
-}
-
 static Num
-solve1(const Strings& cluster) {
-  Num res = 0;
-  for (Num ts = std::count_if(cluster.begin(), cluster.end(), [](auto v) { return v.front() == 't'; }), size = cluster.size();
-      ts > 0 && size >=3;
-      --ts, --size) {
-    res += ((size - 1) * (size - 2)) / 2;
+solve1(const Strings& edges) {
+  Strings cliques;
+  for (auto a : edges) {
+    if (a.front() == 't') {
+      for (auto b : edges) {
+        if (v1(b) == v2(a)) {
+          for (auto c : edges) {
+            if (v1(c) == v2(b) && v2(c) == v1(a)) {
+              std::array<String, 3> clique = {v1(a), v1(b), v1(c)};
+              std::sort(clique.begin(), clique.end());
+              cliques.push_back(clique[0] + clique[1] + clique[2]);
+            }
+          }
+        }
+      }
+    }
   }
-  return res;
+  std::sort(cliques.begin(), cliques.end());
+  return std::unique(cliques.begin(), cliques.end()) - cliques.begin();
+}
+
+static Strings
+bronKerboschIsh(const Neighbors& neighbors, const Strings& r, const Strings& p, Strings maxClique) {
+  if (p.empty()) {
+    return r.size() > maxClique.size() ? r : maxClique;
+  }
+  for (auto it = p.begin(), end = p.end(); it != end; ++it) {
+    const auto& n = neighbors.at(*it);
+    Strings rr;
+    std::set_union(r.begin(), r.end(), it, it + 1, std::back_inserter(rr));
+    Strings pp;
+    std::set_intersection(it, p.end(), n.begin(), n.end(), std::back_inserter(pp));
+    auto mc = bronKerboschIsh(neighbors, rr, pp, maxClique);
+    if (mc.size() > maxClique.size()) {
+      std::swap(maxClique, mc);
+    }
+  }
+  return maxClique;
+}
+
+static String
+solve2(const Strings& edges) {
+  Neighbors neighbors;
+  Strings vertices;
+  for (auto e : edges) {
+    auto v = v1(e);
+    if (vertices.empty() || vertices.back() != v) {
+      vertices.push_back(v);
+    }
+    neighbors[v].push_back(v2(e));
+  }
+  Strings maxClique = bronKerboschIsh(neighbors, {}, vertices, {});
+  return std::accumulate(std::next(maxClique.begin()), maxClique.end(), *maxClique.begin(), [](auto s, auto n) { s += ','; return s += n; });
 }
 
 int
@@ -87,17 +108,12 @@ main() {
   while (std::cin >> line) {
     pairs.emplace_back(line.substr(0, 2), line.substr(3));
   }
-  Set edges;
+  Strings edges;
   std::transform(pairs.begin(), pairs.end(), std::inserter(edges, edges.begin()), [](auto p) { return toEdge(p); });
   std::transform(pairs.begin(), pairs.end(), std::inserter(edges, edges.begin()), [](auto p) { return toEdge(rev(p)); });
+  std::sort(edges.begin(), edges.end());
+  edges.erase(std::unique(edges.begin(), edges.end()), edges.end());
 
-  Set visited;
-  auto tClusters = findClustersWithT(edges);
-  for (auto tc : tClusters) {
-    std::cout << tc << std::endl;
-  }
-  Num res1 = std::transform_reduce(tClusters.begin(), tClusters.end(), Num{}, std::plus<>(), solve1);
-
-  std::cout << "1: " << res1 << std::endl;
+  std::cout << "1: " << solve1(edges) << std::endl;
+  std::cout << "2: " << solve2(edges) << std::endl;
 }
-  
