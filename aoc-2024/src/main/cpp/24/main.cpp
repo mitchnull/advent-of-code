@@ -29,19 +29,6 @@ findNode(auto& nodes, String out) {
 }
 
 static auto
-findNode(auto& nodes, String left, String right, char op, String name = {}, int i = 0) {
-  auto it = std::find_if(nodes.begin(), nodes.end(), [=](auto& n) {
-    return n.op == op &&
-      ((n.left == left && n.right == right) || 
-      ((n.left == right && n.right == left))); });
-  if (!name.empty() && it == nodes.end()) {
-    std::cerr << "couldn't find node " << name << "(" << i << "): left=" << left << ", right=" << right << ", op=" << op << std::endl;
-    exit(1);
-  }
-  return it;
-}
-
-static auto
 findOut(const Outputs& outs, String node) {
   return std::find_if(outs.begin(), outs.end(), [node](auto& o) {
       return o.first == node; });
@@ -90,9 +77,18 @@ solve1(const Nodes& nodes, Outputs outs, int maxz) {
   return res;
 }
 
+/* ------------------------------------------------------------------------ */
+
+static auto
+findNode(auto& nodes, String left, String right, char op) {
+  return std::find_if(nodes.begin(), nodes.end(), [=](auto& n) {
+    return n.op == op &&
+      ((n.left == left && n.right == right) || 
+      ((n.left == right && n.right == left))); });
+}
+
 static void
 swapOut(Node& a, Node& b, Strings& swaps) {
-  std::cout << "@@@ swapping " << a.out << " <=> " << b.out << std::endl;
   swaps.push_back(a.out);
   swaps.push_back(b.out);
   std::swap(a.out, b.out);
@@ -106,42 +102,27 @@ solve2(Nodes nodes, int maxz) {
     Node& wrongNode = *findNode(nodes, z(0));
     swapOut(z00, wrongNode, swaps);
   }
-  auto cc = findNode(nodes, x(0), y(0), 'A', "cc", 0);
+  auto cc = findNode(nodes, x(0), y(0), 'A');
   for (int i = 1; i < maxz; ++i) {
-    auto nn = findNode(nodes, x(i), y(i), 'X', "nn", i);
+    auto nn = findNode(nodes, x(i), y(i), 'X');
     auto zitByIns = findNode(nodes, cc->out, nn->out, 'X');
     auto zz = findNode(nodes, z(i));
     if (zitByIns == nodes.end()) {
       if (nn->out == zz->left) {
-        // cc is swapped with right
-        auto ww = findNode(nodes, zz->right);
-        std::cout << "@@@ swapping cc.out with zz.right: " << cc->out << " <=> " << ww->out << std::endl;
-        swapOut(*cc, *ww, swaps);
+        swapOut(*cc, *findNode(nodes, zz->right), swaps);
       } else if (nn->out == zz->right) {
-        // cc is swapped with left
-        auto ww = findNode(nodes, zz->left);
-        std::cout << "@@@ swapping cc.out with zz.left: " << cc->out << " <=> " << ww->out << std::endl;
-        swapOut(*cc, *ww, swaps);
+        swapOut(*cc, *findNode(nodes, zz->left), swaps);
       } else if (cc->out == zz->left) {
-        // nn is swapped with right
-        auto ww = findNode(nodes, zz->right);
-        std::cout << "@@@ swapping nn.out with zz.right: " << nn->out << " <=> " << ww->out << std::endl;
-        swapOut(*nn, *ww, swaps);
+        swapOut(*nn, *findNode(nodes, zz->right), swaps);
       } else if (cc->out == zz->right) {
-        // nn is swapped with left
-        auto ww = findNode(nodes, zz->left);
-        std::cout << "@@@ swapping nn.out with zz.left: " << nn->out << " <=> " << ww->out << std::endl;
-        swapOut(*nn, *ww, swaps);
+        swapOut(*nn, *findNode(nodes, zz->left), swaps);
       }
     } else if (zz != zitByIns) {
       swapOut(*zz, *zitByIns, swaps);
     }
-    auto ss = findNode(nodes, cc->out, nn->out, 'A', "ss", i);
-    cc = findNode(nodes, x(i), y(i), 'A', "cc", i);
-    cc = findNode(nodes, cc->out, ss->out, 'O', "tt", i);
-  }
-  if (swaps.empty()) {
-    return "";
+    auto ss = findNode(nodes, cc->out, nn->out, 'A');
+    cc = findNode(nodes, x(i), y(i), 'A');
+    cc = findNode(nodes, cc->out, ss->out, 'O');
   }
   std::sort(swaps.begin(), swaps.end());
   return std::accumulate(swaps.begin() + 1, swaps.end(), swaps.front(), [](auto a, auto b) { return a + ',' + b; });
@@ -171,5 +152,5 @@ main() {
   }
 
   std::cout << "1: " << solve1(nodes, outs, maxz) << std::endl;
-  std::cout << solve2(nodes, maxz) << std::endl;
+  std::cout << "2:\n" << solve2(nodes, maxz) << std::endl;
 }
