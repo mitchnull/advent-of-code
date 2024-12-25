@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <unordered_map>
+#include <map>
 #include <iterator>
 #include <string>
 #include <numeric>
@@ -15,7 +16,7 @@ using Buttons = std::vector<Button>;
 using Edge = std::pair<Button, Button>;
 using Path = std::string;
 using Paths = std::vector<Path>;
-using ChunkedPath = std::unordered_map<Path, Num>;
+using ChunkedPath = std::map<Path, Num>;
 using ChunkedPaths = std::vector<ChunkedPath>;
 using BasePaths = std::unordered_map<Edge, ChunkedPaths>;
 
@@ -147,11 +148,11 @@ findBasePaths(const Buttons& buttons, Button f, Button t) {
     return {xp};
   }
   Paths paths;
-  if (buttons[fy * 3 + tx] != 'X') {
-    paths.push_back(xp + yp);
-  }
   if (buttons[ty * 3 + fx] != 'X') {
     paths.push_back(yp + xp);
+  }
+  if (buttons[fy * 3 + tx] != 'X') {
+    paths.push_back(xp + yp);
   }
   return paths;
 }
@@ -188,13 +189,13 @@ nextChunkedPath(const BasePaths& basePaths, const ChunkedPath& chunkedPath, int 
       auto sel = bps.begin();
       if (bps.size() > 1 && depth > 0) {
         ChunkedPaths expandedPaths = bps;
-        for (int d = 0; d < depth; ++d) {
+        for (int d = depth; d > 0; --d) {
           std::transform(expandedPaths.begin(), expandedPaths.end(), expandedPaths.begin(),
               [&](auto& cp) {
                 if (auto it = cache.find(cp); it != cache.end()) {
                   return it->second;
                 }
-                return cache[cp] = nextChunkedPath(basePaths, cp, depth - d - 1);
+                return cache[cp] = nextChunkedPath(basePaths, cp, d - 1);
               });
           auto [itMin, itMax] = std::minmax_element(expandedPaths.begin(), expandedPaths.end(),
               [](auto& a, auto& b) { return len(a) < len(b); });
@@ -217,7 +218,7 @@ static Num
 solve(const BasePaths basePaths, const std::string& line, int rounds) {
   auto chunkedPath = chunked(line);
   for (int i = 0; i <= rounds; ++i) {
-    chunkedPath = nextChunkedPath(basePaths, chunkedPath, rounds - i + 1);
+    chunkedPath = nextChunkedPath(basePaths, chunkedPath, rounds - i);
   }
 
   Num mul = std::stol(line.substr(0, line.length() - 1));
@@ -242,7 +243,7 @@ main() {
 
   auto basePaths = findBasePaths(ABUTTONS);
   basePaths.merge(findBasePaths(BBUTTONS));
-  
+
   Num res1 = solve(basePaths, lines, 2);
   std::cout << "1: " << res1 << "\n";
 
