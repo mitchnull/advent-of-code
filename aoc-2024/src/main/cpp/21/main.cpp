@@ -19,6 +19,7 @@ using Paths = std::vector<Path>;
 using ChunkedPath = std::map<Path, Num>;
 using ChunkedPaths = std::vector<ChunkedPath>;
 using BasePaths = std::unordered_map<Edge, ChunkedPaths>;
+using CacheKey = std::pair<ChunkedPath, int>;
 
 template <>
 struct std::hash<Edge> {
@@ -28,10 +29,11 @@ struct std::hash<Edge> {
 };
 
 template <>
-struct std::hash<ChunkedPath> {
-  std::size_t operator()(const ChunkedPath& cp) const {
-    return std::accumulate(cp.begin(), cp.end(), 0, [](auto h, auto& e) {
-        return hashCombine(h, std::hash<Path>{}(e.first) * e.second); });
+struct std::hash<CacheKey> {
+  std::size_t operator()(const CacheKey& ck) const {
+    return hashCombine(std::accumulate(ck.first.begin(), ck.first.end(), 0,
+          [](auto h, auto& e) { return hashCombine(h, std::hash<Path>{}(e.first) * e.second); }),
+        ck.second);
   }
 };
 
@@ -54,6 +56,7 @@ operator<<(auto& os, const ChunkedPath& chunks) {
   if (chunks.empty()) {
     return os << "{}";
   }
+
   os << "{\n";
   for (auto [k, v] : chunks) {
     os << "  " << k << ": " << v << ",\n";
@@ -96,6 +99,8 @@ operator<<(auto& os, const BasePaths& basePaths) {
   }
   return os << "}";
 }
+
+/* ------------------------------------------------------------------------ */
 
 static ChunkedPath
 chunked(const Path& path, Num count = 1) {
@@ -148,11 +153,11 @@ findBasePaths(const Buttons& buttons, Button f, Button t) {
     return {xp};
   }
   Paths paths;
-  if (buttons[ty * 3 + fx] != 'X') {
-    paths.push_back(yp + xp);
-  }
   if (buttons[fy * 3 + tx] != 'X') {
     paths.push_back(xp + yp);
+  }
+  if (buttons[ty * 3 + fx] != 'X') {
+    paths.push_back(yp + xp);
   }
   return paths;
 }
@@ -180,7 +185,7 @@ len(const ChunkedPath& path) {
 
 static ChunkedPath
 nextChunkedPath(const BasePaths& basePaths, const ChunkedPath& chunkedPath, int depth) {
-  static std::unordered_map<ChunkedPath, ChunkedPath> cache;
+  static std::unordered_map<CacheKey, ChunkedPath> cache;
   ChunkedPath res;
   Button pb = 'A';
   for (const auto& [p, count] : chunkedPath) {
@@ -192,10 +197,11 @@ nextChunkedPath(const BasePaths& basePaths, const ChunkedPath& chunkedPath, int 
         for (int d = depth; d > 0; --d) {
           std::transform(expandedPaths.begin(), expandedPaths.end(), expandedPaths.begin(),
               [&](auto& cp) {
-                if (auto it = cache.find(cp); it != cache.end()) {
+                CacheKey ck{cp, depth};
+                if (auto it = cache.find(ck); it != cache.end()) {
                   return it->second;
                 }
-                return cache[cp] = nextChunkedPath(basePaths, cp, d - 1);
+                return cache[ck] = nextChunkedPath(basePaths, cp, d - 1);
               });
           auto [itMin, itMax] = std::minmax_element(expandedPaths.begin(), expandedPaths.end(),
               [](auto& a, auto& b) { return len(a) < len(b); });
@@ -249,5 +255,4 @@ main() {
 
   Num res2 = solve(basePaths, lines, 25);
   std::cout << "2: " << res2 << "\n";
-  return 0;
 }
