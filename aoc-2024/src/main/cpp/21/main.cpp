@@ -19,7 +19,11 @@ using Paths = std::vector<Path>;
 using ChunkedPath = std::map<Path, Num>;
 using ChunkedPaths = std::vector<ChunkedPath>;
 using BasePaths = std::unordered_map<Edge, ChunkedPaths>;
-using CacheKey = std::pair<ChunkedPath, int>;
+
+struct CachedChunkedPath {
+  ChunkedPath cp;
+  int depth;
+};
 
 template <>
 struct std::hash<Edge> {
@@ -29,11 +33,10 @@ struct std::hash<Edge> {
 };
 
 template <>
-struct std::hash<CacheKey> {
-  std::size_t operator()(const CacheKey& ck) const {
-    return hashCombine(std::accumulate(ck.first.begin(), ck.first.end(), 0,
-          [](auto h, auto& e) { return hashCombine(h, std::hash<Path>{}(e.first) * e.second); }),
-        ck.second);
+struct std::hash<ChunkedPath> {
+  std::size_t operator()(const ChunkedPath& cp) const {
+    return std::accumulate(cp.begin(), cp.end(), 0, [](auto h, auto& e) {
+        return hashCombine(h, std::hash<Path>{}(e.first) * e.second); });
   }
 };
 
@@ -56,7 +59,6 @@ operator<<(auto& os, const ChunkedPath& chunks) {
   if (chunks.empty()) {
     return os << "{}";
   }
-
   os << "{\n";
   for (auto [k, v] : chunks) {
     os << "  " << k << ": " << v << ",\n";
@@ -185,7 +187,7 @@ len(const ChunkedPath& path) {
 
 static ChunkedPath
 nextChunkedPath(const BasePaths& basePaths, const ChunkedPath& chunkedPath, int depth) {
-  static std::unordered_map<CacheKey, ChunkedPath> cache;
+  static std::unordered_map<ChunkedPath, CachedChunkedPath> cache;
   ChunkedPath res;
   Button pb = 'A';
   for (const auto& [p, count] : chunkedPath) {
@@ -197,11 +199,10 @@ nextChunkedPath(const BasePaths& basePaths, const ChunkedPath& chunkedPath, int 
         for (int d = depth; d > 0; --d) {
           std::transform(expandedPaths.begin(), expandedPaths.end(), expandedPaths.begin(),
               [&](auto& cp) {
-                CacheKey ck{cp, depth};
-                if (auto it = cache.find(ck); it != cache.end()) {
-                  return it->second;
+                if (auto it = cache.find(cp); it != cache.end() && it->second.depth >= depth) {
+                  return it->second.cp;
                 }
-                return cache[ck] = nextChunkedPath(basePaths, cp, d - 1);
+                return (cache[cp] = {nextChunkedPath(basePaths, cp, d - 1), depth}).cp;
               });
           auto [itMin, itMax] = std::minmax_element(expandedPaths.begin(), expandedPaths.end(),
               [](auto& a, auto& b) { return len(a) < len(b); });
