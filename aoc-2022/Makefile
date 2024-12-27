@@ -1,4 +1,11 @@
+CXX=clang++
 VPATH=../src/main
-#CXXFLAGS?=-std=c++2a -Wall -g -D_GLIBCXX_DEBUG
-#CXXFLAGS?=-std=c++2a -Wall -g -fsanitize=address
-CXXFLAGS?=-std=c++2a -Wall -O3
+#CXXFLAGS?=-Og -g -D_GLIBCXX_DEBUG
+#CXXFLAGS?=-Og -g -fsanitize=address
+CXXFLAGS?=-O3
+
+CXXFLAGS+=-std=c++23 -stdlib=libc++ -Wall -Wno-deprecated-declarations -I/opt/homebrew/include
+LDFLAGS=-lgmpxx -lgmp -L/opt/homebrew/lib
+
+clean:
+	rm -rf build
