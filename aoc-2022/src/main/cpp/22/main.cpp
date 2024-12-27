@@ -6,7 +6,6 @@
 using Board = Grid<>;
 
 static constexpr const int BS = 50;
-// static constexpr const int BS = 5;
 
 static const auto DIRSL = std::vector<Dir> {
   {1, 0},
@@ -26,13 +25,13 @@ struct PosDir {
 
 static Dir
 turnLeft(Dir d) {
-  std::cout << "@@@ turning left: " << Dir{d.dy, -d.dx} << std::endl;
+  // std::cout << "@@@ turning left: " << Dir{d.dy, -d.dx} << std::endl;
   return {d.dy, -d.dx};
 }
 
 static Dir
 turnRight(Dir d) {
-  std::cout << "@@@ turning right" << Dir{-d.dy, d.dx} << std::endl;
+  // std::cout << "@@@ turning right" << Dir{-d.dy, d.dx} << std::endl;
   return {-d.dy, d.dx};
 }
 
@@ -102,23 +101,23 @@ warpCube(const Board& board, PosDir pd) {
 
 static PosDir
 move(const Board& board, PosDir pd, int numMoves, auto warp) {
-  std::cout << "@@@ moving from " << pd.pos << pd.dir << ": " << numMoves << std::endl;
+  // std::cout << "@@@ moving from " << pd.pos << pd.dir << ": " << numMoves << std::endl;
   auto warpWithLog = [warp](const Board& board, PosDir pd) {
     auto res = warp(board, pd);
     if (res != pd) {
-      std::cout << "@@@ warped from " << pd.pos << pd.dir << " to " << res.pos << res.dir << std::endl;
+      // std::cout << "@@@ warped from " << pd.pos << pd.dir << " to " << res.pos << res.dir << std::endl;
     }
     return res;
   };
   while (numMoves-- > 0) {
     auto npd = warpWithLog(board, {pd.pos + pd.dir, pd.dir});
     if (board[npd.pos] != '.') {
-      std::cout << "@@@ hit obstacle at" << npd.pos << std::endl;
+      // std::cout << "@@@ hit obstacle at" << npd.pos << std::endl;
       break;
     }
     pd = npd;
   }
-  std::cout << "@@@ moved to " << pd.pos << pd.dir << std::endl;
+  // std::cout << "@@@ moved to " << pd.pos << pd.dir << std::endl;
   return pd;
 }
 
@@ -162,13 +161,6 @@ solve(const Board& board, const std::string& steps, auto warp) {
 
 /* ------------------------------------------------------------------------ */
 
-static void
-assertEquals(std::string name, PosDir a, PosDir e) {
-  if (a != e) {
-    std::cerr << "FAIL: " << name << ": " << a.pos << a.dir << " != " << e.pos << e.dir << std::endl;
-  }
-}
-
 int
 main() {
   std::vector<std::string> lines;
@@ -185,25 +177,10 @@ main() {
   std::string steps;
   std::cin >> steps;
 
-
-  // auto res1 = solve(board, steps, warpFlat);
+  auto res1 = solve(board, steps, warpFlat);
   auto res2 = solve(board, steps, warpCube);
-  // std::cout << "1: " << res1 << std::endl;
+  std::cout << "1: " << res1 << std::endl;
   std::cout << "2: " << res2 << std::endl;
 
-  assertEquals("2U -> 6L", warpCube(board, {{51, -1}, {0, -1}}), {{0, 151}, {1, 0}});
-  assertEquals("1U -> 6D", warpCube(board, {{102, -1}, {0, -1}}), {{2, 199}, {0, -1}});
-  assertEquals("1R -> -4R", warpCube(board, {{150, 1}, {1, 0}}), {{99, 148}, {-1, 0}});
-  assertEquals("1D -> 3R", warpCube(board, {{102, 50}, {0, 1}}), {{99, 52}, {-1, 0}});
-  assertEquals("3R -> 1D", warpCube(board, {{100, 52}, {1, 0}}), {{102, 49}, {0, -1}});
-  assertEquals("4R -> -1R", warpCube(board, {{100, 101}, {1, 0}}), {{149, 48}, {-1, 0}});
-  assertEquals("4D -> 6R", warpCube(board, {{51, 150}, {0, 1}}), {{49, 151}, {-1, 0}});
-  assertEquals("6R -> 4D", warpCube(board, {{50, 151}, {1, 0}}), {{51, 149}, {0, -1}});
-  assertEquals("6D -> 1U", warpCube(board, {{1, 200}, {0, 1}}), {{101, 0}, {0, 1}});
-  assertEquals("6L -> 2U", warpCube(board, {{-1, 151}, {-1, 0}}), {{51, 0}, {0, 1}});
-  assertEquals("5L -> -2L", warpCube(board, {{-1, 101}, {-1, 0}}), {{50, 48}, {1, 0}});
-  assertEquals("5U -> 3L", warpCube(board, {{1, 99}, {0, -1}}), {{50, 51}, {1, 0}});
-  assertEquals("3L -> 5U", warpCube(board, {{49, 51}, {-1, 0}}), {{1, 100}, {0, 1}});
-  assertEquals("2L -> -5L", warpCube(board, {{49, 1}, {-1, 0}}), {{0, 148}, {1, 0}});
   return 0;
 }
