@@ -30,6 +30,17 @@ struct Dir {
   friend Dir operator*(Dir d, auto n) {
     return d *= n;
   }
+  friend Dir operator*(auto n, Dir d) {
+    return d *= n;
+  }
+  Dir& operator/=(auto n) {
+    dx /= n;
+    dy /= n;
+    return *this;
+  }
+  friend Dir operator/(Dir d, auto n) {
+    return d /= n;
+  }
   Dir operator-() {
     return Dir{-dx, -dy};
   }
@@ -73,7 +84,9 @@ struct Pos {
   friend Pos operator-(Pos p, Dir d) {
     return p -= d;
   }
-
+  friend Dir operator-(Pos a, Pos b) {
+    return {a.x - b.x, a.y - b.y};
+  }
   auto friend operator<=>(const Pos& a, const Pos& b) = default;
 
   friend std::ostream& operator<<(std::ostream& os, const Pos& p) {
@@ -140,6 +153,10 @@ public:
 
   auto iter() { return iter_(*this); }
   auto iter() const { return iter_(*this); }
+  auto begin() { return data_.begin(); }
+  auto begin() const { return data_.begin(); }
+  auto end() { return data_.end(); }
+  auto enn() const { return data_.end(); }
 
   friend std::ostream& operator<<(std::ostream& os, const Grid& m) {
     for (int y = 0; y < m.h(); ++y) {

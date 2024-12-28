@@ -1,17 +1,34 @@
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <unordered_set>
+#include <unordered_map>
 #include "../utils.h"
 
 using Board = Grid<>;
 
-static constexpr const int BS = 50;
+static constexpr const auto DIRSL = std::array<Dir, 4>{
+  Dir{1, 0},
+  Dir{0, 1},
+  Dir{-1, 0},
+  Dir{0, -1},
+};
 
-static const auto DIRSL = std::vector<Dir> {
-  {1, 0},
-  {0, 1},
-  {-1, 0},
-  {0, -1},
+using CubeConf = std::string;
+static constexpr const CubeConf BASE_CUBE_CONF = "ABCDEFGH";
+static constexpr const auto CUBE_ROTS = std::array<CubeConf, 4>{
+  // match order with DIRSL
+  "EFBAHGCD",
+  "BFGCAEHD",
+  "DCGHABFE",
+  "EADHFBCG",
+};
+
+struct WarpLine {
+  std::string id; // FIXME remove
+  Pos srcBegin, srcEnd, dstBegin, dstEnd;
+  Dir dir;
 };
 
 struct PosDir {
@@ -19,6 +36,24 @@ struct PosDir {
   Dir dir;
 
   friend auto operator<=>(const PosDir&, const PosDir&) = default;
+};
+
+struct CubeVertex {
+  Pos pos;
+  char name;
+
+  friend auto operator<=>(const CubeVertex& a, const CubeVertex& b) { return a.name <=> b.name; }
+};
+
+struct CubeEdge {
+  CubeVertex a, b;
+  Dir dir;
+
+  std::string id() { return {a.name, b.name}; };
+
+  static CubeEdge ordered(CubeVertex a, CubeVertex b, Dir dir) {
+    return CubeEdge{std::min(a, b), std::max(a, b), dir};
+  }
 };
 
 /* ------------------------------------------------------------------------ */
@@ -36,7 +71,7 @@ turnRight(Dir d) {
 }
 
 static PosDir
-warpFlat(const Board& board, PosDir pd) {
+warpAroundBoard(const Board& board, PosDir pd) {
   pd.pos.x = (pd.pos.x + board.w()) % board.w();
   pd.pos.y = (pd.pos.y + board.h()) % board.h();
   while (board[pd.pos] == ' ') {
@@ -47,54 +82,18 @@ warpFlat(const Board& board, PosDir pd) {
   return pd;
 }
 
+static int
+hvLen(Dir d) {
+  return std::max(std::abs(d.dx), std::abs(d.dy));
+}
+
 static PosDir
-warpCube(const Board& board, PosDir pd) {
-  //  21
-  //  3
-  // 54
-  // 6
-  auto [x, y] = pd.pos;
-  if (y == -1 && BS <= x && x < 2 * BS) { /* 2U -> 6L */
-    return {{0, 3 * BS + x - BS}, {1, 0}};
-  }
-  if (y == -1 && 2 * BS <= x && x < 3 * BS) { /* 1U -> 6D */
-    return {{x - 2 * BS, 4 * BS - 1}, {0, -1}};
-  }
-  if (x == 3 * BS && 0 <= y && y < BS) { /* 1R -> -4R */
-    return {{2 * BS - 1, 3 * BS - 1 - y}, {-1, 0}};
-  }
-  if (y == BS && 2 * BS <= x && x < 3 * BS) { /* 1D -> 3R */
-    return {{2 * BS - 1, BS + x - 2 * BS}, {-1, 0}};
-  }
-  if (x == 2 * BS && BS <= y && y < 2 * BS) { /* 3R -> 1D */
-    return {{2 * BS + y - BS, BS - 1}, {0, -1}};
-  }
-  if (x == 2 * BS && 2 * BS <= y && y < 3 * BS) { /* 4R -> -1R */
-    return {{3 * BS - 1, BS - 1 - (y - 2 * BS)}, {-1, 0}};
-  }
-  if (y == 3 * BS && BS <= x && x < 2 * BS) { /* 4D -> 6R */
-    return {{BS - 1, 3 * BS + x - BS}, {-1, 0}};
-  }
-  if (x == BS && 3 * BS <= y && y < 4 * BS) { /* 6R -> 4D */
-    return {{BS + y - 3 * BS, 3 * BS - 1}, {0, -1}};
-  }
-  if (y == 4 * BS && 0 <= x && x < BS) { /* 6D -> 1U */
-    return {{2 * BS + x, 0}, {0, 1}};
-  }
-  if (x == -1 && 3 * BS <= y && y <= 4 * BS) { /* 6L -> 2U */
-    return {{BS + y - 3 * BS, 0}, {0, 1}};
-  }
-  if (x == -1 && 2 * BS <= y && y < 3 * BS) { /* 5L -> -2L */
-    return {{BS, BS - 1 - (y - 2 * BS)}, {1, 0}};
-  }
-  if (y == 2 * BS - 1 && 0 <= x && x < BS) { /* 5U -> 3L */
-    return {{BS, BS + x}, {1, 0}};
-  }
-  if (x == BS - 1 && BS <= y && y < 2 * BS) { /* 3L -> 5U */
-    return {{y - BS, 2 * BS}, {0, 1}};
-  }
-  if (x == BS - 1 && 0 <= y && y < BS) { /* 2L -> -5L */
-    return {{0, 3 * BS - 1 - y}, {1, 0}};
+warpAtLines(const std::vector<WarpLine>& warpLines, PosDir pd) {
+  for (auto& wl : warpLines) {
+    if (std::min(wl.srcBegin.x, wl.srcEnd.x) <= pd.pos.x && pd.pos.x <= std::max(wl.srcBegin.x, wl.srcEnd.x) &&
+        std::min(wl.srcBegin.y, wl.srcEnd.y) <= pd.pos.y && pd.pos.y <= std::max(wl.srcBegin.y, wl.srcEnd.y)) {
+      return {wl.dstBegin + ((wl.dstEnd - wl.dstBegin) / (hvLen(wl.dstEnd - wl.dstBegin))) * hvLen(pd.pos - wl.srcBegin), wl.dir};
+    }
   }
   return pd;
 }
@@ -102,15 +101,15 @@ warpCube(const Board& board, PosDir pd) {
 static PosDir
 move(const Board& board, PosDir pd, int numMoves, auto warp) {
   // std::cout << "@@@ moving from " << pd.pos << pd.dir << ": " << numMoves << std::endl;
-  auto warpWithLog = [warp](const Board& board, PosDir pd) {
-    auto res = warp(board, pd);
-    if (res != pd) {
-      // std::cout << "@@@ warped from " << pd.pos << pd.dir << " to " << res.pos << res.dir << std::endl;
-    }
-    return res;
-  };
+  // auto warpWithLog = [warp](const Board& board, PosDir pd) {
+  //   auto res = warp(board, pd);
+  //   if (res != pd) {
+  //     std::cout << "@@@ warped from " << pd.pos << pd.dir << " to " << res.pos << res.dir << std::endl;
+  //   }
+  //   return res;
+  // };
   while (numMoves-- > 0) {
-    auto npd = warpWithLog(board, {pd.pos + pd.dir, pd.dir});
+    auto npd = warp({pd.pos + pd.dir, pd.dir});
     if (board[npd.pos] != '.') {
       // std::cout << "@@@ hit obstacle at" << npd.pos << std::endl;
       break;
@@ -122,18 +121,71 @@ move(const Board& board, PosDir pd, int numMoves, auto warp) {
 }
 
 static Pos
-findStart(const Board& board) {
+findStart(const Board& board, auto pred) {
   for (auto [x, y, v]: board.iter()) {
-    if (v == '.') {
+    if (pred(v)) {
       return {x, y};
     }
   }
   return {};
 }
 
+static void
+addWarpLine(std::vector<WarpLine>& warpLines, CubeEdge src, CubeEdge dst) {
+  auto srcBegin = src.a.pos + src.dir;
+  auto srcEnd = src.b.pos + src.dir;
+  if (srcBegin != dst.a.pos || srcEnd != dst.b.pos) {
+    warpLines.emplace_back(src.id(), srcBegin, srcEnd, dst.a.pos, dst.b.pos, -dst.dir);
+  }
+}
+
+static void
+findWarpLines(std::vector<WarpLine>& warpLines, const Board& board, int bs, Pos pos, CubeConf cubeConf, std::unordered_map<std::string, CubeEdge>& edges, std::unordered_set<Pos>& visited) {
+  const auto corners = std::array<Dir, 4>{
+    Dir{bs - 1, 0},
+    Dir{bs - 1, bs - 1},
+    Dir{0, bs - 1},
+    Dir{0, 0},
+  };
+
+  std::cout << "@@@ checking " << cubeConf << " at " << pos << std::endl;
+  visited.insert(pos);
+  for (int i = 0; i < 4; ++i) {
+    auto ei = (i + 1) % 4;
+    CubeEdge edge = CubeEdge::ordered({pos + corners[i], cubeConf[i]}, {pos + corners[ei], cubeConf[ei]}, DIRSL[i]);
+    if (auto it = edges.find(edge.id()); it != edges.end()) {
+      addWarpLine(warpLines, it->second, edge);
+      addWarpLine(warpLines, edge, it->second);
+    } else {
+      edges[edge.id()] = edge;
+    }
+  }
+
+  for (int i = 0; i < 4; ++i) {
+    auto pp = pos + (bs * DIRSL[i]);
+    if (board[pp] != ' ' && !visited.contains(pp)) {
+      std::cout << "@@@ turning cube toward " << DIRSL[i] << std::endl;
+      CubeConf rotated = CUBE_ROTS[i]
+        | views::transform([&](auto c) { return cubeConf[c - 'A']; })
+        | std::ranges::to<CubeConf>();
+      findWarpLines(warpLines, board, bs, pp, rotated, edges, visited);
+    }
+  }
+}
+
+static std::vector<WarpLine>
+findWarpLines(const Board& board, int bs) {
+  std::vector<WarpLine> warpLines;
+  Pos pos = findStart(board, [](char c) { return c != ' '; });
+  std::unordered_set<Pos> visited;
+  std::unordered_map<std::string, CubeEdge> cubeEdges;
+  findWarpLines(warpLines, board, bs, pos, BASE_CUBE_CONF, cubeEdges, visited);
+  return warpLines;
+}
+
 static int
 solve(const Board& board, const std::string& steps, auto warp) {
-  PosDir pd = {findStart(board), {1, 0}};
+  PosDir pd = {findStart(board, [](char c) { return c == '.'; }), {1, 0}};
 
   auto ss = std::stringstream(steps);
   int numMoves;
@@ -177,8 +229,15 @@ main() {
   std::string steps;
   std::cin >> steps;
 
-  auto res1 = solve(board, steps, warpFlat);
-  auto res2 = solve(board, steps, warpCube);
+  int bs = std::sqrt((std::ranges::count_if(board, [](char c) { return c != ' '; }) / 6));
+  auto warpLines = findWarpLines(board, bs);
+  for (auto wl : warpLines) { std::cout << "@@@ " << wl.id << ": " << wl.srcBegin << "," << wl.srcEnd << " -> " << wl.dstBegin << "," << wl.dstEnd << ", dir: " << wl.dir << std::endl; }
+
+  auto warp1 = [&board](PosDir pd) { return warpAroundBoard(board, pd); };
+  auto warp2 = [&warpLines](PosDir pd) { return warpAtLines(warpLines, pd); };
+
+  auto res1 = solve(board, steps, warp1);
+  auto res2 = solve(board, steps, warp2);
   std::cout << "1: " << res1 << std::endl;
   std::cout << "2: " << res2 << std::endl;
 
