@@ -18,8 +18,10 @@ static constexpr const auto DIRSL = std::array<Dir, 4>{
 using CubeConf = std::string;
 
 struct WarpLine {
-  Pos srcBegin, srcEnd, dstBegin, dstEnd;
-  Dir dir;
+  Pos srcBegin, srcEnd;
+  Dir srcDir;
+  Pos dstBegin, dstEnd;
+  Dir dstDir;
 };
 
 struct PosDir {
@@ -79,9 +81,10 @@ hvLen(Dir d) {
 static PosDir
 warpAtLines(const std::vector<WarpLine>& warpLines, PosDir pd) {
   for (auto& wl : warpLines) {
-    if (std::min(wl.srcBegin.x, wl.srcEnd.x) <= pd.pos.x && pd.pos.x <= std::max(wl.srcBegin.x, wl.srcEnd.x) &&
+    if (pd.dir == wl.srcDir &&
+        std::min(wl.srcBegin.x, wl.srcEnd.x) <= pd.pos.x && pd.pos.x <= std::max(wl.srcBegin.x, wl.srcEnd.x) &&
         std::min(wl.srcBegin.y, wl.srcEnd.y) <= pd.pos.y && pd.pos.y <= std::max(wl.srcBegin.y, wl.srcEnd.y)) {
-      return {wl.dstBegin + ((wl.dstEnd - wl.dstBegin) / (hvLen(wl.dstEnd - wl.dstBegin))) * hvLen(pd.pos - wl.srcBegin), wl.dir};
+      return {wl.dstBegin + ((wl.dstEnd - wl.dstBegin) / (hvLen(wl.dstEnd - wl.dstBegin))) * hvLen(pd.pos - wl.srcBegin), wl.dstDir};
     }
   }
   return pd;
@@ -110,15 +113,6 @@ findStart(const Board& board, auto pred) {
 }
 
 static void
-addWarpLine(std::vector<WarpLine>& warpLines, CubeEdge src, CubeEdge dst) {
-  auto srcBegin = src.a.pos + src.dir;
-  auto srcEnd = src.b.pos + src.dir;
-  if (srcBegin != dst.a.pos || srcEnd != dst.b.pos) {
-    warpLines.emplace_back(srcBegin, srcEnd, dst.a.pos, dst.b.pos, -dst.dir);
-  }
-}
-
-static void
 findWarpLines(std::vector<WarpLine>& warpLines, const Board& board, int bs, Pos pos, CubeConf cubeConf, std::unordered_map<std::string, CubeEdge>& edges, std::unordered_set<Pos>& visited) {
   static constexpr const auto cubeRotations = std::array<CubeConf, 4>{
     // match order with DIRSL
@@ -139,8 +133,8 @@ findWarpLines(std::vector<WarpLine>& warpLines, const Board& board, int bs, Pos 
     auto ei = (i + 1) % 4;
     CubeEdge edge = CubeEdge::ordered({pos + corners[i], cubeConf[i]}, {pos + corners[ei], cubeConf[ei]}, DIRSL[i]);
     if (auto it = edges.find(edge.id()); it != edges.end()) {
-      addWarpLine(warpLines, it->second, edge);
-      addWarpLine(warpLines, edge, it->second);
+      warpLines.emplace_back(it->second.a.pos + it->second.dir, it->second.b.pos + it->second.dir, it->second.dir, edge.a.pos, edge.b.pos, -edge.dir);
+      warpLines.emplace_back(edge.a.pos + edge.dir, edge.b.pos + edge.dir, edge.dir, it->second.a.pos, it->second.b.pos, -it->second.dir);
     } else {
       edges[edge.id()] = edge;
     }
