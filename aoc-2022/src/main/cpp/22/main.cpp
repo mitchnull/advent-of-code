@@ -113,6 +113,15 @@ findStart(const Board& board, auto pred) {
 }
 
 static void
+addWarpLine(std::vector<WarpLine>& warpLines, CubeEdge src, CubeEdge dst) {
+  auto srcBegin = src.a.pos + src.dir;
+  auto srcEnd = src.b.pos + src.dir;
+  if (srcBegin != dst.a.pos || srcEnd != dst.b.pos || src.dir != -dst.dir) {
+    warpLines.emplace_back(srcBegin, srcEnd, src.dir, dst.a.pos, dst.b.pos, -dst.dir);
+  }
+}
+
+static void
 findWarpLines(std::vector<WarpLine>& warpLines, const Board& board, int bs, Pos pos, CubeConf cubeConf, std::unordered_map<std::string, CubeEdge>& edges, std::unordered_set<Pos>& visited) {
   static constexpr const auto cubeRotations = std::array<CubeConf, 4>{
     // match order with DIRSL
@@ -133,8 +142,8 @@ findWarpLines(std::vector<WarpLine>& warpLines, const Board& board, int bs, Pos 
     auto ei = (i + 1) % 4;
     CubeEdge edge = CubeEdge::ordered({pos + corners[i], cubeConf[i]}, {pos + corners[ei], cubeConf[ei]}, DIRSL[i]);
     if (auto it = edges.find(edge.id()); it != edges.end()) {
-      warpLines.emplace_back(it->second.a.pos + it->second.dir, it->second.b.pos + it->second.dir, it->second.dir, edge.a.pos, edge.b.pos, -edge.dir);
-      warpLines.emplace_back(edge.a.pos + edge.dir, edge.b.pos + edge.dir, edge.dir, it->second.a.pos, it->second.b.pos, -it->second.dir);
+      addWarpLine(warpLines, it->second, edge);
+      addWarpLine(warpLines, edge, it->second);
     } else {
       edges[edge.id()] = edge;
     }
