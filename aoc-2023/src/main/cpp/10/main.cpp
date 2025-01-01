@@ -1,30 +1,10 @@
-#include <ios>
 #include <iostream>
-#include <cctype>
 #include <cstdint>
-#include <limits>
-#include <deque>
 #include <string>
 #include <vector>
-#include <map>
-#include <unordered_map>
-#include <bitset>
 #include <algorithm>
-#include <ranges>
-#include <sstream>
-#include <numeric>
 
 using Num = std::int64_t;
-
-namespace ranges = std::ranges;
-namespace views = ranges::views;
-
-
-template <typename T>
-static std::make_signed_t<T>
-s(const T& t) {
-  return t;
-}
 
 enum Dir {
   Z = 0,
@@ -90,7 +70,7 @@ struct Map {
       return {};
     }
     auto& line = lines[i];
-    if (j < 0 || j >= (int)lines.size()) {
+    if (j < 0 || j >= (int)line.size()) {
       return {};
     }
     return line[j];
@@ -102,7 +82,7 @@ struct Map {
       return def;
     }
     auto& line = lines[i];
-    if (j < 0 || j >= (int)lines.size()) {
+    if (j < 0 || j >= (int)line.size()) {
       return def;
     }
     return line[j];
@@ -116,7 +96,37 @@ struct Map {
     }
     return *this;
   }
+
+  Map& resize(int w, int h) {
+    lines.resize(h);
+    for (int i = 0, e = lines.size(); i != e; ++i) {
+      lines[i].resize(w);
+    }
+    return *this;
+  }
 };
+
+using ScaledMap = Map<std::uint8_t>;
+
+static const std::vector<Dir> Dirs{U, D, L, R};
+
+static const auto Figs = std::vector<ScaledMap>{
+    {{{0,1,0},
+      {0,1,0},
+      {0,0,0}}},
+
+    {{{0,0,0},
+      {0,1,0},
+      {0,1,0}}},
+
+    {{{0,0,0},
+      {1,1,0},
+      {0,0,0}}},
+
+    {{{0,0,0},
+      {0,1,1},
+      {0,0,0}}},
+  };
 
 static Pos
 findStart(const Map<Dir>& map) {
@@ -131,15 +141,29 @@ findStart(const Map<Dir>& map) {
   return {-1, -1};
 }
 
-static const std::vector<Dir> Dirs{U, D, L, R};
+static void
+scaleUp(const Map<Dir>& map, Pos p, Dir curr, ScaledMap& scaledMap) {
+  for (int di = 0; di < Dirs.size(); ++di) {
+    Dir dir = Dirs[di];
+    if (curr & dir) {
+      auto& fig = Figs[di];
+      for (int i = 0 ; i < 3; ++i) {
+        for (int j = 0; j < 3; ++j) {
+          scaledMap(p.i * 3 + i, p.j * 3 + j) |= fig(i, j);
+        }
+      }
+    }
+  }
+}
 
 static int
-findDist(const Map<Dir>& map, Map<int>& dists) {
+findDist(const Map<Dir>& map, Map<int>& dists, ScaledMap& scaledMap) {
   Pos p = findStart(map);
   int count = 0;
   while (dists(p.i, p.j) == 0) {
     dists(p.i, p.j) = ++count;
     Dir curr = map(p.i, p.j);
+    scaleUp(map, p, curr, scaledMap);
 
     for (Dir dir : Dirs) {
       if (!(curr & dir)) {
@@ -155,6 +179,17 @@ findDist(const Map<Dir>& map, Map<int>& dists) {
   return count / 2;
 }
 
+static void
+fill(ScaledMap& scaledMap, Pos p) {
+  if (scaledMap(p.i, p.j)) {
+    return;
+  }
+  scaledMap(p.i, p.j) = true;
+  for (Dir dir : Dirs) {
+    fill(scaledMap, step(p, dir));
+  }
+}
+
 int
 main() {
   Map<Dir> map;
@@ -162,12 +197,23 @@ main() {
   std::string line;
   while (std::getline(std::cin, line)) {
     std::vector<Dir> dirs;
-    dirs.reserve(line.size());
     std::transform(line.begin(), line.end(), std::back_inserter(dirs), toDir);
     map.lines.push_back(std::move(dirs));
   }
   dists.resize(map);
-  int dist = findDist(map, dists);
+  int w = map.lines.front().size();
+  int h = map.lines.size();
+  ScaledMap scaledMap;
+  scaledMap.resize(w * 3, h * 3);
+  int dist = findDist(map, dists, scaledMap);
+  fill(scaledMap, {0, 0});
+
+  int inner = 0;
+  for (int i = 0; i < h; ++i) {
+    for (int j = 0; j < w; ++j) {
+      inner += !scaledMap(i * 3 + 1, j * 3 + 1);
+    }
+  }
   std::cout << dist << "\n";
-  return 0;
+  std::cout << inner << "\n";
 }
