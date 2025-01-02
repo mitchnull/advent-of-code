@@ -104,22 +104,9 @@ struct std::hash<Pos> {
 /* ------------------------------------------------------------------------ */
 
 template<typename T = char>
-class Grid {
+struct Grid {
   using value_type = std::conditional<std::is_same<T, bool>::value, char, T>::type;
-  int w_, h_;
-  std::vector<value_type> data_;
-  value_type off_;
 
-  template <typename V>
-  struct Iter {
-    int x, y;
-    V v;
-  };
-  template <typename M>
-  static auto iter_(M& map) {
-    return views::iota(0UZ, map.data_.size()) | views::transform([&map](int i) { return Iter<decltype(map[0,0])>{i % map.w_, i / map.w_, map.data_[i]}; });
-  }
-public:
   template<typename Tr = std::identity>
   Grid(std::vector<std::string> lines, value_type off = {}, Tr tr = {}) : w_(lines[0].size()), h_(lines.size()), data_{}, off_(off) {
     data_.reserve(w_ * h_);
@@ -166,6 +153,20 @@ public:
       os << "\n";
     }
     return os;
+  }
+private:
+  int w_, h_;
+  std::vector<value_type> data_;
+  value_type off_;
+
+  template <typename V>
+  struct Iter {
+    int x, y;
+    V v;
+  };
+  template <typename M>
+  static auto iter_(M& map) {
+    return views::iota(0UZ, map.data_.size()) | views::transform([&map](int i) { return Iter<decltype(map[0,0])>{i % map.w_, i / map.w_, map.data_[i]}; });
   }
 };
 
