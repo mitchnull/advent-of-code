@@ -11,8 +11,7 @@ struct Tile {
   Num area;
 };
 
-using Board = Grid<>;
-using TileBoard= Grid<Tile>;
+using Board= Grid<Tile>;
 using string = std::string;
 using Line = std::pair<Pos, Pos>;
 using Lines = std::vector<Line>;
@@ -35,54 +34,15 @@ toDir(char c) {
   return {};
 }
 
-static std::tuple<Pos, int, int>
-findExtents(const Entries& entries) {
-  Pos p{}, tl{}, br{};
-  for (auto& e : entries) {
-    p += (e.dir * e.steps);
-    tl.x = std::min(tl.x, p.x);
-    tl.y = std::min(tl.y, p.y);
-    br.x = std::max(br.x, p.x);
-    br.y = std::max(br.y, p.y);
-  }
-  return {{p.x - tl.x + 1, p.y - tl.y + 1}, br.x - tl.x + 3, br.y - tl.y + 3};
-}
-
 static void
 fill(Board& board, Pos pos) {
-  if (board[pos] != '.') {
-    return;
-  }
-  board[pos] = ' ';
-  for (auto dir : DIRS) {
-    fill(board, pos + dir);
-  }
-}
-
-static void
-fill2(TileBoard& board, Pos pos) {
   if (board[pos].c != '.') {
     return;
   }
   board[pos].c = ' ';
   for (auto dir : DIRS) {
-    fill2(board, pos + dir);
+    fill(board, pos + dir);
   }
-}
-
-static Num
-solve(const Entries& entries) {
-  auto [pos, w, h] = findExtents(entries);
-  Board board(w, h, '.');
-  board[pos] = '#';
-  for (auto& e : entries) {
-    for (int i = 0; i < e.steps; ++i) {
-      pos += e.dir;
-      board[pos] = '#';
-    }
-  }
-  fill(board, {0, 0});
-  return std::count_if(board.begin(), board.end(), [](auto c) { return c != ' '; });
 }
 
 static char
@@ -92,7 +52,7 @@ tileChar(const Lines& lines, int x, int y) {
     : '.';
 }
 
-static TileBoard
+static Board
 convertToBoard(const Entries& entries) {
   Lines lines;
   std::vector<Num> xs, ys;
@@ -113,7 +73,7 @@ convertToBoard(const Entries& entries) {
   xs.push_back(xs.back() + 2);
   ys.push_back(ys.back() + 2);
   
-  TileBoard board(xs.size() * 2, ys.size() * 2);
+  Board board(xs.size() * 2, ys.size() * 2);
   Num py = ys.front() - 2;
   for (int yi = 0; yi < ys.size(); ++yi) {
     auto y = ys[yi];
@@ -132,9 +92,9 @@ convertToBoard(const Entries& entries) {
 }
 
 static Num
-solve2(const Entries& entries) {
+solve(const Entries& entries) {
   auto board = convertToBoard(entries);
-  fill2(board, {0, 0});
+  fill(board, {0, 0});
   return std::reduce(board.begin(), board.end(), Num{}, [](Num a, auto t) { return t.c != ' ' ? a + t.area : a; });
 }
 
@@ -153,9 +113,8 @@ main() {
     entries2.emplace_back(toDir(color[7]), std::stoi(color.substr(2, 5), nullptr, 16));
   }
   auto res1 = solve(entries1);
-  auto res2 = solve2(entries2);
+  auto res2 = solve(entries2);
 
   std::cout << res1 << "\n";
-  std::cout << solve2(entries1) << "\n";
   std::cout << res2 << "\n";
 }
