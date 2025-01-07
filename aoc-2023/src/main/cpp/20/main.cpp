@@ -7,10 +7,10 @@
 
 /* ------------------------------------------------------------------------ */
 
-using std::string;
-using Inputs = std::unordered_map<string, bool>;
-using Outputs = std::vector<string>;
 using Num = std::int64_t;
+using std::string;
+using Inputs = std::unordered_map<string, std::pair<bool, Num>>;
+using Outputs = std::vector<string>;
 using Counts = std::array<Num, 2>;
 
 struct Pulse {
@@ -33,10 +33,9 @@ struct Module {
   Outputs outputs;
   Inputs inputs;
   bool level;
-  bool receivedLow;
+  Num period;
 
-  void process(Pulse p, Queue& queue) {
-    receivedLow |= !p.level;
+  void process(Pulse p, Queue& queue, Num pc) {
     bool outLevel = p.level;
     switch (type) {
       case Broadcaster:
@@ -49,8 +48,12 @@ struct Module {
         outLevel = level;
         break;
       case Conjunction:
-        inputs[p.src] = p.level;
-        outLevel = std::find_if(inputs.begin(), inputs.end(), [](auto& it) { return !it.second; }) != inputs.end();
+        inputs[p.src].first = p.level;
+        if (p.level && !inputs[p.src].second) {
+          inputs[p.src].second = pc;
+          period = std::reduce(inputs.begin(), inputs.end(), Num{1}, [](auto a, auto b) { return a * b.second.second; });
+        }
+        outLevel = std::find_if(inputs.begin(), inputs.end(), [](auto& it) { return !it.second.first; }) != inputs.end();
         break;
     }
     for (auto& out : outputs) {
@@ -62,7 +65,7 @@ struct Module {
 using Modules = std::unordered_map<string, Module>;
 
 static Counts
-pulse(Modules& modules) {
+pulse(Modules& modules, Num pc) {
   std::array<Num, 2> counts = {};
   Queue queue;
   queue.emplace("button" ,"broadcaster", false);
@@ -72,7 +75,7 @@ pulse(Modules& modules) {
     // std::cout << p.src << (p.level ? " -high-> " : " -low-> ") << p.dst << std::endl;
     ++counts[p.level];
     auto& m = modules[p.dst];
-    m.process(p, queue);
+    m.process(p, queue, pc);
   }
   return counts;
 }
@@ -80,8 +83,8 @@ pulse(Modules& modules) {
 static Num
 solve1(Modules modules) {
   Counts allCounts = {};
-  for (int i = 0; i < 1000; ++i) {
-    auto counts = pulse(modules);
+  for (int i = 1; i <= 1000; ++i) {
+    auto counts = pulse(modules, i);
     allCounts[0] += counts[0];
     allCounts[1] += counts[1];
   }
@@ -90,13 +93,12 @@ solve1(Modules modules) {
 
 static Num
 solve2(Modules modules) {
-  Num count = 0;
   Module& rx = modules["rx"];
-  while (!rx.receivedLow) {
-    pulse(modules);
-    ++count;
+  Module& rxi = modules[rx.inputs.begin()->first];
+  for (int i = 1; rxi.period == 0; ++i) {
+    pulse(modules, i);
   }
-  return count;
+  return rxi.period;
 }
 
 /* ------------------------------------------------------------------------ */
@@ -129,13 +131,13 @@ main() {
     while (ss >> out) {
       m.outputs.push_back(out);
       Module& t = modules[out];
-      t.inputs[name] = false;
+      t.inputs[name] = {false, 0};
     }
   }
 
   Num res1 = solve1(modules);
   std::cout << res1 << "\n";
 
-  // Num res2 = solve2(modules);
-  // std::cout << res2 << "\n";
+  Num res2 = solve2(modules);
+  std::cout << res2 << "\n";
 }
