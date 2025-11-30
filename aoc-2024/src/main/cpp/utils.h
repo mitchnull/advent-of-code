@@ -65,6 +65,17 @@ struct std::hash<Dir> {
   }
 };
 
+template <>
+struct std::formatter<Dir> {
+  constexpr auto parse(std::format_parse_context& ctx) {
+      return ctx.begin();
+  }
+
+  auto format(const Dir& d, std::format_context& ctx) const {
+      return std::format_to(ctx.out(), "{{{}, {}}}", d.dx, d.dy);
+  }
+};
+
 /* ------------------------------------------------------------------------ */
 
 struct Pos {
@@ -98,6 +109,17 @@ template <>
 struct std::hash<Pos> {
   std::size_t operator()(const Pos& p) const {
     return hashCombine(p.x, p.y);
+  }
+};
+
+template <>
+struct std::formatter<Pos> {
+  constexpr auto parse(std::format_parse_context& ctx) {
+      return ctx.begin();
+  }
+
+  auto format(const Pos& pos, std::format_context& ctx) const {
+      return std::format_to(ctx.out(), "{{{}, {}}}", pos.x, pos.y);
   }
 };
 
@@ -167,6 +189,23 @@ private:
   template <typename M>
   static auto iter_(M& map) {
     return views::iota(0UZ, map.data_.size()) | views::transform([&map](int i) { return Iter<decltype(map[0,0])>{i % map.w_, i / map.w_, map.data_[i]}; });
+  }
+};
+
+template <typename T>
+struct std::formatter<Grid<T>> {
+  constexpr auto parse(std::format_parse_context& ctx) {
+      return ctx.begin();
+  }
+
+  auto format(const Grid<T>& m, std::format_context& ctx) const {
+    for (int y = 0; y < m.h(); ++y) {
+      for (int x = 0; x < m.w(); ++x) {
+        std::format_to(ctx.out(), "{}", m[x, y]);
+      }
+      std::format_to(ctx.out(), "\n");
+    }
+    return ctx.out();
   }
 };
 
