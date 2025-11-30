@@ -143,7 +143,7 @@ struct Grid {
   auto begin() { return data_.begin(); }
   auto begin() const { return data_.begin(); }
   auto end() { return data_.end(); }
-  auto enn() const { return data_.end(); }
+  auto end() const { return data_.end(); }
 
   friend std::ostream& operator<<(std::ostream& os, const Grid& m) {
     for (int y = 0; y < m.h(); ++y) {
