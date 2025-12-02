@@ -6,8 +6,10 @@
 #include <vector>
 #include <ranges>
 #include <iostream>
+#include <print>
 
 namespace views = std::views;
+using std::print, std::println;
 
 /* ------------------------------------------------------------------------ */
 
