@@ -213,4 +213,37 @@ struct std::formatter<Grid<T>> {
 
 /* ------------------------------------------------------------------------ */
 
+static auto
+piecewise_apply(auto a, auto b, auto op) {
+  return [&]<size_t... Is>(std::index_sequence<Is...>) {
+    return std::make_tuple(op(std::get<Is>(a), std::get<Is>(b))...);
+  }(std::make_index_sequence<std::tuple_size_v<decltype(a)>>());
+}
+
+template <typename... As, typename... Bs>
+static auto
+operator+(const std::tuple<As...>& a, const std::tuple<Bs...>& b) {
+  return piecewise_apply(a, b, std::plus<>());
+}
+
+template <typename... As, typename... Bs>
+static auto
+operator+=(std::tuple<As...>& a, const std::tuple<Bs...>& b) {
+  return a = piecewise_apply(a, b, std::plus<>());
+}
+
+template <typename A, typename B>
+static auto
+operator+(const std::pair<A, B>& a, const std::pair<A, B>& b) {
+  return piecewise_apply(a, b, std::plus<>());
+}
+
+template <typename A, typename B>
+static auto
+operator+=(std::pair<A, B>& a, const std::pair<A, B>& b) {
+  return a = piecewise_apply(a, b, std::plus<>());
+}
+
+/* ------------------------------------------------------------------------ */
+
 #endif /* AOC_UTILS_H */

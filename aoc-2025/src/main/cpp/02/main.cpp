@@ -3,6 +3,7 @@
 #include <print>
 #include <cmath>
 #include <unordered_set>
+#include "../utils.h"
 
 using Num = std::int64_t;
 using Nums = std::unordered_set<Num>;
@@ -16,9 +17,8 @@ static digits(Num n) {
 static Num
 rep(Num n, int r) {
   Num res = n;
-  int d = digits(n);
   while (--r) {
-    res = res * std::pow(10, d) + n;
+    res = res * std::pow(10, digits(n)) + n;
   }
   return res;
 }
@@ -40,10 +40,10 @@ invalids(Num a, Num b) {
         }
         auto [it, inserted] = found.insert(n);
         if (inserted) {
-          res2 += n;
           if (r == 2) {
             res1 += n;
           }
+          res2 += n;
         }
       }
     }
@@ -57,16 +57,14 @@ int
 main() {
   char c;
   Num a, b;
-  Num res1{}, res2{};
+  auto res = std::make_pair(Num{}, Num{});
 
   while (std::cin >> a >> c >> b) {
     std::cin >> c;
-    auto [r1, r2] = invalids(a, b);
-    res1 += r1;
-    res2 += r2;
+    res += invalids(a, b);
   }
-  println("1: {}", res1);
-  println("2: {}", res2);
+  println("1: {}", res.first);
+  println("2: {}", res.second);
 
   return 0;
 }
