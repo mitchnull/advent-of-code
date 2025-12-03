@@ -1,13 +1,11 @@
-#include <cstdint>
 #include <iostream>
-#include <print>
+#include <cstdint>
 #include <cmath>
 #include <unordered_set>
 #include "../utils.h"
 
 using Num = std::int64_t;
 using Nums = std::unordered_set<Num>;
-using std::println;
 
 int
 static digits(Num n) {

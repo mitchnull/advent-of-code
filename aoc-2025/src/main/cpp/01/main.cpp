@@ -1,5 +1,5 @@
-#include <cstdint>
 #include <iostream>
+#include <cstdint>
 #include <print>
 
 using Num = std::int32_t;
