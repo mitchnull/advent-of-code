@@ -1,34 +1,10 @@
 #include <cstdint>
 #include <iostream>
 #include <print>
-#include <unordered_set>
 #include <algorithm>
 
 using Num = std::int64_t;
-using Nums = std::unordered_set<Num>;
 using std::println;
-
-static Num
-v(char c) {
-  return c - '0';
-}
-
-static Num
-jolts(char d1, char d2) {
-  return 10 * v(d1) + v(d2);
-}
-
-static Num
-jolts(std::string_view b) {
-  auto d1 = std::max_element(b.begin(), b.end());
-  auto n = d1 + 1;
-  if (n == b.end()) {
-    auto d0 = std::max_element(b.begin(), d1);
-    return jolts(*d0, *d1);
-  }
-  auto d2 = std::max_element(n, b.end());
-  return jolts(*d1, *d2);
-}
 
 static Num
 jolts(auto b, auto e, auto e1, int r) {
@@ -42,7 +18,7 @@ jolts(auto b, auto e, auto e1, int r) {
   auto n = d1 + 1;
   Num v2 = jolts(n, e, e, r - 1);
   if (v2 >= 0) {
-    return v(*d1) * std::pow(10, r - 1) + v2;
+    return (*d1 - '0') * std::pow(10, r - 1) + v2;
   }
   return jolts(b, e, e1 - 1, r);
 }
@@ -54,7 +30,7 @@ main() {
   Num res1{}, res2{};
   std::string s;
   while (std::cin >> s) {
-    res1 += jolts(s);
+    res1 += jolts(s.begin(), s.end(), s.end(), 2);
     res2 += jolts(s.begin(), s.end(), s.end(), 12);
   }
   println("1: {}", res1);
