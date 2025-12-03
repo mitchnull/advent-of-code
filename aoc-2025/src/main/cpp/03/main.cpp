@@ -1,5 +1,5 @@
-#include <cstdint>
 #include <iostream>
+#include <cstdint>
 #include <print>
 #include <algorithm>
 
