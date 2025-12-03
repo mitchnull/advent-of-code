@@ -17,10 +17,10 @@ jolts(auto b, auto e, auto e1, int r) {
   auto d1 = std::max_element(b, e1);
   auto n = d1 + 1;
   Num v2 = jolts(n, e, e, r - 1);
-  if (v2 >= 0) {
-    return (*d1 - '0') * std::pow(10, r - 1) + v2;
+  if (v2 < 0) {
+    return jolts(b, e, e1 - 1, r);
   }
-  return jolts(b, e, e1 - 1, r);
+  return (*d1 - '0') * std::pow(10, r - 1) + v2;
 }
 
 /* ------------------------------------------------------------------------ */
