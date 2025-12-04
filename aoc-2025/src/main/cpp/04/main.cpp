@@ -1,7 +1,4 @@
 #include <iostream>
-#include <cstdint>
-#include <cmath>
-#include <unordered_set>
 #include "../utils.h"
 
 using Board = Grid<>;
@@ -34,15 +31,11 @@ solve1(const Board& board) {
 
 static int
 solve2(Board board) {
-  int res = 0;
-  while (true) {
-    auto [c, nb] = solve1(board);
-    if (c == 0) {
-      return res;
-    }
-    res += c;
-    board = nb;
+  int res{}, r;
+  for (std::tie(r, board) = solve1(board); r > 0; std::tie(r, board) = solve1(board)) {
+    res += r;
   }
+  return res;
 }
 
 /* ------------------------------------------------------------------------ */
@@ -57,8 +50,8 @@ main() {
   }
   Board board = Board(lines, '.');
 
-  res1 = solve1(board).first;
-  res2 = solve2(board);
+  std::tie(res1, board) = solve1(board);
+  res2 = res1 + solve2(board);
 
   println("1: {}", res1);
   println("2: {}", res2);
