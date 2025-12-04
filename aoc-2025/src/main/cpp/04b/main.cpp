@@ -1,7 +1,4 @@
 #include <iostream>
-#include <cstdint>
-#include <cmath>
-#include <unordered_set>
 #include "../utils.h"
 
 using Board = Grid<>;
