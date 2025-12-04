@@ -178,6 +178,16 @@ struct Grid {
     }
     return os;
   }
+
+  template<typename Tr = std::identity>
+  static Grid read(std::istream& in = std::cin, value_type off = {}, Tr tr = {}) {
+    std::vector<std::string> lines;
+    std::string line;
+    while (std::getline(in, line)) {
+      lines.push_back(line);
+    }
+    return Grid(lines, off, tr);
+  }
 private:
   int w_, h_;
   std::vector<value_type> data_;
