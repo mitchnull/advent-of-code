@@ -1,4 +1,3 @@
-#include <iostream>
 #include <algorithm>
 #include "../utils.h"
 
@@ -34,13 +33,8 @@ solve1(Board& board) {
 
 int
 main() {
-  std::vector<std::string> lines;
-  std::string line;
   int res1{}, res2{}, r;
-  while (std::getline(std::cin, line)) {
-    lines.push_back(line);
-  }
-  Board board = Board(lines, '.');
+  Board board = Board::read(std::cin, '.');
 
   res1 = res2 = solve1(board);
   while ((r = solve1(board)) > 0) {

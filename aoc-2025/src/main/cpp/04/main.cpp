@@ -1,4 +1,3 @@
-#include <iostream>
 #include "../utils.h"
 
 using Board = Grid<>;
@@ -42,13 +41,8 @@ solve2(Board board) {
 
 int
 main() {
-  std::vector<std::string> lines;
-  std::string line;
   int res1{}, res2{};
-  while (std::getline(std::cin, line)) {
-    lines.push_back(line);
-  }
-  Board board = Board(lines, '.');
+  Board board = Board::read(std::cin, '.');
 
   std::tie(res1, board) = solve1(board);
   res2 = res1 + solve2(board);
