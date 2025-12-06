@@ -73,17 +73,9 @@ main() {
     std::istringstream ss{line};
     if (isDataLine(line)) {
       dataLines.push_back(line);
-      Nums nums;
-      Num n;
-      while (ss >> n) {
-        nums.push_back(n);
-      }
-      allNums.push_back(std::move(nums));
+      allNums.emplace_back(std::istream_iterator<Num>(ss), std::istream_iterator<Num>());
     } else {
-      char c;
-      while (ss >> c) {
-        ops.push_back(c);
-      }
+      ops = {std::istream_iterator<char>(ss), std::istream_iterator<char>()};
     }
   }
   println("1: {}", solve1(allNums, ops));
