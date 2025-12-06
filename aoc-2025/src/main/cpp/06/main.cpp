@@ -38,10 +38,33 @@ solve1(const std::vector<Nums>& allNums, const std::vector<char>& ops) {
   return res;
 }
 
+static Num
+solve2(const std::vector<std::string>& dataLines, const std::vector<char>& ops) {
+  auto grid = Grid<>(dataLines);
+  auto it = ops.begin();
+  Num res{}, r{};
+  for (int x = 0; x < grid.w(); ++x) {
+    std::string data;
+    for (int y = 0; y < grid.h(); ++y) {
+      data += grid[x, y];
+    }
+    if (isDataLine(data)) {
+      Num n = std::stol(data);
+      r = r == 0 ? n : apply(*it, r, n);
+    } else {
+      res += r;
+      r = 0;
+      ++it;
+    }
+  }
+  return res + r;
+}
+
 /* ------------------------------------------------------------------------ */
 
 int
 main() {
+  std::vector<std::string> dataLines;
   std::vector<Nums> allNums;
   std::vector<char> ops;
   std::string line;
@@ -49,6 +72,7 @@ main() {
   while (std::getline(std::cin, line)) {
     std::istringstream ss{line};
     if (isDataLine(line)) {
+      dataLines.push_back(line);
       Nums nums;
       Num n;
       while (ss >> n) {
@@ -62,10 +86,8 @@ main() {
       }
     }
   }
-  Num res1 = solve1(allNums, ops);
-
-  println("1: {}", res1);
-  // println("2: {}", res2);
+  println("1: {}", solve1(allNums, ops));
+  println("2: {}", solve2(dataLines, ops));
 
   return 0;
 }
