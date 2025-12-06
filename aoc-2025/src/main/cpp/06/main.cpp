@@ -17,7 +17,7 @@ isDataLine(std::string_view line) {
 }
 
 static Num
-apply(char op, Num a, Num b) {
+calc(char op, Num a, Num b) {
   switch (op) {
     case '+': return a + b;
     case '*': return a * b;
@@ -31,7 +31,7 @@ solve1(const std::vector<Nums>& allNums, const std::vector<char>& ops) {
   for (auto i = 0; i < ops.size(); ++i) {
     Num r = allNums.front()[i];
     for (auto j = 1; j < allNums.size(); ++j) {
-      r = apply(ops[i], r, allNums[j][i]);
+      r = calc(ops[i], r, allNums[j][i]);
     }
     res += r;
   }
@@ -40,17 +40,16 @@ solve1(const std::vector<Nums>& allNums, const std::vector<char>& ops) {
 
 static Num
 solve2(const std::vector<std::string>& dataLines, const std::vector<char>& ops) {
-  auto grid = Grid<>(dataLines);
-  auto it = ops.begin();
   Num res{}, r{};
-  for (int x = 0; x < grid.w(); ++x) {
+  auto it = ops.begin();
+  for (int i = 0, e = dataLines.front().size(); i < e; ++i) {
     std::string data;
-    for (int y = 0; y < grid.h(); ++y) {
-      data += grid[x, y];
+    for (const auto& dataLine : dataLines) {
+      data += dataLine[i];
     }
     if (isDataLine(data)) {
       Num n = std::stol(data);
-      r = r == 0 ? n : apply(*it, r, n);
+      r = r == 0 ? n : calc(*it, r, n);
     } else {
       res += r;
       r = 0;

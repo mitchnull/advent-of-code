@@ -9,6 +9,7 @@
 #include <print>
 
 namespace views = std::views;
+namespace ranges = std::ranges;
 using std::print, std::println;
 
 /* ------------------------------------------------------------------------ */
