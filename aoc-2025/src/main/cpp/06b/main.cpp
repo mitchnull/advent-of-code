@@ -30,8 +30,8 @@ calc(char op, Num a, Num b) {
 #if HAS_FOLD_LEFT_FIRST
 static Num
 solve1(const std::vector<Nums>& allNums, const std::vector<char>& ops) {
-  return ranges::fold_left_first(views::iota(0UZ, ops.size()) | views::transform([&](auto i) {
-    return *std::fold_left_first(allNums | views::transform[i](auto &ns) { return ns[i]; }), [&](auto a, auto b) { return calc(ops[i], a, b); });
+  return *ranges::fold_left_first(views::iota(0UZ, ops.size()) | views::transform([&](auto i) {
+    return *ranges::fold_left_first(allNums | views::transform([i](auto &ns) { return ns[i]; }), [&](auto a, auto b) { return calc(ops[i], a, b); });
   }), std::plus<>{});
 }
 #else
