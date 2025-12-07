@@ -189,6 +189,8 @@ struct Grid {
     }
     return Grid(lines, off, tr);
   }
+
+  auto friend operator<=>(const Grid& a, const Grid& b) = default;
 private:
   int w_, h_;
   std::vector<value_type> data_;
@@ -202,6 +204,17 @@ private:
   template <typename M>
   static auto iter_(M& map) {
     return views::iota(0UZ, map.data_.size()) | views::transform([&map](int i) { return Iter<decltype(map[0,0])>{i % map.w_, i / map.w_, map.data_[i]}; });
+  }
+};
+
+template <typename T>
+struct std::hash<Grid<T>> {
+  std::size_t operator()(const Grid<T>& grid) const {
+    std::size_t h = hashCombine(grid.w(), grid.h());
+    for (const auto& v: grid) {
+      h = hashCombine(h, v);
+    }
+    return h;
   }
 };
 
