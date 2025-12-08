@@ -27,20 +27,14 @@ d2(const Pos3& a, const Pos3& b) {
 static Num
 solve1(const Groups& groups) {
   auto groupCounts = std::unordered_map<int, Num>{};
-
   for (const auto& g : groups) {
     if (g != 0) {
       ++groupCounts[g];
     }
   }
-  auto counts = std::vector<int>{};
-  for (const auto& gc: groupCounts) {
-    counts.push_back(gc.second);
-  }
-
-  std::sort(counts.begin(), counts.end(), std::greater<>{});
-
-  return std::accumulate(counts.begin(), counts.begin() + 3, Num{1}, std::multiplies<>{});
+  auto counts = groupCounts | views::transform([](auto e) { return e.second; }) | ranges::to<std::vector<int>>();
+  std::partial_sort(counts.begin(), counts.begin() + 3, counts.end(), std::greater<>{});
+  return std::reduce(counts.begin(), counts.begin() + 3, Num{1}, std::multiplies<>{});
 }
 
 static int
