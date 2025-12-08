@@ -27,6 +27,37 @@ d2(const Pos3& a, const Pos3& b) {
   return res;
 }
 
+
+static Num
+solve1(const M& m) {
+  auto groupCounts = std::unordered_map<int, Num>{};
+
+  for (const auto& pg : m) {
+    if (pg.second != 0) {
+      ++groupCounts[pg.second];
+    }
+  }
+  auto counts = std::vector<Num>{};
+  for (const auto& gc: groupCounts) {
+    counts.push_back(gc.second);
+  }
+
+  std::sort(counts.begin(), counts.end(), std::greater<>{});
+
+  return std::accumulate(counts.begin(), counts.begin() + 3, Num{1}, std::multiplies<>{});
+}
+
+static int
+isSingleGroup(const M& m) {
+  auto g = m.begin()->second;
+  for (const auto& pg : m) {
+    if (pg.second != g) {
+      return false;
+    }
+  }
+  return true;
+}
+
 /* ------------------------------------------------------------------------ */
 
 int
@@ -48,9 +79,16 @@ main() {
   std::sort(ps.begin(), ps.end(), [](const auto& a, const auto& b) { return d2(a.first, a.second) < d2(b.first, b.second); });
 
   auto m = M{};
+  for (const auto p : v) {
+    m[p] = 0;
+  }
+  Num res1{}, res2{};
   int g = 0;
-  for (auto i = 0; i < n; ++i) {
+  for (auto i = 0; i < ps.size(); ++i) {
     const auto& p = ps[i];
+    if (i == n) {
+      res1 = solve1(m);
+    }
     auto g1 = m[p.first];
     auto g2 = m[p.second];
     if (g1 == 0 && g2 == 0) {
@@ -66,23 +104,14 @@ main() {
         }
       }
     }
+    if (i > n && isSingleGroup(m)) {
+      res2 = p.first[0] * p.second[0];
+      break;
+    }
   }
-  auto groupCounts = std::unordered_map<int, Num>{};
-
-  for (const auto& pg : m) {
-    ++groupCounts[pg.second];
-  }
-  auto counts = std::vector<Num>{};
-  for (const auto& gc: groupCounts) {
-    counts.push_back(gc.second);
-  }
-
-  std::sort(counts.begin(), counts.end(), std::greater<>{});
-
-  Num res1 = std::accumulate(counts.begin(), counts.begin() + 3, Num{1}, std::multiplies<>{});
 
   println("1: {}", res1);
-  // println("2: {}", 0);
+  println("2: {}", res2);
 
   return 0;
 }
