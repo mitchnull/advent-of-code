@@ -37,12 +37,6 @@ solve1(const Groups& groups) {
   return std::reduce(counts.begin(), counts.begin() + 3, Num{1}, std::multiplies<>{});
 }
 
-static int
-isSingleGroup(const Groups& groups) {
-  auto g = groups.front();
-  return std::find_if(groups.begin(), groups.end(), [g](auto gg) { return gg != g; }) == groups.end();
-}
-
 /* ------------------------------------------------------------------------ */
 
 int
@@ -53,7 +47,7 @@ main() {
   while (std::cin >> x >> c >> y >> c >> z) {
     v.push_back({x, y, z});
   }
-  const auto N = (v.size() < 100 ? 10UZ : 1000UZ);
+  const int N = (v.size() < 100 ? 10 : 1000);
 
   auto tups = Tups{};
   for (int i = 0; i < v.size(); ++i) {
@@ -61,13 +55,17 @@ main() {
       tups.emplace_back(i, j, d2(v[i], v[j]));
     }
   }
-  std::sort(tups.begin(), tups.end(), [](const auto& a, const auto& b) { return a.d2 < b.d2; });
+  auto comp = [](const auto& a, const auto& b) { return a.d2 > b.d2; };
+  std::make_heap(tups.begin(), tups.end(), comp);
 
   auto groups = Groups(v.size(), 0);
   Num res1{}, res2{};
   int g = 0;
-  for (auto i = 0; i < tups.size(); ++i) {
-    const auto& t = tups[i];
+  int numGroups = v.size();
+  for (int i = 0, e = tups.size(); i < e; ++i) {
+    std::pop_heap(tups.begin(), tups.end(), comp);
+    auto t = tups.back();
+    tups.pop_back();
     if (i == N) {
       res1 = solve1(groups);
     }
@@ -79,15 +77,16 @@ main() {
       groups[t.a] = g2;
     } else if (g2 ==0) {
       groups[t.b] = g1;
+    } else if (g1 == g2 ) {
+      continue;
     } else {
       std::replace(groups.begin(), groups.end(), g1, g2);
     }
-    if (i > N && isSingleGroup(groups)) {
+    if (--numGroups == 1) {
       res2 = v[t.a][0] * v[t.b][0];
       break;
     }
   }
-
   println("1: {}", res1);
   println("2: {}", res2);
 
