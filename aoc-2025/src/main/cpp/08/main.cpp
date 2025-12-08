@@ -40,12 +40,7 @@ solve1(const Groups& groups) {
 static int
 isSingleGroup(const Groups& groups) {
   auto g = groups.front();
-  for (const auto& gg : groups) {
-    if (gg != g) {
-      return false;
-    }
-  }
-  return true;
+  return std::find_if(groups.begin(), groups.end(), [g](auto gg) { return gg != g; }) == groups.end();
 }
 
 /* ------------------------------------------------------------------------ */
@@ -85,11 +80,7 @@ main() {
     } else if (g2 ==0) {
       groups[t.b] = g1;
     } else {
-      for (auto& og : groups) {
-        if (og == g2) {
-          og = g1;
-        }
-      }
+      std::replace(groups.begin(), groups.end(), g1, g2);
     }
     if (i > N && isSingleGroup(groups)) {
       res2 = v[t.a][0] * v[t.b][0];
