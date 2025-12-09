@@ -9,13 +9,10 @@ static bool
 check(const Lines& lines, Pos a, Pos b) {
   Pos tl{std::min(a.x, b.x), std::min(a.y, b.y)}, br{std::max(a.x, b.x), std::max(a.y, b.y)};
   for (const auto& line: lines) {
-    if ((line.a.y <= tl.y && line.b.y <= tl.y) || (line.a.y >= br.y && line.b.y >= br.y)) {
-      continue;
+    if ((tl.y < line.a.y || tl.y < line.b.y) && (line.a.y < br.y || line.b.y < br.y)
+        && (tl.x < line.a.x || tl.x < line.b.x) && (line.a.x < br.x || line.b.x < br.x)) {
+      return false;
     }
-    if ((line.a.x <= tl.x && line.b.x <= tl.x) || (line.a.x >= br.x && line.b.x >= br.x)) {
-      continue;
-    }
-    return false;
   }
   return true;
 }
