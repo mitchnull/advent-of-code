@@ -142,7 +142,7 @@ struct Grid {
     }
   }
 
-  Grid(int w, int h, T init = {}, T off = {}) : w_(w), h_(h), data_(w * h, init), off_(off) {}
+  Grid(int w, int h, T init = {}, T off = {}) : w_(w), h_(h), data_(w_ * h_, init), off_(off) {}
 
   const value_type& operator[](int x, int y) const {
     if (0 <= x && x < w_ && 0 <= y && y < h_) {
@@ -192,7 +192,7 @@ struct Grid {
 
   auto friend operator<=>(const Grid& a, const Grid& b) = default;
 private:
-  int w_, h_;
+  std::size_t w_, h_;
   std::vector<value_type> data_;
   value_type off_;
 
