@@ -6,22 +6,23 @@ struct Line { Pos a, b; };
 using Lines = std::vector<Line>;
 
 static bool
-isInside(const Lines& lines, Pos p) {
+isInside(const Lines& lines, Pos p, Dir offset) {
   int left{}, right{}, up{}, down{};
+  p = Pos{p.x * 2, p.y * 2} + offset;
   for (const auto& line: lines) {
     if (line.a.x == line.b.x) {
-      if (std::min(line.a.y, line.b.y) <= p.y && p.y <= std::max(line.a.y, line.b.y)) {
-        if (line.a.x > p.x) {
+      if (std::min(line.a.y * 2, line.b.y * 2) <= p.y && p.y <= std::max(line.a.y * 2, line.b.y * 2)) {
+        if (line.a.x * 2 > p.x) {
           ++right;
-        } else if (line.a.x < p.x) {
+        } else if (line.a.x * 2 < p.x) {
           ++left;
         }
       }
     } else {
-      if (std::min(line.a.x, line.b.x) <= p.x && p.x <= std::max(line.a.x, line.b.x)) {
-        if (line.a.y > p.y) {
+      if (std::min(line.a.x * 2, line.b.x * 2) <= p.x && p.x <= std::max(line.a.x * 2, line.b.x * 2)) {
+        if (line.a.y * 2 > p.y) {
           ++down;
-        } else if (line.a.y < p.y) {
+        } else if (line.a.y * 2 < p.y) {
           ++up;
         }
       }
@@ -39,10 +40,10 @@ check(const Lines& lines, Pos a, Pos b) {
       return false;
     }
   }
-  return isInside(lines, {tl.x + 1, tl.y + 1})
-    && isInside(lines, {tl.x + 1, br.y - 1})
-    && isInside(lines, {br.x - 1, tl.y + 1})
-    && isInside(lines, {br.x - 1, br.y - 1});
+  return isInside(lines, tl, {+1, +1})
+    && isInside(lines, {tl.x, br.y}, {+1, -1})
+    && isInside(lines, {br.x, tl.y}, {-1, + 1})
+    && isInside(lines, br, {-1, - 1});
 }
 
 /* ------------------------------------------------------------------------ */
