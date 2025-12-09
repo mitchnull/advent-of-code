@@ -1,77 +1,24 @@
 #include "../utils.h"
-#include <deque>
 
 using Num = int64_t;
 using V = std::vector<Pos>;
-using Board = Grid<>;
-
-static void
-drawLine(Board& board, Pos a, Pos b) {
-  if (a.x == b.x) {
-    for (int y = std::min(a.y, b.y); y <= std::max(a.y, b.y); ++y) {
-      board[a.x, y] = '#';
-    }
-  } else {
-    for (int x = std::min(a.x, b.x); x <= std::max(a.x, b.x); ++x) {
-      board[x, a.y] = '#';
-    }
-  }
-}
-
-static void
-fill(Board& board, Pos p) {
-  std::deque<Pos> q{p};
-  while (!q.empty()) {
-    p = q.front();
-    q.pop_front();
-    if (board[p] != '.') {
-      continue;
-    }
-    board[p] = '@';
-    for (Dir d : DIRS) {
-      q.push_back(p + d);
-    }
-  }
-}
+struct Line { Pos a, b; };
+using Lines = std::vector<Line>;
 
 static bool
-check(const Board& board, Pos a, Pos b) {
+check(const Lines& lines, Pos a, Pos b) {
   Pos tl{std::min(a.x, b.x), std::min(a.y, b.y)}, br{std::max(a.x, b.x), std::max(a.y, b.y)};
-  for (int y = tl.y; y <= br.y; ++y) {
-    for (int x = tl.x; x <= br.x; ++x) {
-      if (board[x, y] == '@') {
-        return false;
-      }
+  for (const auto& line: lines) {
+    if ((line.a.y <= tl.y && line.b.y <= tl.y) || (line.a.y >= br.y && line.b.y >= br.y)) {
+      continue;
     }
+    if ((line.a.x <= tl.x && line.b.x <= tl.x) || (line.a.x >= br.x && line.b.x >= br.x)) {
+      continue;
+    }
+    return false;
   }
   return true;
 }
-
-static Num
-solve2(const V& v) {
-  Num res2{};
-  const int N = v.size();
-  Pos br{};
-  for (const auto& p: v) {
-    br = { std::max(br.x, p.x), std::max(br.y, p.y) };
-  }
-  Board board(br.x + 2, br.y + 2, '.', '@');
-  for (int i = 1; i < N; ++i) {
-    drawLine(board, v[i - 1], v[i]);
-  }
-  drawLine(board, v[N - 1], v[0]);
-  fill(board, Pos{});
-  for (int i = 0; i < N; ++i) {
-    for (int j = i + 1; j < N; ++j) {
-      Num a = (std::abs(v[j].x - v[i].x) + Num{1}) * (std::abs(v[j].y - v[i].y) + Num{1});
-      if (a > res2 && check(board, v[i], v[j])) {
-        res2 = a;
-      }
-    }
-  }
-  return res2;
-}
-
 
 /* ------------------------------------------------------------------------ */
 
@@ -80,24 +27,30 @@ main() {
   Num res1{}, res2{};
   char c;
   Pos p;
-
   V v;
   while (std::cin >> p.x >> c >> p.y) {
     v.push_back(p);
   }
   const int N = v.size();
+
+  Lines lines;
+  for (int i = 1; i < N; ++i) {
+    lines.emplace_back(v[i - 1], v[i]);
+  }
+  lines.emplace_back(v[N - 1], v[0]);
+
   for (int i = 0; i < N; ++i) {
     for (int j = i + 1; j < N; ++j) {
-      Num a = (std::abs(v[j].x - v[i].x) + Num{1}) * (std::abs(v[j].y - v[i].y) + Num{1});
+      Num a = (std::abs(v[j].x - v[i].x) + 1L) * (std::abs(v[j].y - v[i].y) + 1L);
       if (a > res1) {
         res1 = a;
       }
+      if (a > res2 && check(lines, v[i], v[j])) {
+        res2 = a;
+      }
     }
   }
-
-  res2 = solve2(v);
   println("1: {}", res1);
   println("2: {}", res2);
-
   return 0;
 }
