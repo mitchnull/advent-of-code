@@ -4,8 +4,8 @@
 #include <deque>
 #include <unordered_set>
 
-using Lights = std::bitset<16>;
-using V = std::vector<int>;
+using Lights = std::uint16_t;
+using V = std::vector<std::int16_t>;
 struct Machine {
   Lights lights;
   std::vector<Lights> wirings;
@@ -39,10 +39,20 @@ solve1(const Machine& m) {
   return -1;
 }
 
+static inline bool
+isSet(Lights w, int i) {
+  return w & (1 << i);
+}
+
+static inline void
+set(Lights& w, int i) {
+  w |= (1 << i);
+}
+
 static V
 charge(V jolts, Lights w) {
   for (int i = 0; i < jolts.size(); ++i) {
-    if (w[i]) {
+    if (isSet(w, i)) {
       ++jolts[i];
     }
   }
@@ -61,15 +71,15 @@ isOvercharged(const Machine& m, const V& jolts) {
 
 static int
 solve2(const Machine& m) {
-  println("@@@ checking: m: {}", m.jolts);
-  auto wirings = std::vector<Lights>{};
+  println("@@@ checking: {}", m.wirings);
   auto ways = std::unordered_set<V>{V(m.jolts.size(), 0)};
   for (int res = 1; ; ++res) {
     auto next = std::unordered_set<V>();
-    for (auto pj : ways) {
+    for (const auto& pj : ways) {
       for (auto w : m.wirings) {
         auto jolts = charge(pj, w);
         if (jolts == m.jolts) {
+          println("@@@ res {}: {}", m.jolts, res);
           return res;
         }
         if (!isOvercharged(m, jolts)) {
@@ -95,7 +105,7 @@ main() {
     Lights lights{};
     for (int i = 1; i < str.size() - 1; ++i) {
       if (str[i] == '#') {
-        lights[i - 1] = true;
+        set(lights, i - 1);
       }
     }
     std::vector<Lights> wirings;
@@ -108,7 +118,7 @@ main() {
       if (ch == '(') {
         Lights wiring{};
         while (ss >> button >> ch) {
-          wiring[button] = true;
+          set(wiring, button);
         }
         wirings.push_back(wiring);
       } else {
