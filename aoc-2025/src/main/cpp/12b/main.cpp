@@ -1,5 +1,4 @@
 #include "../utils.h"
-#include <algorithm>
 #include <numeric>
 #include <sstream>
 #include <iterator>
@@ -139,27 +138,22 @@ solve1(const Task& t, const BoxConfigs& boxConfigs, const std::vector<int>& boxS
   if (bs > (t.w * t.h)) {
     return false;
   }
-  int ext = 0;
-  for (const auto& bc : boxConfigs) {
-    ext = std::max(ext, std::max(bc[0].w(), bc[0].h()));
-  }
-  int easy = (t.w / ext) * (t.h / ext);
-  int sum = std::reduce(t.items.begin(), t.items.end(), 0, std::plus<>{});
-  if (sum <= easy) {
-    return true;
-  }
-
   std::vector<State> p;
   for (int i = 0; i < N; ++i) {
     for (int j = 0; j < t.items[i]; ++j) {
       p.push_back(State{i});
     }
   }
+  println("@@@ solve: {}x{}: {}", t.w, t.h, t.items);
   do {
+    print("@@@ p: {}\r", p | views::transform([](const auto& s) { return s.conf; }));
+    // println("@@@ p: {}", p);
     if (check(t, boxConfigs, p)) {
+      println("\n@@@ fits");
       return true;
     }
   } while (inc(t, boxConfigs, p));
+  println("\n@@@ nope");
   return false;
 }
 
@@ -194,8 +188,17 @@ main() {
   BoxConfigs boxConfigs = boxes | views::transform(rotFlip) | ranges::to<BoxConfigs>();
   auto boxSizes = boxes | views::transform([](auto b) { return std::count(b.begin(), b.end(), '#'); }) | ranges::to<std::vector<int>>();
 
-  auto res1 = std::transform_reduce(tasks.begin(), tasks.end(), 0, std::plus<>{}, [&](const auto& t) { return solve1(t, boxConfigs, boxSizes); });
-  println("1: {}", res1);
+  // auto res1 = std::transform_reduce(tasks.begin(), tasks.end(), 0, std::plus<>{}, [&](const auto& t) { return solve1(t, boxConfigs, boxSizes); });
 
+  println("1: {}", 0);
+  println("2: {}", 0);
+
+  int max = 0, mw = 0, mh = 0;
+  for (auto t : tasks) {
+    max = std::max(max, t.w * t.h);
+    mw = std::max(mw, t.w);
+    mh = std::max(mh, t.h);
+  }
+  println("@@@ max: {}, mw: {}, mh: {}", max, mw, mh);
   return 0;
 }

@@ -144,6 +144,8 @@ struct Grid {
 
   Grid(int w, int h, T init = {}, T off = {}) : w_(w), h_(h), data_(w_ * h_, init), off_(off) {}
 
+  Grid& operator=(const Grid& other) = default;
+
   const value_type& operator[](int x, int y) const {
     if (0 <= x && x < w_ && 0 <= y && y < h_) {
       return data_[y * w_ + x];
