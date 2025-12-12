@@ -54,6 +54,16 @@ solve2(const Machine& m) {
   }
   auto h = opt.minimize(z);
   opt.check();
+
+  // <<<
+  std::cout << "@@@ x: [";
+  std::string sep = "";
+  for (int i = 0; i < v.size(); ++i) {
+    std::cout << sep << opt.get_model().eval(v[i]);
+    sep = ", ";
+  }
+  std::cout << "]\n";
+  // >>>
   return opt.lower(h).as_int64();
 }
 

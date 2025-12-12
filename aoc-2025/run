@@ -6,7 +6,7 @@ if [ "$1" = "--asan" ]; then
   rm -f build/cpp/$1/main
 elif [ "$1" = "--debug" ]; then
   KIND=.debug
-  export CXXFLAGS="-g -D_GLIBCXX_DEBUG"
+  export CXXFLAGS="-g -D_GLIBCXX_DEBUG -D_LIBCPP_DEBUG=1"
   shift
   rm -f build/cpp/$1/main
 fi
