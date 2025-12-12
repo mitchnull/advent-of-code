@@ -67,29 +67,40 @@ solve1(const Machine& m) {
 
 static void
 degauss(Mat& g) {
-  for (int i = 0, k = 0, w = g.front().size() - 1; i < g.size() && k < w; ++k) {
-    if (g[i][k] == 0) {
+  for (int i = 0; i < g.size(); ++i) {
+    if (g[i][i] == 0) {
       for (int j = i + 1; j < g.size(); ++j) {
-        if (g[j][k] != 0) {
+        if (g[j][i] != 0) {
           std::swap(g[i], g[j]);
           println("@@@ swap: {}, {}, {:#}", i, j, g);
           break;
         }
       }
     }
-    if (g[i][k] == 0) {
-      println("@@@ skip: {}, {}, {:#}", i, k, g);
-      continue;
-    }
-    for (int j = i + 1; j < g.size(); ++j) {
-      if (g[j][k] != 0) {
-        int lcm = std::lcm(g[j][k], g[i][k]);
-        println("@@@ i: {}, j: {}, lcm: {}, mul: {}, div: {}", i, j, lcm, (lcm / g[j][k]), (lcm / g[i][k]));
-        g[j] = g[j] * (lcm / g[j][k]) - g[i] * (lcm / g[i][k]);
-        println("@@@ after {:#}", g);
+    if (g[i][i] == 0) {
+      for (int k = i + 1; k < g.front().size() - 1; ++k) {
+        if (g[i][k] != 0) {
+          for (int j = 0; j < g.size(); ++j) {
+            std::swap(g[j][i], g[j][k]);
+          }
+          println("@@@ vswap: {}, {}, {:#}", i, k, g);
+          break;
+        }
       }
     }
-    ++i;
+    if (g[i][i] == 0) {
+      g.erase(g.begin() + i, g.end());
+      println("@@@ prune: {}, {:#}", i, g);
+    } else {
+      for (int j = i + 1; j < g.size(); ++j) {
+        if (g[j][i] != 0) {
+          int lcm = std::lcm(g[j][i], g[i][i]);
+          println("@@@ i: {}, j: {}, lcm: {}, mul: {}, div: {}", i, j, lcm, (lcm / g[j][i]), (lcm / g[i][i]));
+          g[j] = g[j] * (lcm / g[j][i]) - g[i] * (lcm / g[i][i]);
+          println("@@@ after {:#}", g);
+        }
+      }
+    }
   }
   println("@@@ degauss: {:#}", g);
 }
