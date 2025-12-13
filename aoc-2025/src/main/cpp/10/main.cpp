@@ -72,7 +72,6 @@ degauss(Mat& g) {
       for (int j = i + 1; j < g.size(); ++j) {
         if (g[j][i] != 0) {
           std::swap(g[i], g[j]);
-          println("@@@ swap: {}, {}, {:#}", i, j, g);
           break;
         }
       }
@@ -83,26 +82,21 @@ degauss(Mat& g) {
           for (int j = 0; j < g.size(); ++j) {
             std::swap(g[j][i], g[j][k]);
           }
-          println("@@@ vswap: {}, {}, {:#}", i, k, g);
           break;
         }
       }
     }
     if (g[i][i] == 0) {
       g.erase(g.begin() + i, g.end());
-      println("@@@ prune: {}, {:#}", i, g);
     } else {
       for (int j = i + 1; j < g.size(); ++j) {
         if (g[j][i] != 0) {
           int lcm = std::lcm(g[j][i], g[i][i]);
-          println("@@@ i: {}, j: {}, lcm: {}, mul: {}, div: {}", i, j, lcm, (lcm / g[j][i]), (lcm / g[i][i]));
           g[j] = g[j] * (lcm / g[j][i]) - g[i] * (lcm / g[i][i]);
-          println("@@@ after {:#}", g);
         }
       }
     }
   }
-  println("@@@ degauss: {:#}", g);
 }
 
 static bool
@@ -118,7 +112,6 @@ inc(VA& v, int n, int max) {
 
 static int
 check(const Mat& g, VA v) {
-  println("@@@ checking: {}", v);
   for (int i = g.size() - 1; i >= 0; --i) {
     auto c = g[i][i];
     if (c == 0) {
@@ -134,7 +127,6 @@ check(const Mat& g, VA v) {
       return std::numeric_limits<int>::max();
     }
   }
-  println("@@@ checked: {}: {}", v, v.sum());
   return v.sum();
 }
 
@@ -153,14 +145,12 @@ solve2(const Machine& m) {
     max = std::max(max, m.jolts[i]);
     g.push_back(std::move(v));
   }
-  println("@@@ {:#}", g);
   degauss(g);
   auto v = VA(0, m.wirings.size());
   auto res = std::numeric_limits<int>::max();
   do {
     res = std::min(res, check(g, v));
   } while (inc(v, g.size(), max));
-  println("@@@ res: {:#}", res);
   return res;
 }
 
