@@ -12,43 +12,13 @@ using V = std::vector<int>;
 using VA = std::valarray<int>;
 using Mat = std::vector<VA>;
 
-template <>
-struct std::formatter<Mat> {
-  bool pretty = false;
-  constexpr auto parse(std::format_parse_context& ctx) {
-    auto it = ctx.begin();
-    if (it == ctx.end()) {
-        return it;
-    }
-    if (*it == '#') {
-        pretty = true;
-        ++it;
-    }
-    if (it != ctx.end() && *it != '}') {
-      throw std::format_error("invalid format args");
-    }
-    return it;
-  }
-
-  auto format(const Mat& m, std::format_context& ctx) const {
-    if (pretty) {
-      std::format_to(ctx.out(), "[\n");
-      for (auto r : m) {
-        std::format_to(ctx.out(), "{}\n", r);
-      }
-      std::format_to(ctx.out(), "]");
-    } else {
-      std::format_to(ctx.out(), "{}", m);
-    }
-    return ctx.out();
-  }
-};
-
 struct Machine {
   Lights lights;
   std::vector<Lights> wirings;
   V jolts;
 };
+
+/* ------------------------------------------------------------------------ */
 
 static int
 solve1(const Machine& m) {
@@ -68,6 +38,8 @@ solve1(const Machine& m) {
   }
   return -1;
 }
+
+/* ------------------------------------------------------------------------ */
 
 static void
 degauss(Mat& g, VA& limits) {
