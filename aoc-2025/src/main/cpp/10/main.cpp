@@ -70,13 +70,14 @@ solve1(const Machine& m) {
 }
 
 static void
-degauss(Mat& g) {
+degauss(Mat& g, VA& limits) {
   for (int i = 0; i < g.size();) {
     if (g[i][i] == 0) {
       for (int k = i + 1; k < g.front().size() - 1; ++k) {
         if (g[i][k] != 0) {
           for (int j = 0; j < g.size(); ++j) {
             std::swap(g[j][i], g[j][k]);
+            std::swap(limits[i], limits[k]);
           }
           break;
         }
@@ -97,9 +98,9 @@ degauss(Mat& g) {
 }
 
 static bool
-inc(VA& v, int n, int max) {
+inc(VA& v, int n, const VA& limits) {
   for (int i = v.size() - 1; i >= n; --i) {
-    if (++v[i] <= max) {
+    if (++v[i] <= limits[i]) {
       return true;
     }
     v[i] = 0;
@@ -129,25 +130,25 @@ check(const Mat& g, VA v) {
 
 static int
 solve2(const Machine& m) {
-  int max = 0;
+  VA limits = VA(std::numeric_limits<int>::max(), m.wirings.size());
   Mat g;
   for (int i = 0; i < m.jolts.size(); ++i) {
     auto v = VA(0, m.wirings.size() + 1);
     for (int j = 0; j < m.wirings.size(); ++j) {
       if (m.wirings[j][i]) {
         v[j] = 1;
+        limits[j] = std::min(limits[j], m.jolts[i]);
       }
     }
     v[v.size() - 1] = m.jolts[i];
-    max = std::max(max, m.jolts[i]);
     g.push_back(std::move(v));
   }
-  degauss(g);
+  degauss(g, limits);
   auto v = VA(0, m.wirings.size());
   auto res = std::numeric_limits<int>::max();
   do {
     res = std::min(res, check(g, v));
-  } while (inc(v, g.size(), max));
+  } while (inc(v, g.size(), limits));
   return res;
 }
 
