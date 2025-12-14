@@ -4,6 +4,7 @@
 #include <deque>
 #include <bitset>
 #include <z3++.h>
+#include <unordered_set>
 
 using Lights = std::bitset<16>;
 using V = std::vector<std::int16_t>;
@@ -16,6 +17,7 @@ struct Machine {
 
 static int
 solve1(const Machine& m) {
+  auto visited = std::unordered_set<Lights>{Lights{}};
   auto q = std::deque<std::pair<Lights, int>>{{}};
   while (!q.empty()) {
     auto [lights, step] = q.front();
@@ -24,8 +26,10 @@ solve1(const Machine& m) {
       return step;
     }
     for (auto w : m.wirings) {
+      if (visited.insert(lights ^ w).second) {
       q.emplace_back(lights ^ w, step + 1);
     }
+  }
   }
   return -1;
 }
