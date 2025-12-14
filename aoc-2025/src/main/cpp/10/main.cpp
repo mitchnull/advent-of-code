@@ -112,9 +112,6 @@ static int
 check(const Mat& g, VA v) {
   for (int i = g.size() - 1; i >= 0; --i) {
     auto c = g[i][i];
-    if (c == 0) {
-      continue;
-    }
     int xv = 0;
     for (int j = i + 1; j < v.size(); ++j) {
       xv += g[i][j] * v[j];
@@ -157,7 +154,6 @@ solve2(const Machine& m) {
 int
 main() {
   std::string str;
-  // [.##.] (3) (1,3) (2) (2,3) (0,2) (0,1) {3,5,4,7}
   std::vector<Machine> machines;
   while (std::getline(std::cin, str)) {
     std::istringstream line{str};
