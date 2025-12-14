@@ -71,15 +71,7 @@ solve1(const Machine& m) {
 
 static void
 degauss(Mat& g) {
-  for (int i = 0; i < g.size(); ++i) {
-    if (g[i][i] == 0) {
-      for (int j = i + 1; j < g.size(); ++j) {
-        if (g[j][i] != 0) {
-          std::swap(g[i], g[j]);
-          break;
-        }
-      }
-    }
+  for (int i = 0; i < g.size();) {
     if (g[i][i] == 0) {
       for (int k = i + 1; k < g.front().size() - 1; ++k) {
         if (g[i][k] != 0) {
@@ -91,15 +83,16 @@ degauss(Mat& g) {
       }
     }
     if (g[i][i] == 0) {
-      g.erase(g.begin() + i, g.end());
-    } else {
-      for (int j = i + 1; j < g.size(); ++j) {
-        if (g[j][i] != 0) {
-          int lcm = std::lcm(g[j][i], g[i][i]);
-          g[j] = g[j] * (lcm / g[j][i]) - g[i] * (lcm / g[i][i]);
-        }
+      g.erase(g.begin() + i);
+      continue;
+    }
+    for (int j = i + 1; j < g.size(); ++j) {
+      if (g[j][i] != 0) {
+        int lcm = std::lcm(g[j][i], g[i][i]);
+        g[j] = g[j] * (lcm / g[j][i]) - g[i] * (lcm / g[i][i]);
       }
     }
+    ++i;
   }
 }
 
