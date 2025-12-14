@@ -17,21 +17,26 @@ struct Machine {
 
 static int
 solve1(const Machine& m) {
-  auto visited = std::unordered_set<Lights>{Lights{}};
-  auto q = std::deque<std::pair<Lights, int>>{{}};
-  while (!q.empty()) {
-    auto [lights, step] = q.front();
-    q.pop_front();
-    if (lights == m.lights) {
-      return step;
-    }
-    for (auto w : m.wirings) {
-      if (visited.insert(lights ^ w).second) {
-      q.emplace_back(lights ^ w, step + 1);
-    }
+  z3::context ctx;
+  z3::optimize opt{ctx};
+  z3::expr_vector v{ctx};
+
+  for (int i = 0; i < m.wirings.size(); ++i) {
+    z3::expr xi = ctx.bool_const(std::format("x{}", i).c_str());
+    v.push_back(xi);
   }
+  for (int j = 0; j < m.jolts.size(); ++j) {
+    z3::expr_vector vv{ctx};
+    for (int i = 0; i < m.wirings.size(); ++i) {
+      if (m.wirings[i][j]) {
+        vv.push_back(v[i]);
+      }
+    }
+    opt.add(ctx.bool_val(m.lights[j]) == z3::mk_xor(vv));
   }
-  return -1;
+  auto h = opt.minimize(z3::sum(v));
+  opt.check();
+  return opt.lower(h).as_int64();
 }
 
 static int
@@ -45,8 +50,6 @@ solve2(const Machine& m) {
     v.push_back(xi);
     opt.add(xi >= 0);
   }
-  z3::expr z = ctx.int_const("z");
-  opt.add(z == z3::sum(v));
   for (int j = 0; j < m.jolts.size(); ++j) {
     z3::expr_vector vv{ctx};
     for (int i = 0; i < m.wirings.size(); ++i) {
@@ -56,7 +59,7 @@ solve2(const Machine& m) {
     }
     opt.add(m.jolts[j] == z3::sum(vv));
   }
-  auto h = opt.minimize(z);
+  auto h = opt.minimize(z3::sum(v));
   opt.check();
   return opt.lower(h).as_int64();
 }
