@@ -13,7 +13,7 @@ main() {
     as.push_back(a);
     bs.push_back(b);
   }
-  
+
   std::sort(as.begin(), as.end());
   std::sort(bs.begin(), bs.end());
   int res1 = 0;

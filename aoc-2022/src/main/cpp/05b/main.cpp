@@ -23,8 +23,8 @@ using uint = uint32;
 using Stack = std::vector<char>;
 
 static void
-print(const std::vector<Stack>& stacks) {
-  for (const auto& stack: stacks) {
+print(const std::vector<Stack> &stacks) {
+  for (const auto &stack : stacks) {
     std::cout << (stack.empty() ? ' ' : stack.back());
   }
   std::cout << "\n";
@@ -32,18 +32,18 @@ print(const std::vector<Stack>& stacks) {
 
 template <typename C>
 static auto
-pop_back(C& v) {
+pop_back(C &v) {
   auto res = v.back();
   v.pop_back();
   return res;
 }
 
 static void
-move(std::vector<Stack>& stacks, uint count, uint from, uint to) {
+move(std::vector<Stack> &stacks, uint count, uint from, uint to) {
   while (stacks.size() <= to) {
     stacks.emplace_back();
   }
-  auto& f = stacks[from];
+  auto &f = stacks[from];
   std::move(f.end() - count, f.end(), std::back_inserter(stacks[to]));
   f.erase(f.end() - count, f.end());
 }
@@ -56,7 +56,7 @@ main() {
     if (line.empty()) {
       break;
     }
-    for (uint i =0, j = 1; j < line.size(); ++i, j += 4) {
+    for (uint i = 0, j = 1; j < line.size(); ++i, j += 4) {
       char c = line[j];
       if (c < 'A') {
         continue;
@@ -67,7 +67,7 @@ main() {
       stacks[i].push_back(c);
     }
   }
-  for (auto& stack: stacks) {
+  for (auto &stack : stacks) {
     std::reverse(stack.begin(), stack.end());
   }
   uint count, from, to;

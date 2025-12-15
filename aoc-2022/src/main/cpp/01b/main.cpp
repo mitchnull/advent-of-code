@@ -20,7 +20,6 @@ using int64 = std::int64_t;
 
 using uint = uint32;
 
-
 int
 main() {
   std::string line;

@@ -52,8 +52,7 @@ toString(Type t) {
     case Obsidian: return "Obsidian";
     case Geode: return "Geode";
     case None: return "None";
-    default:
-      return "?";
+    default: return "?";
   }
 }
 
@@ -71,13 +70,14 @@ struct State {
 using Set = std::vector<State>;
 
 static uint
-parse(const std::sregex_iterator& it) {
+parse(const std::sregex_iterator &it) {
   return std::stoi(it->str());
 }
 
-// Blueprint  1: Each ore robot costs 3 ore. Each clay robot costs 4 ore. Each obsidian robot costs 3 ore and 19 clay. Each geode robot costs 3 ore and  8 obsidian.
+// Blueprint  1: Each ore robot costs 3 ore. Each clay robot costs 4 ore. Each obsidian robot costs 3 ore and 19 clay.
+// Each geode robot costs 3 ore and  8 obsidian.
 static Costs
-parse(const string& line) {
+parse(const string &line) {
   Costs costs{};
   std::regex numMatch("[0-9]+");
   auto it = std::sregex_iterator(line.begin(), line.end(), numMatch);
@@ -88,19 +88,20 @@ parse(const string& line) {
   costs[Geode][Ore] = parse(++it);
   costs[Geode][Obsidian] = parse(++it);
 #if 1
-  std::cout
-    << "Each ore robot costs " << +costs[Ore][Ore] << " ore. "
-    << "Each clay robot costs " << +costs[Clay][Ore] << " ore. "
-    << "Each obsidian robot costs " << +costs[Obsidian][Ore] << " ore and " << +costs[Obsidian][Clay] << " clay. "
-    << "Each geode robot costs " << +costs[Geode][Ore] << " ore and " << +costs[Geode][Obsidian] << " obsidian.\n";
+  std::cout << "Each ore robot costs " << +costs[Ore][Ore] << " ore. "
+            << "Each clay robot costs " << +costs[Clay][Ore] << " ore. "
+            << "Each obsidian robot costs " << +costs[Obsidian][Ore] << " ore and " << +costs[Obsidian][Clay]
+            << " clay. "
+            << "Each geode robot costs " << +costs[Geode][Ore] << " ore and " << +costs[Geode][Obsidian]
+            << " obsidian.\n";
 #endif
   return costs;
 }
 
 static uint
-canBuild(const Costs& costs, const Counts& robots, const Counts& counts, Type r) {
+canBuild(const Costs &costs, const Counts &robots, const Counts &counts, Type r) {
   uint res = 0;
-  for (Type i: Ingredients) {
+  for (Type i : Ingredients) {
     uint c = costs[r][i];
     uint needed = (c > counts[i]) ? c - counts[i] : 0;
     if (needed == 0) {
@@ -115,9 +116,8 @@ canBuild(const Costs& costs, const Counts& robots, const Counts& counts, Type r)
   return res + 1;
 }
 
-
 static Counts
-operator+(Counts a, const Counts& b) {
+operator+(Counts a, const Counts &b) {
   for (uint i = 0; i < None; ++i) {
     a[i] += b[i];
   }
@@ -125,7 +125,7 @@ operator+(Counts a, const Counts& b) {
 }
 
 static Counts
-operator-(Counts a, const Counts& b) {
+operator-(Counts a, const Counts &b) {
   for (uint i = 0; i < None; ++i) {
     a[i] -= b[i];
   }
@@ -147,7 +147,7 @@ operator*(Counts a, uint n) {
 }
 
 static Count
-maxGeodes(const Costs& costs, const Counts& maxNeededRobots, const State& initState) {
+maxGeodes(const Costs &costs, const Counts &maxNeededRobots, const State &initState) {
   Set states{initState};
   Count res = 0;
   while (!states.empty()) {
@@ -157,7 +157,8 @@ maxGeodes(const Costs& costs, const Counts& maxNeededRobots, const State& initSt
     for (uint i = 0; i < None; ++i) {
       Type r = static_cast<Type>(i);
       if (state.robots[r] >= maxNeededRobots[r]) {
-        // std::cout << "step " << state.step << ": already have " << maxNeededRobots[r] << " " << toString(r) << " robots\n";
+        // std::cout << "step " << state.step << ": already have " << maxNeededRobots[r] << " " << toString(r) << "
+        // robots\n";
         continue;
       }
       uint steps = canBuild(costs, state.robots, state.counts, r);
@@ -173,9 +174,9 @@ maxGeodes(const Costs& costs, const Counts& maxNeededRobots, const State& initSt
 }
 
 static Counts
-calcMaxNeededRobots(const Costs& costs) {
+calcMaxNeededRobots(const Costs &costs) {
   Counts res{};
-  for (Counts cost: costs) {
+  for (Counts cost : costs) {
     for (uint i = 0; i < Geode; ++i) {
       Type r = static_cast<Type>(i);
       res[r] = std::max(res[r], cost[r]);
@@ -195,7 +196,7 @@ main() {
   State initState{1, Counts{} + Ore, {}};
   uint res = 0;
   for (uint i = 0; i < blueprints.size(); ++i) {
-    const Costs& bp = blueprints[i];
+    const Costs &bp = blueprints[i];
     Counts maxNeededRobots = calcMaxNeededRobots(bp);
     uint bpm = maxGeodes(bp, maxNeededRobots, initState);
     std::cout << (i + 1) << ": " << bpm << "\n";

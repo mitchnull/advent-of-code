@@ -1,14 +1,14 @@
+#include <algorithm>
+#include <bitset>
+#include <cctype>
+#include <charconv>
+#include <deque>
 #include <ios>
 #include <iostream>
-#include <cctype>
 #include <limits>
-#include <deque>
+#include <ranges>
 #include <string>
 #include <vector>
-#include <bitset>
-#include <algorithm>
-#include <ranges>
-#include <charconv>
 
 using uint8 = std::uint8_t;
 using int8 = std::int8_t;
@@ -23,7 +23,7 @@ using Board = std::vector<std::pair<uint, bool>>;
 static constexpr uint N = 5;
 
 static bool
-isWinner(const Board& b, uint row, uint col) {
+isWinner(const Board &b, uint row, uint col) {
   auto horiz = true;
   for (uint j = 0; j < N; ++j) {
     horiz = horiz & b[row * N + j].second;
@@ -42,11 +42,11 @@ isWinner(const Board& b, uint row, uint col) {
 }
 
 static uint
-check(Board& board, uint n) {
+check(Board &board, uint n) {
   bool winner = false;
   for (uint i = 0; i < N; ++i) {
     for (uint j = 0; j < N; ++j) {
-      auto& b = board[i * N + j];
+      auto &b = board[i * N + j];
       if (b.first == n) {
         b.second = true;
         winner = winner || isWinner(board, i, j);
@@ -66,7 +66,7 @@ check(Board& board, uint n) {
 }
 
 static bool
-readBoard(std::vector<Board>& boards) {
+readBoard(std::vector<Board> &boards) {
   Board board;
   for (uint i = 0; i < N * N; ++i) {
     int n;
@@ -103,7 +103,8 @@ main() {
         return 0;
       }
     } else {
-      boards.erase(std::remove_if(boards.begin(), boards.end(), [n](auto &b) { return check(b, n) != 0; }), boards.end());
+      boards.erase(
+          std::remove_if(boards.begin(), boards.end(), [n](auto &b) { return check(b, n) != 0; }), boards.end());
     }
   }
   std::cout << "0\n";

@@ -11,14 +11,14 @@ using BoolMap = Grid<bool>;
 using IntMap = Grid<int>;
 
 static auto
-pop_front(auto& queue) {
+pop_front(auto &queue) {
   auto res = queue.front();
   queue.pop_front();
   return res;
 }
 
 static Num
-sides(const IntMap& ids, int id, Pos start, Dir outerDir, int outerBound, Dir innerDir, int innerBound) {
+sides(const IntMap &ids, int id, Pos start, Dir outerDir, int outerBound, Dir innerDir, int innerBound) {
   Num res = 0;
   Pos outerStart = start;
   for (int o = 0; o < outerBound; ++o, outerStart += outerDir) {
@@ -37,16 +37,15 @@ sides(const IntMap& ids, int id, Pos start, Dir outerDir, int outerBound, Dir in
 }
 
 static Num
-sides(const IntMap& ids, int id) {
-  return
-    sides(ids, id, {0, 0}, {0, 1}, ids.h(), {1, 0}, ids.w()) +
-    sides(ids, id, {ids.w() - 1, 0}, {-1, 0}, ids.w(), {0, 1}, ids.h()) +
-    sides(ids, id, {ids.w() - 1, ids.h() - 1}, {0, -1}, ids.h(), {-1, 0}, ids.w()) +
-    sides(ids, id, {0, ids.h() - 1}, {1, 0}, ids.h(), {0, -1}, ids.w());
+sides(const IntMap &ids, int id) {
+  return sides(ids, id, {0, 0}, {0, 1}, ids.h(), {1, 0}, ids.w()) +
+      sides(ids, id, {ids.w() - 1, 0}, {-1, 0}, ids.w(), {0, 1}, ids.h()) +
+      sides(ids, id, {ids.w() - 1, ids.h() - 1}, {0, -1}, ids.h(), {-1, 0}, ids.w()) +
+      sides(ids, id, {0, ids.h() - 1}, {1, 0}, ids.h(), {0, -1}, ids.w());
 }
 
 static std::pair<Num, Num>
-solve(const Plants& plants) {
+solve(const Plants &plants) {
   auto visited = BoolMap(plants.w(), plants.h());
   auto ids = IntMap(plants.w(), plants.h());
   auto areas = std::vector<Num>{0};
@@ -71,7 +70,7 @@ solve(const Plants& plants) {
         visited[p] = true;
         ids[p] = id;
         ++area;
-        for (auto d: DIRS) {
+        for (auto d : DIRS) {
           auto pp = p + d;
           if (plants[pp] != plant) {
             ++perimiter;

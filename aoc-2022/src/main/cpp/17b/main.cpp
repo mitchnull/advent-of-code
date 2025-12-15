@@ -42,34 +42,34 @@ using Rock = std::vector<Bits>;
 using Board = std::vector<Bits>;
 
 const std::vector<Rock> rocks{
-  {
-    0b000111100,
-  },
-  {
-    0b000010000,
-    0b000111000,
-    0b000010000,
-  },
-  {
-    0b000001000,
-    0b000001000,
-    0b000111000,
-  },
-  {
-    0b000100000,
-    0b000100000,
-    0b000100000,
-    0b000100000,
-  },
-  {
-    0b000110000,
-    0b000110000,
-  },
+    {
+        0b000111100,
+    },
+    {
+        0b000010000,
+        0b000111000,
+        0b000010000,
+    },
+    {
+        0b000001000,
+        0b000001000,
+        0b000111000,
+    },
+    {
+        0b000100000,
+        0b000100000,
+        0b000100000,
+        0b000100000,
+    },
+    {
+        0b000110000,
+        0b000110000,
+    },
 };
 
 static void
-grow(Board& board, const Rock& r) {
-  for (uint y = board.size(); y-- > 0; ) {
+grow(Board &board, const Rock &r) {
+  for (uint y = board.size(); y-- > 0;) {
     if ((board[y] & mask).any()) {
       uint ns = y + VD + r.size() + 1;
       while (board.size() < ns) {
@@ -84,7 +84,7 @@ grow(Board& board, const Rock& r) {
 }
 
 static bool
-coll(const Board& board, const Rock& rock, int x, uint y) {
+coll(const Board &board, const Rock &rock, int x, uint y) {
   for (uint j = 0; j < rock.size(); ++j) {
     Bits rb = (x < 0) ? (rock[j] << -x) : (rock[j] >> x);
     if ((board[y - j] & rb).any()) {
@@ -95,7 +95,7 @@ coll(const Board& board, const Rock& rock, int x, uint y) {
 }
 
 static void
-merge(Board& board, const Rock& rock, int x, uint y) {
+merge(Board &board, const Rock &rock, int x, uint y) {
   for (uint j = 0; j < rock.size(); ++j) {
     Bits rb = (x < 0) ? (rock[j] << -x) : (rock[j] >> x);
     board[y - j] |= rb;
@@ -103,11 +103,11 @@ merge(Board& board, const Rock& rock, int x, uint y) {
 }
 
 static void
-print(const Board& board, const char* title) {
+print(const Board &board, const char *title) {
   std::cout << title << ":\n";
-  for (uint y = board.size(); y-- > 0; ) {
-    const Bits& b = board[y];
-    for (uint i = b.size(); i-- > 0; ) {
+  for (uint y = board.size(); y-- > 0;) {
+    const Bits &b = board[y];
+    for (uint i = b.size(); i-- > 0;) {
       std::cout << ((b[i]) ? '#' : '.');
     }
     std::cout << "\n";
@@ -115,7 +115,7 @@ print(const Board& board, const char* title) {
 }
 
 static bool
-checkRepeat(const Board& board, uint y, std::pair<uint64, uint> cy) {
+checkRepeat(const Board &board, uint y, std::pair<uint64, uint> cy) {
   uint repeat = y - cy.second;
   if (repeat > cy.second) {
     return false;
@@ -129,10 +129,11 @@ checkRepeat(const Board& board, uint y, std::pair<uint64, uint> cy) {
 }
 
 static std::pair<uint64, uint>
-checkRepeat(const Board& board, const std::vector<std::vector<std::pair<uint64, uint>>> airCYs, uint64 c, uint y, uint ai) {
-  const auto& cys = airCYs[ai];
+checkRepeat(
+    const Board &board, const std::vector<std::vector<std::pair<uint64, uint>>> airCYs, uint64 c, uint y, uint ai) {
+  const auto &cys = airCYs[ai];
   for (auto ri = cys.rbegin(), rend = cys.rend(); ri != rend; ++ri) {
-    const auto& cy = *ri;
+    const auto &cy = *ri;
     if (checkRepeat(board, y, cy)) {
       std::cout << "c = " << c << " ac = " << cy.first << ", dc = " << (c - cy.first) << "\n";
       return {c - cy.first, y - cy.second};
@@ -155,7 +156,7 @@ main() {
     if (c % M == 0) {
       std::cout << c << "\n";
     }
-    const Rock& r = rocks[c % rmod];
+    const Rock &r = rocks[c % rmod];
     grow(board, r);
     uint y = board.size() - 1;
     int x = 0;
@@ -182,11 +183,12 @@ main() {
     if (ry == 0) {
       auto repeat = checkRepeat(board, airYCs, c, y, ai);
       if (repeat.second > 0) {
-        std::cout << "repeat: c=" << repeat.first <<  ", y=" << repeat.second << "\n";
+        std::cout << "repeat: c=" << repeat.first << ", y=" << repeat.second << "\n";
         uint64 count = (N - c) / repeat.first;
         c += count * repeat.first;
         ry = count * repeat.second;
-        std::cout << "repeat: N=" << N << ", c=" << repeat.first <<  ", y=" << repeat.second << ", count=" << count << ", ry=" << ry << "\n";
+        std::cout << "repeat: N=" << N << ", c=" << repeat.first << ", y=" << repeat.second << ", count=" << count
+                  << ", ry=" << ry << "\n";
       }
     }
     airYCs[ai].push_back({c, y});

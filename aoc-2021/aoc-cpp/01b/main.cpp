@@ -31,7 +31,7 @@ main() {
     }
     // std::cout << c;
     if (c > last) {
-     // std::cout << " (increase)";
+      // std::cout << " (increase)";
       ++res;
     }
     // std::cout << "\n";

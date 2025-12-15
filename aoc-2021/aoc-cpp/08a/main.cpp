@@ -32,8 +32,7 @@ countUnique(std::string line) {
       case 2:
       case 3:
       case 4:
-      case 7:
-        ++res;
+      case 7: ++res;
     }
   }
   return res;
@@ -42,7 +41,7 @@ countUnique(std::string line) {
 int
 main() {
   int res = 0;
-  for (std::string line; std::getline(std::cin, line); ) {
+  for (std::string line; std::getline(std::cin, line);) {
     res += countUnique(line);
   }
   std::cout << res << "\n";

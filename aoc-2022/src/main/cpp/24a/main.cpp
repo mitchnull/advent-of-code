@@ -37,22 +37,16 @@ using Num = int32;
 struct Pos {
   Num x, y;
 
-  friend auto operator<=>(const Pos& a, const Pos& b) = default;
+  friend auto operator<=>(const Pos &a, const Pos &b) = default;
 
-  friend auto operator+(Pos a, const Pos& b) {
+  friend auto operator+(Pos a, const Pos &b) {
     a.x += b.x;
     a.y += b.y;
     return a;
   }
 };
 
-constexpr const std::array<Pos, 5> Moves{
-  Pos{1, 0},
-  Pos{-1, 0},
-  Pos{0, 1},
-  Pos{0, -1},
-  Pos{0, 0}
-};
+constexpr const std::array<Pos, 5> Moves{Pos{1, 0}, Pos{-1, 0}, Pos{0, 1}, Pos{0, -1}, Pos{0, 0}};
 
 enum Tile {
   Up = '^',
@@ -68,11 +62,11 @@ using Row = std::vector<Tiles>;
 using Map = std::vector<Row>;
 
 static void
-print(const Map& map, const Pos& pos) {
+print(const Map &map, const Pos &pos) {
   for (uint y = 0; y < map.size(); ++y) {
-    const Row& row = map[y];
+    const Row &row = map[y];
     for (uint x = 0; x < row.size(); ++x) {
-      const Tiles& tiles = row[x];
+      const Tiles &tiles = row[x];
       if (x == pos.x && y == pos.y) {
         std::cout << 'E';
       } else if (tiles.empty()) {
@@ -88,41 +82,31 @@ print(const Map& map, const Pos& pos) {
 }
 
 static void
-sort(Map& map) {
-  for (Row& row: map) {
-    for (Tiles& tiles: row) {
+sort(Map &map) {
+  for (Row &row : map) {
+    for (Tiles &tiles : row) {
       std::sort(tiles.begin(), tiles.end());
     }
   }
 }
 
 static Map
-advance(const Map& map) {
+advance(const Map &map) {
   uint rows = map.size();
   uint cols = map.front().size();
   Map res(rows, Row(cols, Tiles{}));
   for (uint y = 0; y < rows; ++y) {
-    const Row& row = map[y];
+    const Row &row = map[y];
     for (uint x = 0; x < cols; ++x) {
-      const Tiles& tiles = row[x];
-      for (Tile tile: tiles) {
+      const Tiles &tiles = row[x];
+      for (Tile tile : tiles) {
         switch (tile) {
-          case Up:
-            res[(y > 1) ? (y - 1) : (rows - 2)][x].push_back(tile);
-            break;
-          case Down:
-            res[(y < rows - 2) ? (y + 1) : 1][x].push_back(tile);
-            break;
-          case Left:
-            res[y][(x > 1) ? (x - 1) : (cols - 2)].push_back(tile);
-            break;
-          case Right:
-            res[y][(x < cols - 2) ? (x + 1) : 1].push_back(tile);
-            break;
-          case Wall:
-            res[y][x].push_back(tile);
-          case None:
-            break;
+          case Up: res[(y > 1) ? (y - 1) : (rows - 2)][x].push_back(tile); break;
+          case Down: res[(y < rows - 2) ? (y + 1) : 1][x].push_back(tile); break;
+          case Left: res[y][(x > 1) ? (x - 1) : (cols - 2)].push_back(tile); break;
+          case Right: res[y][(x < cols - 2) ? (x + 1) : 1].push_back(tile); break;
+          case Wall: res[y][x].push_back(tile);
+          case None: break;
         }
       }
     }
@@ -132,8 +116,7 @@ advance(const Map& map) {
 }
 
 struct MapCache {
-  const Map&
-  add(Map map) {
+  const Map &add(Map map) {
     if (!cache.empty() && map == *cache.front()) {
       loop = true;
       last = cache.begin();
@@ -144,8 +127,7 @@ struct MapCache {
     return *cache.back();
   }
 
-  const Map&
-  advance(const Map& map) {
+  const Map &advance(const Map &map) {
     ++advanceCount;
 #if 1
     if (map != **last) {
@@ -162,10 +144,7 @@ struct MapCache {
     return **last;
   }
 
-  void debug() {
-    std::cout << "advance called " << advanceCount << " times, size: " << cache.size() << "\n";
-  }
-
+  void debug() { std::cout << "advance called " << advanceCount << " times, size: " << cache.size() << "\n"; }
 private:
   std::vector<std::unique_ptr<Map>> cache;
   decltype(cache.cend()) last = cache.cend();
@@ -174,10 +153,10 @@ private:
 };
 
 struct MapPos {
-  const Map* map;
+  const Map *map;
   Pos pos;
 
-  friend auto operator<=>(const MapPos& a, const MapPos& b) = default;
+  friend auto operator<=>(const MapPos &a, const MapPos &b) = default;
 };
 
 struct State {
@@ -207,14 +186,14 @@ main() {
   Pos endPos = Pos{static_cast<Num>(cols - 2), static_cast<Num>(rows - 1)};
 
   MapCache mapCache;
-  const Map* map = &mapCache.add(std::move(initMap));
+  const Map *map = &mapCache.add(std::move(initMap));
   State start{{map, {1, 0}}, 1};
   print(*map, start.mapPos.pos);
 
   std::queue<State> queue;
   queue.push(start);
   uint turn = 0;
-  std::vector<std::vector<std::vector<const Map*>>> visited(rows, std::vector<std::vector<const Map*>>(cols));
+  std::vector<std::vector<std::vector<const Map *>>> visited(rows, std::vector<std::vector<const Map *>>(cols));
   visited[start.mapPos.pos.y][start.mapPos.pos.x].push_back(map);
   while (!queue.empty()) {
     State state = queue.front();
@@ -224,7 +203,7 @@ main() {
       map = &mapCache.advance(*map);
     }
     uint nextTurn = turn + 1;
-    for (const Pos& move: Moves) {
+    for (const Pos &move : Moves) {
       Pos p = state.mapPos.pos + move;
       if (p.x < 0 || p.y < 0) {
         continue;
@@ -233,7 +212,7 @@ main() {
       if (!(*map)[p.y][p.x].empty()) {
         continue;
       }
-      auto& visitedAtPos = visited[p.y][p.x];
+      auto &visitedAtPos = visited[p.y][p.x];
       if (std::find(visitedAtPos.cbegin(), visitedAtPos.cend(), map) != visitedAtPos.end()) {
         continue;
       }

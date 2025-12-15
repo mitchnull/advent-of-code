@@ -21,7 +21,7 @@ using int64 = std::int64_t;
 using uint = uint32;
 
 static const std::vector<std::string> digits = {
-  "0", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" };
+    "0", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
 
 static int
 parseDigit(auto b, auto e) {

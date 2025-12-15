@@ -29,7 +29,7 @@ using Counts = std::vector<int>;
 // Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53
 
 static void
-inc(Counts& counts, std::size_t i, int increment = 1) {
+inc(Counts &counts, std::size_t i, int increment = 1) {
   counts.resize(std::max(i + 1, counts.size()));
   counts[i] += increment;
 }
@@ -47,7 +47,7 @@ main() {
     std::string word;
     int n;
     V winning;
-    first >> word  >> word;
+    first >> word >> word;
     while (first >> n) {
       winning.push_back(n);
     }

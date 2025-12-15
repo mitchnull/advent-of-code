@@ -37,12 +37,12 @@ static constexpr const uint TIMES = 10;
 using List = std::list<int>;
 using It = List::iterator;
 
-template<typename T> 
+template <typename T>
 static void
-print(const std::vector<T>& v) {
+print(const std::vector<T> &v) {
   bool first = true;
   std::cout << "{";
-  for (const auto& vv: v) {
+  for (const auto &vv : v) {
     if (first) {
       first = false;
     } else {
@@ -53,12 +53,12 @@ print(const std::vector<T>& v) {
   std::cout << "}\n";
 }
 
-template<typename T> 
+template <typename T>
 static void
 print(const std::vector<T> nums, const std::vector<uint> idxs) {
   bool first = true;
   std::cout << "{";
-  for (auto idx: idxs) {
+  for (auto idx : idxs) {
     if (first) {
       first = false;
     } else {
@@ -75,7 +75,7 @@ mod(int64 i, int64 m) {
 }
 
 static void
-rot(std::vector<It>& nums, List& list, uint i) {
+rot(std::vector<It> &nums, List &list, uint i) {
   uint n = nums.size();
   uint m = n - 1;
 
@@ -90,7 +90,6 @@ rot(std::vector<It>& nums, List& list, uint i) {
   list.splice(it, list, curr, std::next(curr));
 }
 
-
 int
 main() {
   std::vector<int> nums;
@@ -102,7 +101,7 @@ main() {
   List list;
   std::vector<It> iters;
   iters.reserve(n);
-  for (auto num: nums) {
+  for (auto num : nums) {
     iters.push_back(list.insert(list.end(), num));
   }
   for (uint t = 0; t < TIMES; ++t) {
@@ -113,13 +112,14 @@ main() {
   uint mzi = 0;
   std::vector<int> mixed;
   mixed.reserve(n);
-  for (const auto& num: list) {
+  for (const auto &num : list) {
     if (num == 0) {
       mzi = mixed.size();
     }
     mixed.push_back(num);
   }
   int64 mres = mixed[mod(mzi + 1000, n)] * K + mixed[mod(mzi + 2000, n)] * K + mixed[mod(mzi + 3000, n)] * K;
-  std::cout << mixed[mod(mzi + 1000, n)] * K << " + " << mixed[mod(mzi + 2000, n)] * K  << " + " << mixed[mod(mzi + 3000, n)] << " = " << mres << "\n";
+  std::cout << mixed[mod(mzi + 1000, n)] * K << " + " << mixed[mod(mzi + 2000, n)] * K << " + "
+            << mixed[mod(mzi + 3000, n)] << " = " << mres << "\n";
   return 0;
 }

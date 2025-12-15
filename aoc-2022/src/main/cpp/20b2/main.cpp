@@ -41,25 +41,25 @@ static constexpr const int64 K = 811589153;
 static constexpr const uint TIMES = 10;
 
 #ifdef SLIST
-struct Node: boost::intrusive::slist_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>> {
+struct Node : boost::intrusive::slist_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>> {
   int value;
   Node(int value) : value(value) {}
 };
 using List = boost::intrusive::slist<Node, boost::intrusive::constant_time_size<false>>;
 #else
-struct Node: boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>> {
+struct Node : boost::intrusive::list_base_hook<boost::intrusive::link_mode<boost::intrusive::normal_link>> {
   int value;
   Node(int value) : value(value) {}
 };
 using List = boost::intrusive::list<Node, boost::intrusive::constant_time_size<false>>;
 #endif
 
-template<typename T> 
+template <typename T>
 static void
-print(const std::vector<T>& v) {
+print(const std::vector<T> &v) {
   bool first = true;
   std::cout << "{";
-  for (const auto& vv: v) {
+  for (const auto &vv : v) {
     if (first) {
       first = false;
     } else {
@@ -70,12 +70,12 @@ print(const std::vector<T>& v) {
   std::cout << "}\n";
 }
 
-template<typename T> 
+template <typename T>
 static void
 print(const std::vector<T> nums, const std::vector<uint> idxs) {
   bool first = true;
   std::cout << "{";
-  for (auto idx: idxs) {
+  for (auto idx : idxs) {
     if (first) {
       first = false;
     } else {
@@ -92,11 +92,11 @@ mod(int64 i, int64 m) {
 }
 
 static void
-rot(std::vector<Node>& nums, List& nodes, uint i) {
+rot(std::vector<Node> &nums, List &nodes, uint i) {
   uint n = nums.size();
   uint m = n - 1;
 
-  Node& num = nums[i];
+  Node &num = nums[i];
   int64 iv = mod(num.value * K, m);
   auto it = nodes.erase(nodes.iterator_to(num));
   while (iv-- > 0) {
@@ -107,7 +107,6 @@ rot(std::vector<Node>& nums, List& nodes, uint i) {
   }
   nodes.insert(it, num);
 }
-
 
 int
 main() {
@@ -129,13 +128,14 @@ main() {
   uint mzi = 0;
   std::vector<int> mixed;
   mixed.reserve(n);
-  for (const auto& n: nodes) {
+  for (const auto &n : nodes) {
     if (n.value == 0) {
       mzi = mixed.size();
     }
     mixed.push_back(n.value);
   }
   int64 mres = mixed[mod(mzi + 1000, n)] * K + mixed[mod(mzi + 2000, n)] * K + mixed[mod(mzi + 3000, n)] * K;
-  std::cout << mixed[mod(mzi + 1000, n)] * K << " + " << mixed[mod(mzi + 2000, n)] * K  << " + " << mixed[mod(mzi + 3000, n)] << " = " << mres << "\n";
+  std::cout << mixed[mod(mzi + 1000, n)] * K << " + " << mixed[mod(mzi + 2000, n)] * K << " + "
+            << mixed[mod(mzi + 3000, n)] << " = " << mres << "\n";
   return 0;
 }

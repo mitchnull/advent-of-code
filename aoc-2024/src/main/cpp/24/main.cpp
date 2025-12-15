@@ -20,19 +20,27 @@ using Nodes = std::vector<Node>;
 
 /* ------------------------------------------------------------------------ */
 
-static constexpr String x(int i) { return std::format("x{:02}", i); }
-static constexpr String y(int i) { return std::format("y{:02}", i); }
-static constexpr String z(int i) { return std::format("z{:02}", i); }
-
-static auto
-findNode(auto& nodes, String out) {
-  return std::find_if(nodes.begin(), nodes.end(), [out](auto& n) { return n.out == out; });
+static constexpr String
+x(int i) {
+  return std::format("x{:02}", i);
+}
+static constexpr String
+y(int i) {
+  return std::format("y{:02}", i);
+}
+static constexpr String
+z(int i) {
+  return std::format("z{:02}", i);
 }
 
 static auto
-findOut(const Outputs& outs, String node) {
-  return std::find_if(outs.begin(), outs.end(), [node](auto& o) {
-      return o.first == node; });
+findNode(auto &nodes, String out) {
+  return std::find_if(nodes.begin(), nodes.end(), [out](auto &n) { return n.out == out; });
+}
+
+static auto
+findOut(const Outputs &outs, String node) {
+  return std::find_if(outs.begin(), outs.end(), [node](auto &o) { return o.first == node; });
 }
 
 static bool
@@ -46,7 +54,7 @@ eval(bool left, bool right, char op) {
 }
 
 static bool
-eval(const Nodes& nodes, Outputs& outs, String node) {
+eval(const Nodes &nodes, Outputs &outs, String node) {
   if (auto it = findOut(outs, node); it != outs.end()) {
     return it->second;
   }
@@ -69,7 +77,7 @@ zmax(int currMax, String candidate) {
 }
 
 static Num
-solve1(const Nodes& nodes, Outputs outs, int maxz) {
+solve1(const Nodes &nodes, Outputs outs, int maxz) {
   Num res = 0;
   for (int i = 0; i <= maxz; ++i) {
     bool zv = eval(nodes, outs, z(i));
@@ -81,15 +89,14 @@ solve1(const Nodes& nodes, Outputs outs, int maxz) {
 /* ------------------------------------------------------------------------ */
 
 static auto
-findNode(auto& nodes, String left, String right, char op) {
-  return std::find_if(nodes.begin(), nodes.end(), [=](auto& n) {
-    return n.op == op &&
-      ((n.left == left && n.right == right) || 
-      ((n.left == right && n.right == left))); });
+findNode(auto &nodes, String left, String right, char op) {
+  return std::find_if(nodes.begin(), nodes.end(), [=](auto &n) {
+    return n.op == op && ((n.left == left && n.right == right) || ((n.left == right && n.right == left)));
+  });
 }
 
 static void
-swapOut(Node& a, Node& b, Strings& swaps) {
+swapOut(Node &a, Node &b, Strings &swaps) {
   swaps.push_back(a.out);
   swaps.push_back(b.out);
   std::swap(a.out, b.out);
@@ -98,9 +105,9 @@ swapOut(Node& a, Node& b, Strings& swaps) {
 static String
 solve2(Nodes nodes, int maxz) {
   Strings swaps;
-  Node& z00 = *findNode(nodes, x(0), y(0), 'X'); 
+  Node &z00 = *findNode(nodes, x(0), y(0), 'X');
   if (z00.out != z(0)) {
-    Node& wrongNode = *findNode(nodes, z(0));
+    Node &wrongNode = *findNode(nodes, z(0));
     swapOut(z00, wrongNode, swaps);
   }
   auto cc = findNode(nodes, x(0), y(0), 'A');

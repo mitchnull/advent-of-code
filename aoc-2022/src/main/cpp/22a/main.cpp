@@ -46,8 +46,7 @@ struct Pos {
   size_t row, col;
   Facing facing;
 
-  Pos&
-  turn(int dir) {
+  Pos &turn(int dir) {
     facing = static_cast<Facing>((facing + NumFacings + dir) % NumFacings);
     return *this;
   }
@@ -64,24 +63,19 @@ struct Step {
   uint steps = 0;
   size_t sp = 0;
 
-  bool
-  isLast() const {
-    return op == Move && steps == 0;
-  }
+  bool isLast() const { return op == Move && steps == 0; }
 };
 
 using It = std::string::const_iterator;
 
 Step
-readStep(const string& str, size_t pos) {
+readStep(const string &str, size_t pos) {
   if (pos >= str.size()) {
     return {Move, 0, pos};
   }
   switch (str[pos]) {
-    case 'L':
-      return {TurnLeft, 0, ++pos};
-    case 'R':
-      return {TurnRight, 0, ++pos};
+    case 'L': return {TurnLeft, 0, ++pos};
+    case 'R': return {TurnRight, 0, ++pos};
   }
   uint steps = 0;
   while (pos < str.size() && std::isdigit(str[pos])) {
@@ -91,29 +85,22 @@ readStep(const string& str, size_t pos) {
   return {Move, steps, pos};
 }
 
-static Facing 
+static Facing
 rev(Facing facing) {
   switch (facing) {
-    case Left:
-      return Right;
-    case Right:
-      return Left;
-    case Up:
-      return Down;
-    case Down:
-      return Up;
-    case NumFacings:
-      break;
+    case Left: return Right;
+    case Right: return Left;
+    case Up: return Down;
+    case Down: return Up;
+    case NumFacings: break;
   }
   return facing; // never reached
 }
 
 static void
-moveOne(const Board& board, Pos& pos, Facing direction) {
+moveOne(const Board &board, Pos &pos, Facing direction) {
   switch (direction) {
-    case Left:
-      do {
-        pos.col = pos.col == 0 ? board[pos.row].size() - 1 : pos.col - 1;
+    case Left: do { pos.col = pos.col == 0 ? board[pos.row].size() - 1 : pos.col - 1;
       } while (board[pos.row][pos.col] == ' ');
       break;
     case Right:
@@ -123,54 +110,44 @@ moveOne(const Board& board, Pos& pos, Facing direction) {
         }
       } while (board[pos.row][pos.col] == ' ');
       break;
-    case Up:
-      do {
-        pos.row = pos.row == 0 ? board.size() - 1 : pos.row - 1;
-      } while (board[pos.row].size() <= pos.col ||
-            board[pos.row][pos.col] == ' ');
+    case Up: do { pos.row = pos.row == 0 ? board.size() - 1 : pos.row - 1;
+      } while (board[pos.row].size() <= pos.col || board[pos.row][pos.col] == ' ');
       break;
     case Down:
       do {
         if (++pos.row >= board.size()) {
           pos.row = 0;
         }
-      } while (board[pos.row].size() <= pos.col ||
-            board[pos.row][pos.col] == ' ');
+      } while (board[pos.row].size() <= pos.col || board[pos.row][pos.col] == ' ');
       break;
-    case NumFacings:
-      break; // never reached
+    case NumFacings: break; // never reached
   }
 }
 
 static void
-moveOne(const Board& board, Pos& pos) {
+moveOne(const Board &board, Pos &pos) {
   moveOne(board, pos, pos.facing);
 }
 
 static void
-moveBackOne(const Board& board, Pos& pos) {
+moveBackOne(const Board &board, Pos &pos) {
   moveOne(board, pos, rev(pos.facing));
 }
 
 static char
 facingSign(Facing facing) {
   switch (facing) {
-    case Left:
-      return '<';
-    case Right:
-      return '>';
-    case Up:
-      return '^';
-    case Down:
-      return 'V';
-    case NumFacings:
-      break;
+    case Left: return '<';
+    case Right: return '>';
+    case Up: return '^';
+    case Down: return 'V';
+    case NumFacings: break;
   }
   return '?';
 }
 
 static void
-print(const Board& board, const Pos& pos) {
+print(const Board &board, const Pos &pos) {
   for (uint row = 0; row < board.size(); ++row) {
     if (pos.row == row) {
       string line = board[row];
@@ -184,7 +161,7 @@ print(const Board& board, const Pos& pos) {
 }
 
 static void
-move(const Board& board, Pos& pos, uint steps) {
+move(const Board &board, Pos &pos, uint steps) {
   while (steps-- > 0) {
     moveOne(board, pos);
     if (board[pos.row][pos.col] == '#') {

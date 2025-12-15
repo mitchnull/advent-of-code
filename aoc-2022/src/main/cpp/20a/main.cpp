@@ -30,12 +30,12 @@ using string = std::string;
 using namespace std::literals;
 using size_t = std::size_t;
 
-template<typename T> 
+template <typename T>
 static void
-print(const std::vector<T>& v) {
+print(const std::vector<T> &v) {
   bool first = true;
   std::cout << "{";
-  for (const auto& vv: v) {
+  for (const auto &vv : v) {
     if (first) {
       first = false;
     } else {
@@ -46,12 +46,12 @@ print(const std::vector<T>& v) {
   std::cout << "}\n";
 }
 
-template<typename T> 
+template <typename T>
 static void
 print(const std::vector<T> nums, const std::vector<uint> idxs) {
   bool first = true;
   std::cout << "{";
-  for (auto idx: idxs) {
+  for (auto idx : idxs) {
     if (first) {
       first = false;
     } else {
@@ -68,7 +68,7 @@ mod(int i, int m) {
 }
 
 static void
-rot(const std::vector<int>& nums, std::vector<uint>& idxs, uint i) {
+rot(const std::vector<int> &nums, std::vector<uint> &idxs, uint i) {
   uint n = nums.size();
   uint m = n - 1;
 
@@ -84,7 +84,6 @@ rot(const std::vector<int>& nums, std::vector<uint>& idxs, uint i) {
     std::rotate(it, it + 1, b + ni + 1);
   }
 }
-
 
 int
 main() {
@@ -105,6 +104,7 @@ main() {
   }
   uint mzi = std::find_if(idxs.begin(), idxs.end(), [&](auto i) { return nums[i] == 0; }) - idxs.cbegin();
   int mres = 0L + nums[idxs[mod(mzi + 1000, n)]] + nums[idxs[mod(mzi + 2000, n)]] + nums[idxs[mod(mzi + 3000, n)]];
-  std::cout << nums[idxs[mod(mzi + 1000, n)]] << " + " <<  nums[idxs[mod(mzi + 2000, n)]] << " + " << nums[idxs[mod(mzi + 3000, n)]] << " = " << mres << "\n";
+  std::cout << nums[idxs[mod(mzi + 1000, n)]] << " + " << nums[idxs[mod(mzi + 2000, n)]] << " + "
+            << nums[idxs[mod(mzi + 3000, n)]] << " = " << mres << "\n";
   return 0;
 }

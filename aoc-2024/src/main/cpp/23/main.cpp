@@ -16,13 +16,13 @@ using Neighbors = std::unordered_map<String, Strings>;
 /* ------------------------------------------------------------------------ */
 
 static Num
-solve1(const Neighbors& neighbors) {
+solve1(const Neighbors &neighbors) {
   Strings cliques;
-  for (auto& [a, ats] : neighbors) {
+  for (auto &[a, ats] : neighbors) {
     if (a.front() == 't') {
       for (auto b : ats) {
         for (auto c : neighbors.at(b)) {
-          auto& cts = neighbors.at(c);
+          auto &cts = neighbors.at(c);
           if (std::find(cts.begin(), cts.end(), a) != cts.end()) {
             std::array<String, 3> clique = {a, b, c};
             std::sort(clique.begin(), clique.end());
@@ -39,12 +39,12 @@ solve1(const Neighbors& neighbors) {
 /* ------------------------------------------------------------------------ */
 
 static Strings
-bronKerboschIsh(const Neighbors& neighbors, const Strings& r, const Strings& p, Strings maxClique) {
+bronKerboschIsh(const Neighbors &neighbors, const Strings &r, const Strings &p, Strings maxClique) {
   if (p.empty()) {
     return r.size() > maxClique.size() ? r : maxClique;
   }
   for (auto it = p.begin(), end = p.end(); it != end; ++it) {
-    const auto& n = neighbors.at(*it);
+    const auto &n = neighbors.at(*it);
     Strings rr;
     std::set_union(r.begin(), r.end(), it, it + 1, std::back_inserter(rr));
     Strings pp;
@@ -58,9 +58,12 @@ bronKerboschIsh(const Neighbors& neighbors, const Strings& r, const Strings& p, 
 }
 
 static String
-solve2(const Strings& vertices, const Neighbors& neighbors) {
+solve2(const Strings &vertices, const Neighbors &neighbors) {
   Strings maxClique = bronKerboschIsh(neighbors, {}, vertices, {});
-  return std::accumulate(std::next(maxClique.begin()), maxClique.end(), *maxClique.begin(), [](auto s, auto n) { s += ','; return s += n; });
+  return std::accumulate(std::next(maxClique.begin()), maxClique.end(), *maxClique.begin(), [](auto s, auto n) {
+    s += ',';
+    return s += n;
+  });
 }
 
 /* ------------------------------------------------------------------------ */
@@ -80,7 +83,7 @@ main() {
   }
   std::sort(vertices.begin(), vertices.end());
   vertices.erase(std::unique(vertices.begin(), vertices.end()), vertices.end());
-  for (auto& [f, ts] : neighbors) {
+  for (auto &[f, ts] : neighbors) {
     std::sort(ts.begin(), ts.end());
   }
 

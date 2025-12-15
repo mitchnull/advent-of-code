@@ -37,7 +37,7 @@ main() {
     std::string word;
     int n;
     V winning;
-    first >> word  >> word;
+    first >> word >> word;
     while (first >> n) {
       winning.push_back(n);
     }

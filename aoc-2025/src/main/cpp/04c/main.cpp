@@ -4,7 +4,7 @@
 using Board = Grid<>;
 
 static int
-rolls(const Board& board, int x, int y) {
+rolls(const Board &board, int x, int y) {
   int res{};
   for (int yy = y - 1; yy <= y + 1; ++yy) {
     for (int xx = x - 1; xx <= x + 1; ++xx) {
@@ -15,7 +15,7 @@ rolls(const Board& board, int x, int y) {
 }
 
 static int
-solve1(Board& board) {
+solve1(Board &board) {
   int res{};
   for (int y = 0; y < board.h(); ++y) {
     for (int x = 0; x < board.w(); ++x) {
@@ -25,7 +25,7 @@ solve1(Board& board) {
       }
     }
   }
-  std::for_each(board.begin(), board.end(), [](auto& c) { c = (c == '-' ? '.' : c); });
+  std::for_each(board.begin(), board.end(), [](auto &c) { c = (c == '-' ? '.' : c); });
   return res;
 }
 

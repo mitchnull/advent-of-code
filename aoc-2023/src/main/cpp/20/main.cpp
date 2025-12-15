@@ -36,11 +36,10 @@ struct Module {
   bool level;
   Num period;
 
-  void process(Pulse p, Queue& queue, Num pc) {
+  void process(Pulse p, Queue &queue, Num pc) {
     bool outLevel = p.level;
     switch (type) {
-      case Broadcaster:
-        break;
+      case Broadcaster: break;
       case FlipFlop:
         if (p.level) {
           return;
@@ -52,12 +51,14 @@ struct Module {
         inputs[p.src].first = p.level;
         if (p.level && !inputs[p.src].second) {
           inputs[p.src].second = pc;
-          period = std::reduce(inputs.begin(), inputs.end(), Num{1}, [](auto a, auto b) { return a * b.second.second; });
+          period =
+              std::reduce(inputs.begin(), inputs.end(), Num{1}, [](auto a, auto b) { return a * b.second.second; });
         }
-        outLevel = std::find_if(inputs.begin(), inputs.end(), [](auto& it) { return !it.second.first; }) != inputs.end();
+        outLevel =
+            std::find_if(inputs.begin(), inputs.end(), [](auto &it) { return !it.second.first; }) != inputs.end();
         break;
     }
-    for (auto& out : outputs) {
+    for (auto &out : outputs) {
       queue.emplace(name, out, outLevel);
     }
   }
@@ -66,16 +67,16 @@ struct Module {
 using Modules = std::unordered_map<string, Module>;
 
 static Counts
-pulse(Modules& modules, Num pc) {
+pulse(Modules &modules, Num pc) {
   std::array<Num, 2> counts = {};
   Queue queue;
-  queue.emplace("button" ,"broadcaster", false);
+  queue.emplace("button", "broadcaster", false);
   while (!queue.empty()) {
     Pulse p = queue.front();
     queue.pop();
     // std::cout << p.src << (p.level ? " -high-> " : " -low-> ") << p.dst << std::endl;
     ++counts[p.level];
-    auto& m = modules[p.dst];
+    auto &m = modules[p.dst];
     m.process(p, queue, pc);
   }
   return counts;
@@ -94,8 +95,8 @@ solve1(Modules modules) {
 
 static Num
 solve2(Modules modules) {
-  Module& rx = modules["rx"];
-  Module& rxi = modules[rx.inputs.begin()->first];
+  Module &rx = modules["rx"];
+  Module &rxi = modules[rx.inputs.begin()->first];
   for (int i = 1; rxi.period == 0; ++i) {
     pulse(modules, i);
   }
@@ -124,14 +125,14 @@ main() {
         type = Conjunction;
         break;
     }
-    Module& m = modules[name];
+    Module &m = modules[name];
     m.name = name;
     m.type = type;
     string out;
     ss >> out;
     while (ss >> out) {
       m.outputs.push_back(out);
-      Module& t = modules[out];
+      Module &t = modules[out];
       t.inputs[name] = {false, 0};
     }
   }

@@ -29,9 +29,7 @@ using SSet = std::unordered_set<Segments>;
 
 static Segments
 segments(const std::string &str) {
-  return std::accumulate(str.begin(), str.end(), S0, [](Segments s, char c) {
-      return s | (1 << (c - 'a'));
-  });
+  return std::accumulate(str.begin(), str.end(), S0, [](Segments s, char c) { return s | (1 << (c - 'a')); });
 }
 
 static Segments
@@ -60,7 +58,7 @@ decode(std::string line) {
   std::unordered_map<Segments, int> guessed;
   guessed[cfSegments] = 1;
   guessed[acfSegments] = 7;
-  guessed[bcdfSegments] =4;
+  guessed[bcdfSegments] = 4;
   guessed[allSegments] = 8;
   for (auto s : bySize[5]) {
     if (cfSegments && containsAll(s, cfSegments)) {
@@ -100,7 +98,7 @@ decode(std::string line) {
 int
 main() {
   int res = 0;
-  for (std::string line; std::getline(std::cin, line); ) {
+  for (std::string line; std::getline(std::cin, line);) {
     res += decode(line);
   }
   std::cout << res << "\n";

@@ -19,18 +19,16 @@ using Num = std::int64_t;
 namespace ranges = std::ranges;
 namespace views = ranges::views;
 
-
 struct Pos {
   int i, j;
-  friend auto operator<=>(const Pos& a, const Pos& b) = default;
+  friend auto operator<=>(const Pos &a, const Pos &b) = default;
 };
-
 
 using V = std::vector<Pos>;
 
 static void
-expand(V& v, int Pos::* proj) {
-  std::sort(v.begin(), v.end(), [&](auto& a, auto& b) { return a.*proj < b.*proj; });
+expand(V &v, int Pos::*proj) {
+  std::sort(v.begin(), v.end(), [&](auto &a, auto &b) { return a.*proj < b.*proj; });
   int k = 0;
   for (auto it = v.begin(), end = v.end(); it < end; ++it) {
     int offset = ((*it).*proj - k) - 1;
@@ -44,13 +42,13 @@ expand(V& v, int Pos::* proj) {
 }
 
 static Num
-d(const Pos& a, const Pos& b) {
+d(const Pos &a, const Pos &b) {
   return std::abs(a.i - b.i) + std::abs(a.j - b.j);
 }
 
 int
 main() {
-  int i =0;
+  int i = 0;
   int j = 0;
 
   V v;
@@ -61,9 +59,7 @@ main() {
         ++i;
         j = 0;
         continue;
-      case '#':
-        v.emplace_back(i, j);
-        break;
+      case '#': v.emplace_back(i, j); break;
     }
     ++j;
   }

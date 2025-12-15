@@ -11,3 +11,6 @@ cpp/10z3/main: LDFLAGS+=-lz3
 
 clean:
 	rm -rf build
+
+fmt:
+	clang-format -i src/main/cpp/*.h src/main/cpp/*/*.cpp

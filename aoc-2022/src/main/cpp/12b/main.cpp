@@ -30,18 +30,12 @@ struct Point {
   int x, y;
 
   constexpr Point() {}
-  constexpr Point(int x, int y): x(x), y(y) {}
-  constexpr Point(size_t x, size_t y): x(x), y(y) {}
+  constexpr Point(int x, int y) : x(x), y(y) {}
+  constexpr Point(size_t x, size_t y) : x(x), y(y) {}
 
-  friend Point
-  operator+(const Point& a, const Point& b) {
-    return {a.x + b.x, a.y + b.y};
-  }
+  friend Point operator+(const Point &a, const Point &b) { return {a.x + b.x, a.y + b.y}; }
 
-  friend bool
-  operator==(const Point& a, const Point& b) {
-    return a.x == b.x && a.y == b.y;
-  }
+  friend bool operator==(const Point &a, const Point &b) { return a.x == b.x && a.y == b.y; }
 };
 
 constexpr const uint MAX_H = std::numeric_limits<uint>::max();
@@ -50,9 +44,9 @@ struct Data {
   uint h = MAX_H;
   uint len = MAX_H;
   Point prev;
-  
+
   Data() {}
-  Data(char c): h(c) {}
+  Data(char c) : h(c) {}
 };
 
 using Row = std::vector<Data>;
@@ -61,12 +55,12 @@ using Queue = std::deque<Point>;
 
 const std::vector<Point> dirs = {{-1, 0}, {+1, 0}, {0, -1}, {0, +1}};
 
-static Data&
-get(Map& map, const Point& p) {
+static Data &
+get(Map &map, const Point &p) {
   static Data Invalid = Data{};
 
   if (0 <= p.x && p.x < map.size()) {
-    auto& row = map[p.x];
+    auto &row = map[p.x];
     if (0 <= p.y && p.y < row.size()) {
       return row[p.y];
     }
@@ -83,9 +77,10 @@ main() {
   while (std::cin >> line) {
     Row row;
     row.reserve(line.size());
-    for (auto c: line) {
+    for (auto c : line) {
       switch (c) {
-        case 'S': case 'a':
+        case 'S':
+        case 'a':
           queue.emplace_back(map.size(), row.size());
           c = 'a';
           row.emplace_back(c);
@@ -103,11 +98,11 @@ main() {
   while (!queue.empty()) {
     Point p = queue.front();
     queue.pop_front();
-    Data& data = map[p.x][p.y];
+    Data &data = map[p.x][p.y];
     uint len = data.len + 1;
-    for (const auto& d: dirs) {
+    for (const auto &d : dirs) {
       auto pp = p + d;
-      Data& next = get(map, pp);
+      Data &next = get(map, pp);
       if (next.h <= data.h + 1 && next.len > len) {
         next.len = len;
         next.prev = p;

@@ -4,10 +4,9 @@
 using Num = int64_t;
 using Nums = std::vector<Num>;
 
-
 static bool
 isDataLine(std::string_view line) {
-  for (auto c: line) {
+  for (auto c : line) {
     if (c == ' ') {
       continue;
     }
@@ -26,7 +25,7 @@ calc(char op, Num a, Num b) {
 }
 
 static Num
-solve1(const std::vector<Nums>& allNums, const std::vector<char>& ops) {
+solve1(const std::vector<Nums> &allNums, const std::vector<char> &ops) {
   Num res{};
   for (auto i = 0; i < ops.size(); ++i) {
     Num r = allNums.front()[i];
@@ -39,12 +38,12 @@ solve1(const std::vector<Nums>& allNums, const std::vector<char>& ops) {
 }
 
 static Num
-solve2(const std::vector<std::string>& dataLines, const std::vector<char>& ops) {
+solve2(const std::vector<std::string> &dataLines, const std::vector<char> &ops) {
   Num res{}, r{};
   auto it = ops.begin();
   for (int i = 0, e = dataLines.front().size(); i < e; ++i) {
     std::string data;
-    for (const auto& dataLine : dataLines) {
+    for (const auto &dataLine : dataLines) {
       data += dataLine[i];
     }
     if (isDataLine(data)) {
@@ -67,7 +66,7 @@ main() {
   std::vector<Nums> allNums;
   std::vector<char> ops;
   std::string line;
-  
+
   while (std::getline(std::cin, line)) {
     std::istringstream ss{line};
     if (isDataLine(line)) {

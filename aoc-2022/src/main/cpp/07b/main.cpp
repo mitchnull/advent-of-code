@@ -39,19 +39,13 @@ struct Node {
   string name;
   Type type;
   uint size;
-  Node* parent;
+  Node *parent;
   NodePtrMap children;
 
-  Node(string name, Type type, uint size, Node* parent, NodePtrMap children) :
-    name(std::move(name)),
-    type(type),
-    size(size),
-    parent(parent),
-    children(std::move(children)) {
-  }
+  Node(string name, Type type, uint size, Node *parent, NodePtrMap children)
+      : name(std::move(name)), type(type), size(size), parent(parent), children(std::move(children)) {}
 
-  Node*
-  add(NodePtr node) {
+  Node *add(NodePtr node) {
     if (node->size != 0) {
       for (auto p = this; p != nullptr; p = p->parent) {
         p->size += node->size;
@@ -62,20 +56,20 @@ struct Node {
 };
 
 static NodePtr
-makeFile(const string& name, Node* parent, uint size) {
+makeFile(const string &name, Node *parent, uint size) {
   return std::make_unique<Node>(name, Type::File, size, parent, NodePtrMap{});
 }
 
 static NodePtr
-makeDir(const string& name, Node* parent) {
+makeDir(const string &name, Node *parent) {
   return std::make_unique<Node>(name, Type::Dir, 0, parent, NodePtrMap{});
 }
 
 constexpr const std::string_view CMD_CD = "$ cd ";
 constexpr const uint LEN_CD = CMD_CD.size();
 
-static Node*
-parse(const string& line, Node& root, Node* cwd) {
+static Node *
+parse(const string &line, Node &root, Node *cwd) {
   if (line.starts_with(CMD_CD)) {
     string name = line.substr(LEN_CD);
     if (name == "/") {
@@ -94,7 +88,7 @@ parse(const string& line, Node& root, Node* cwd) {
   } else {
     auto p = line.find(' ');
     string size = line.substr(0, p);
-    auto name = line.substr(p+1);
+    auto name = line.substr(p + 1);
     if (cwd->children.contains(name)) {
       return cwd;
     }
@@ -108,20 +102,21 @@ parse(const string& line, Node& root, Node* cwd) {
 }
 
 static void
-print(const Node& node, std::string indent = "") {
-  std::cout << indent << node.name << ", type: " << (node.type == Type::Dir ? "dir" : "file") << ", size: " << node.size << "\n";
-  for (const auto& kv : node.children) {
+print(const Node &node, std::string indent = "") {
+  std::cout << indent << node.name << ", type: " << (node.type == Type::Dir ? "dir" : "file") << ", size: " << node.size
+            << "\n";
+  for (const auto &kv : node.children) {
     print(*kv.second, indent + "  ");
   }
 }
 
-static const Node*
-toDelete(uint needed, const Node& node, const Node* curr = nullptr) {
+static const Node *
+toDelete(uint needed, const Node &node, const Node *curr = nullptr) {
   if (node.size >= needed && (curr == nullptr || node.size < curr->size)) {
     curr = &node;
   }
-  for (const auto& kv : node.children) {
-    const Node& child = *kv.second;
+  for (const auto &kv : node.children) {
+    const Node &child = *kv.second;
     if (child.type == Type::Dir) {
       curr = toDelete(needed, child, curr);
     }
@@ -132,7 +127,7 @@ toDelete(uint needed, const Node& node, const Node* curr = nullptr) {
 int
 main() {
   Node root = Node{"/", Type::Dir, 0, nullptr, {}};
-  Node* cwd = &root;
+  Node *cwd = &root;
   string line;
   while (std::getline(std::cin, line)) {
     cwd = parse(line, root, cwd);

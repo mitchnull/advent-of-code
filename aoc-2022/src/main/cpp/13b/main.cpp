@@ -30,27 +30,16 @@ using size_t = std::size_t;
 struct Item;
 using List = std::vector<Item>;
 
-
 struct Item {
   std::variant<std::monostate, int, List> value;
 
-  int
-  n() const {
-    return std::get<int>(value);
-  }
+  int n() const { return std::get<int>(value); }
 
-  const List&
-  list() const {
-    return std::get<List>(value);
-  }
+  const List &list() const { return std::get<List>(value); }
 
-  bool
-  isList() const {
-    return std::holds_alternative<List>(value);
-  }
+  bool isList() const { return std::holds_alternative<List>(value); }
 
-  void
-  add(Item&& i) {
+  void add(Item &&i) {
     if (i.value.index() != 0) {
       std::get<List>(value).push_back(std::forward<Item>(i));
     }
@@ -58,11 +47,11 @@ struct Item {
 };
 
 static void
-print(const Item& i) {
+print(const Item &i) {
   if (i.isList()) {
     std::cout << "[";
     bool first = true;
-    for (const auto& v: i.list()) {
+    for (const auto &v : i.list()) {
       if (first) {
         first = false;
       } else {
@@ -77,16 +66,15 @@ print(const Item& i) {
 }
 
 static void
-println(const Item& i) {
+println(const Item &i) {
   print(i);
   std::cout << "\n";
 }
 
-static int
-cmp(const List& a, const List& b);
+static int cmp(const List &a, const List &b);
 
 static int
-cmp(const Item& a, const Item& b) {
+cmp(const Item &a, const Item &b) {
   if (a.isList()) {
     if (b.isList()) {
       return cmp(a.list(), b.list());
@@ -94,14 +82,14 @@ cmp(const Item& a, const Item& b) {
       return cmp(a.list(), List{{b.n()}});
     }
   } else if (b.isList()) {
-      return cmp(List{{a.n()}}, b.list());
+    return cmp(List{{a.n()}}, b.list());
   } else {
     return a.n() - b.n();
   }
 }
 
 static int
-cmp(const List& a, const List& b) {
+cmp(const List &a, const List &b) {
   for (uint i = 0; i < a.size() && i < b.size(); ++i) {
     int r = cmp(a[i], b[i]);
     if (r != 0) {
@@ -111,8 +99,8 @@ cmp(const List& a, const List& b) {
   return (a.size() - b.size());
 }
 
-static std::pair<Item, uint> 
-parse(const string& line, uint p = 0) {
+static std::pair<Item, uint>
+parse(const string &line, uint p = 0) {
   Item res;
   if (line[p] == '[') {
     // std::cerr << "found list: " << line.substr(p) << "\n";
@@ -144,10 +132,10 @@ main() {
     Item i = parse(line).first;
     list.push_back(std::move(i));
   }
-  std::sort(list.begin(), list.end(), [](const Item& a, const Item& b) { return cmp(a, b) < 0; });
+  std::sort(list.begin(), list.end(), [](const Item &a, const Item &b) { return cmp(a, b) < 0; });
   int d1i = 0, d2i = 0;
   int j = 0;
-  for (const auto& i: list) {
+  for (const auto &i : list) {
     ++j;
     if (cmp(i, d1) == 0) {
       d1i = j;

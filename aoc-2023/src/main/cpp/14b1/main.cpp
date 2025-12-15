@@ -27,7 +27,7 @@ struct Dir {
 };
 
 static void
-tiltN(Board& board) {
+tiltN(Board &board) {
   int height = board.size();
   int width = board.front().size();
   for (int i = 1; i < height; ++i) {
@@ -44,7 +44,7 @@ tiltN(Board& board) {
 }
 
 static void
-tiltS(Board& board) {
+tiltS(Board &board) {
   int height = board.size();
   int width = board.front().size();
   for (int i = height - 2; i >= 0; --i) {
@@ -61,7 +61,7 @@ tiltS(Board& board) {
 }
 
 static void
-tiltW(Board& board) {
+tiltW(Board &board) {
   int height = board.size();
   int width = board.front().size();
   for (int j = 1; j < width; ++j) {
@@ -78,7 +78,7 @@ tiltW(Board& board) {
 }
 
 static void
-tiltE(Board& board) {
+tiltE(Board &board) {
   int height = board.size();
   int width = board.front().size();
   for (int j = width - 2; j >= 0; --j) {
@@ -95,7 +95,7 @@ tiltE(Board& board) {
 }
 
 static Num
-calcLoad(const Board& board) {
+calcLoad(const Board &board) {
   int height = board.size();
   int width = board.front().size();
   Num sum = 0;
@@ -110,7 +110,7 @@ calcLoad(const Board& board) {
 }
 
 static void
-cycle(Board& board) {
+cycle(Board &board) {
   tiltN(board);
   tiltW(board);
   tiltS(board);
@@ -126,7 +126,7 @@ main() {
   }
 
   std::vector<Board> boards;
-  
+
   const int cycles = 1000000000;
   for (int i = 0; i < cycles; ++i) {
     auto it = std::find(boards.begin(), boards.end(), board);

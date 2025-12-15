@@ -26,21 +26,21 @@ using Board = std::vector<std::string>;
 
 struct Span {
   int i, j, k;
-  friend auto operator<=>(const Span&, const Span&) = default;
+  friend auto operator<=>(const Span &, const Span &) = default;
 };
 
 using Spans = std::set<Span>;
 
 static int
-parseNum(const char* first, const char* last, int base = 10) {
+parseNum(const char *first, const char *last, int base = 10) {
   int res = 0;
   std::from_chars(first, last, res, base);
   return res;
 }
 
 static Span
-findNum(const Board& board, int i, int j) {
-  const auto& line = board[i];
+findNum(const Board &board, int i, int j) {
+  const auto &line = board[i];
   int w = line.size();
   int b = j;
   while (b >= 0 && std::isdigit(line[b])) {
@@ -54,11 +54,11 @@ findNum(const Board& board, int i, int j) {
 }
 
 static Spans
-adjacentNumbers(const Board& board, int i, int j) {
+adjacentNumbers(const Board &board, int i, int j) {
   Spans spans;
   int h = board.size();
   int w = board[i].size();
-  for (int ii = std::max(0, i -1); ii < std::min(i + 2, h); ++ii) {
+  for (int ii = std::max(0, i - 1); ii < std::min(i + 2, h); ++ii) {
     for (int jj = std::max(0, j - 1); jj < std::min(j + 2, w); ++jj) {
       if (std::isdigit(board[ii][jj])) {
         spans.insert(findNum(board, ii, jj));
@@ -84,8 +84,8 @@ main() {
         Spans spans = adjacentNumbers(board, i, j);
         if (spans.size() == 2) {
           int ratio = 1;
-          for (const auto& span: spans) {
-            const auto& line = board[span.i];
+          for (const auto &span : spans) {
+            const auto &line = board[span.i];
             ratio *= parseNum(line.data() + span.j, line.data() + span.k);
           }
           sum += ratio;

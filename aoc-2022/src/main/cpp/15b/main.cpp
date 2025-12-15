@@ -39,15 +39,9 @@ struct Point {
 struct Segment {
   int a, b;
 
-  friend bool
-  operator<(const Segment& a, const Segment& b) {
-    return a.a < b.a || (a.a == b.a && a.b < b.b);
-  }
+  friend bool operator<(const Segment &a, const Segment &b) { return a.a < b.a || (a.a == b.a && a.b < b.b); }
 
-  friend bool
-  operator==(const Segment& a, const Segment& b) {
-    return a.a == b.a && a.b == b.b;
-  }
+  friend bool operator==(const Segment &a, const Segment &b) { return a.a == b.a && a.b == b.b; }
 };
 
 struct Stripe {
@@ -65,17 +59,17 @@ struct Line {
 };
 
 static Point
-rot(const Point& p) {
+rot(const Point &p) {
   return {p.x + p.y, -p.x + p.y};
 }
 
 static Point
-tor(const Point& p) {
+tor(const Point &p) {
   return {(p.x - p.y) / 2, (p.x + p.y) / 2};
 }
 
 static auto
-d(auto a, auto b) { 
+d(auto a, auto b) {
   return std::abs(a - b);
 };
 
@@ -85,7 +79,7 @@ r(int sx, int sy, int bx, int by) {
 }
 
 static void
-addStripe(std::vector<Stripe>& stripes, Segment v, Segment s) {
+addStripe(std::vector<Stripe> &stripes, Segment v, Segment s) {
   auto it = stripes.begin();
   while (it != stripes.end() && it->v.b < v.a) {
     ++it;
@@ -123,7 +117,8 @@ main() {
   char c;
   std::vector<Stripe> stripes;
   // Sensor at x=98246, y=1908027: closest beacon is at x=1076513, y=2000000
-  while (std::cin >> s >> s >> c >> c >> sx >> c >> c >> c >> sy >> c >> s >> s >> s >> s >> c >> c >> bx >> c >> c >> c >> by) {
+  while (std::cin >> s >> s >> c >> c >> sx >> c >> c >> c >> sy >> c >> s >> s >> s >> s >> c >> c >> bx >> c >> c >>
+      c >> by) {
     int dy = r(sx, sy, bx, by);
     Point p = rot({sx, sy - dy});
     Point q = rot({sx, sy + dy});
@@ -132,23 +127,26 @@ main() {
     addStripe(stripes, v, s);
   }
 
-  for (auto& s: stripes) {
+  for (auto &s : stripes) {
     std::sort(s.segments.begin(), s.segments.end());
     // std::cout << "orig:\n";
     // for (const auto& s: s.segments) {
     //   std::cout << "[" << s.a << ", " << s.b << "]\n";
     // }
-    s.segments.erase(std::remove_if(s.segments.begin() + 1, s.segments.end(), [prev = s.segments.begin()](const Segment& s) mutable {
-          if (s.a <= prev->b) {
-            prev->b = std::max(s.b, prev->b);
-            return true;
-          }
-          ++prev;
-          return false;
-        }), s.segments.end());
+    s.segments.erase(std::remove_if(s.segments.begin() + 1,
+                         s.segments.end(),
+                         [prev = s.segments.begin()](const Segment &s) mutable {
+      if (s.a <= prev->b) {
+        prev->b = std::max(s.b, prev->b);
+        return true;
+      }
+      ++prev;
+      return false;
+    }),
+        s.segments.end());
     if (debug) {
       std::cout << "[" << s.v.a << ", " << s.v.b << "]: ";
-      for (const auto& ss: s.segments) {
+      for (const auto &ss : s.segments) {
         std::cout << "[" << ss.a << ", " << ss.b << "] ";
       }
       std::cout << "\n";

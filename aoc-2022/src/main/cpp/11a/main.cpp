@@ -37,13 +37,10 @@ struct Monkey {
   int monkeyIfFalse;
   int inspectCount = 0;
 
-  void 
-  print() const {
-    std::cout
-      << "id=" << id
-      << ", items={";
+  void print() const {
+    std::cout << "id=" << id << ", items={";
     bool first = true;
-    for (auto i: items) {
+    for (auto i : items) {
       if (first) {
         first = false;
       } else {
@@ -52,18 +49,14 @@ struct Monkey {
       std::cout << i;
     }
     std::cout << "}"
-      << ", op=" << op
-      << ", opParam=";
+              << ", op=" << op << ", opParam=";
     if (opParam.has_value()) {
       std::cout << *opParam;
     } else {
       std::cout << "old";
     }
-    std::cout << ", mod=" << mod
-      << ", mt=" << monkeyIfTrue
-      << ", mf=" << monkeyIfFalse
-      << ", ic=" << inspectCount
-      << "\n";
+    std::cout << ", mod=" << mod << ", mt=" << monkeyIfTrue << ", mf=" << monkeyIfFalse << ", ic=" << inspectCount
+              << "\n";
   }
 };
 
@@ -109,17 +102,13 @@ readMonkey() {
 }
 
 static void
-doRound(Monkeys& monkeys) {
-  for (auto& m: monkeys) {
-    for (auto i: m.items) {
+doRound(Monkeys &monkeys) {
+  for (auto &m : monkeys) {
+    for (auto i : m.items) {
       ++m.inspectCount;
       switch (m.op) {
-        case '+':
-          i += m.opParam.value_or(i);
-          break;
-        case '*':
-          i *= m.opParam.value_or(i);
-          break;
+        case '+': i += m.opParam.value_or(i); break;
+        case '*': i *= m.opParam.value_or(i); break;
       }
       i /= 3;
       monkeys[(i % m.mod) ? m.monkeyIfFalse : m.monkeyIfTrue].items.push_back(i);
@@ -131,14 +120,15 @@ doRound(Monkeys& monkeys) {
 int
 main() {
   Monkeys monkeys;
-  for (Monkey monkey; (monkey = readMonkey()).id != -1; ) {
+  for (Monkey monkey; (monkey = readMonkey()).id != -1;) {
     monkeys.push_back(monkey);
   }
   for (uint i = 0; i < N; ++i) {
     doRound(monkeys);
   }
-  std::sort(monkeys.begin(), monkeys.end(), [](const auto& a, const auto& b) { return a.inspectCount > b.inspectCount; });
-  for (const auto& m : monkeys) {
+  std::sort(
+      monkeys.begin(), monkeys.end(), [](const auto &a, const auto &b) { return a.inspectCount > b.inspectCount; });
+  for (const auto &m : monkeys) {
     m.print();
   }
   std::cout << monkeys[0].inspectCount * monkeys[1].inspectCount << "\n";

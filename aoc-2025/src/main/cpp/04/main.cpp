@@ -3,7 +3,7 @@
 using Board = Grid<>;
 
 static int
-rolls(const Board& board, int x, int y) {
+rolls(const Board &board, int x, int y) {
   int res{};
   for (int yy = y - 1; yy <= y + 1; ++yy) {
     for (int xx = x - 1; xx <= x + 1; ++xx) {
@@ -14,7 +14,7 @@ rolls(const Board& board, int x, int y) {
 }
 
 static std::pair<int, Board>
-solve1(const Board& board) {
+solve1(const Board &board) {
   int res{};
   Board nb{board};
   for (int y = 0; y < board.h(); ++y) {

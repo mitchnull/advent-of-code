@@ -22,12 +22,12 @@ using uint = uint32;
 static uint
 v(char c) {
   switch (c) {
-    case 'A': case 'X':
-      return 1;
-    case 'B': case 'Y':
-      return 2;
-    case 'C': case 'Z':
-      return 3;
+    case 'A':
+    case 'X': return 1;
+    case 'B':
+    case 'Y': return 2;
+    case 'C':
+    case 'Z': return 3;
   }
   return 0;
 }
@@ -38,7 +38,6 @@ score(char a, char x) {
   auto vx = v(x);
   return vx + ((vx - va + 4) % 3) * 3;
 }
-
 
 int
 main() {

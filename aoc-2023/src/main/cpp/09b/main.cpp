@@ -24,7 +24,7 @@ static Num
 prev(It b, It e) {
   auto first = *b;
   std::adjacent_difference(b, e, b);
-  if (std::find_if(b + 1, e, [](const auto& v) { return v != 0; }) == e) {
+  if (std::find_if(b + 1, e, [](const auto &v) { return v != 0; }) == e) {
     return first;
   }
   return first - prev(b + 1, e);

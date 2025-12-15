@@ -12,7 +12,7 @@ struct Tile {
   Num area;
 };
 
-using Board= Grid<Tile>;
+using Board = Grid<Tile>;
 using string = std::string;
 using Line = std::pair<Pos, Pos>;
 using Lines = std::vector<Line>;
@@ -27,16 +27,20 @@ using Entries = std::vector<Entry>;
 static Dir
 toDir(char c) {
   switch (c) {
-    case 'U': case '3': return {0, -1};
-    case 'D': case '1': return {0, 1};
-    case 'L': case '2': return {-1, 0};
-    case 'R': case '0': return {1, 0};
+    case 'U':
+    case '3': return {0, -1};
+    case 'D':
+    case '1': return {0, 1};
+    case 'L':
+    case '2': return {-1, 0};
+    case 'R':
+    case '0': return {1, 0};
   }
   return {};
 }
 
 static void
-fill(Board& board, Pos pos) {
+fill(Board &board, Pos pos) {
   if (board[pos].c != '.') {
     return;
   }
@@ -47,13 +51,17 @@ fill(Board& board, Pos pos) {
 }
 
 static char
-tileChar(const Lines& hLines, const Lines& vLines, int x, int y) {
-  for (auto it = std::lower_bound(hLines.begin(), hLines.end(), x, [](auto a, auto b) { return a.first.x < b; }); it < hLines.end() && it->first.x == x; ++it) {
+tileChar(const Lines &hLines, const Lines &vLines, int x, int y) {
+  for (auto it = std::lower_bound(hLines.begin(), hLines.end(), x, [](auto a, auto b) { return a.first.x < b; });
+      it < hLines.end() && it->first.x == x;
+      ++it) {
     if (it->first.y <= y && y <= it->second.y) {
       return '#';
     }
   }
-  for (auto it = std::lower_bound(vLines.begin(), vLines.end(), y, [](auto a, auto b) { return a.first.y < b; }); it->first.y == y; ++it) {
+  for (auto it = std::lower_bound(vLines.begin(), vLines.end(), y, [](auto a, auto b) { return a.first.y < b; });
+      it->first.y == y;
+      ++it) {
     if (it->first.x <= x && x <= it->second.x) {
       return '#';
     }
@@ -62,13 +70,13 @@ tileChar(const Lines& hLines, const Lines& vLines, int x, int y) {
 }
 
 static Board
-convertToBoard(const Entries& entries) {
+convertToBoard(const Entries &entries) {
   Lines vLines, hLines;
   std::vector<Num> xs, ys;
   Pos p{};
   xs.push_back(p.x);
   ys.push_back(p.y);
-  for (auto& e : entries) {
+  for (auto &e : entries) {
     Pos pp = p + (e.dir * e.steps);
     xs.push_back(pp.x);
     ys.push_back(pp.y);
@@ -86,9 +94,9 @@ convertToBoard(const Entries& entries) {
   ys.erase(std::unique(ys.begin(), ys.end()), ys.end());
   xs.push_back(xs.back() + 2);
   ys.push_back(ys.back() + 2);
-  
+
   std::sort(hLines.begin(), hLines.end());
-  std::sort(vLines.begin(), vLines.end(), [](auto& a, auto& b) { return a.first.y < b.first.y; });
+  std::sort(vLines.begin(), vLines.end(), [](auto &a, auto &b) { return a.first.y < b.first.y; });
 
   Board board(xs.size() * 2, ys.size() * 2);
   Num py = ys.front() - 2;
@@ -97,9 +105,9 @@ convertToBoard(const Entries& entries) {
     Num px = xs.front() - 2;
     for (int xi = 0; xi < xs.size(); ++xi) {
       auto x = xs[xi];
-      board[xi * 2,     yi * 2] = {tileChar(hLines, vLines, px + 1, py + 1), (x - (px + 1)) * (y - (py + 1))};
+      board[xi * 2, yi * 2] = {tileChar(hLines, vLines, px + 1, py + 1), (x - (px + 1)) * (y - (py + 1))};
       board[xi * 2 + 1, yi * 2] = {tileChar(hLines, vLines, x, py + 1), 1 * (y - (py + 1))};
-      board[xi * 2,     yi * 2 + 1] = {tileChar(hLines, vLines, px + 1, y), (x - (px + 1)) * 1};
+      board[xi * 2, yi * 2 + 1] = {tileChar(hLines, vLines, px + 1, y), (x - (px + 1)) * 1};
       board[xi * 2 + 1, yi * 2 + 1] = {tileChar(hLines, vLines, x, y), 1 * 1};
       px = x;
     }
@@ -109,7 +117,7 @@ convertToBoard(const Entries& entries) {
 }
 
 static Num
-solve(const Entries& entries) {
+solve(const Entries &entries) {
   auto board = convertToBoard(entries);
   fill(board, {0, 0});
   return std::reduce(board.begin(), board.end(), Num{}, [](Num a, auto t) { return t.c != ' ' ? a + t.area : a; });

@@ -18,7 +18,7 @@ using Num = int;
 // ------------------------------------------------------------------------ //
 
 static std::pair<Num, Num>
-solve(PlaceMap& map) {
+solve(PlaceMap &map) {
   for (auto [x, y, p] : map.iter()) {
     if (p.h == 0) {
       p.origins.emplace(x, y);
@@ -28,10 +28,10 @@ solve(PlaceMap& map) {
   for (int h = 0; h < 9; ++h) {
     for (auto [x, y, p] : map.iter()) {
       if (p.h == h) {
-        for (auto d: DIRS) {
+        for (auto d : DIRS) {
           auto xx = x + d.dx;
           auto yy = y + d.dy;
-          auto& pp = map[xx, yy];
+          auto &pp = map[xx, yy];
           if (pp.h == h + 1) {
             pp.origins.insert(p.origins.begin(), p.origins.end());
             pp.ways += p.ways;

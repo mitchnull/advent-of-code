@@ -25,7 +25,7 @@ using Window = std::vector<char>;
 constexpr const uint N = 4;
 
 static bool
-isUniq(const Window& w) {
+isUniq(const Window &w) {
   std::bitset<128> set{1};
   for (char c : w) {
     if (set.test(c)) {

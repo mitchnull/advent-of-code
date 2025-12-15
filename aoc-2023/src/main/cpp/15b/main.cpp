@@ -39,15 +39,15 @@ main() {
         continue;
       }
       case '-': {
-        Bucket& b = map[hash];
-        b.erase(std::remove_if(b.begin(), b.end(), [&](auto& n) { return n.key == key; }), b.end());
+        Bucket &b = map[hash];
+        b.erase(std::remove_if(b.begin(), b.end(), [&](auto &n) { return n.key == key; }), b.end());
         continue;
       }
       case '=': {
         std::cin >> ch;
         int value = ch - '0';
-        Bucket& b = map[hash];
-        auto it = std::find_if(b.begin(), b.end(), [&](auto& n) { return n.key == key; });
+        Bucket &b = map[hash];
+        auto it = std::find_if(b.begin(), b.end(), [&](auto &n) { return n.key == key; });
         if (it != b.end()) {
           it->value = value;
         } else {
@@ -62,9 +62,10 @@ main() {
   }
   Num sum = 0;
   for (uint i = 0, ie = map.size(); i < ie; ++i) {
-    const Bucket& b = map[i];
+    const Bucket &b = map[i];
     for (uint j = 0, je = b.size(); j < je; ++j) {
-      // std::cout << "### " << b[j].key << ": " << (i + 1) << " * " << j + 1 << " * " << b[j].value << " = " << (i + 1) * (j + 1) * b[j].value << "\n";
+      // std::cout << "### " << b[j].key << ": " << (i + 1) << " * " << j + 1 << " * " << b[j].value << " = " << (i + 1)
+      // * (j + 1) * b[j].value << "\n";
       sum += (i + 1) * (j + 1) * b[j].value;
     }
   }

@@ -51,7 +51,7 @@ main() {
     if (s.i < 0 || s.j < 0 || s.i >= h || s.j >= w) {
       continue;
     }
-    auto& p = v[s.i][s.j];
+    auto &p = v[s.i][s.j];
     if (p & s.dir) {
       continue;
     }
@@ -77,7 +77,8 @@ main() {
         switch (s.dir) {
           case North: steps.emplace_back(s.i - 1, s.j, North); break;
           case South: steps.emplace_back(s.i + 1, s.j, South); break;
-          case East: case West:
+          case East:
+          case West:
             steps.emplace_back(s.i - 1, s.j, North);
             steps.emplace_back(s.i + 1, s.j, South);
             break;
@@ -85,7 +86,8 @@ main() {
         break;
       case '-':
         switch (s.dir) {
-          case North: case South:
+          case North:
+          case South:
             steps.emplace_back(s.i, s.j + 1, East);
             steps.emplace_back(s.i, s.j - 1, West);
             break;

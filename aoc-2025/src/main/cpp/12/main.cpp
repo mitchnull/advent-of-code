@@ -10,7 +10,7 @@ struct Task {
 };
 
 static std::pair<int, int>
-solve1(const Task& t, const std::vector<int>& blockFills, int ext) {
+solve1(const Task &t, const std::vector<int> &blockFills, int ext) {
   const int N = t.items.size();
   int numItems = std::reduce(t.items.begin(), t.items.end(), 0, std::plus<>{});
   int easyPlaces = (t.w / ext) * (t.h / ext);
@@ -28,7 +28,6 @@ solve1(const Task& t, const std::vector<int>& blockFills, int ext) {
 }
 
 /* ------------------------------------------------------------------------ */
-
 
 int
 main() {
@@ -61,9 +60,9 @@ main() {
       tasks.emplace_back(w, h, items);
     }
   }
-  auto res1 = std::transform_reduce(tasks.begin(), tasks.end(), std::make_pair(0, 0),
-      [](auto a, auto b) { return a + b; },
-      [&](const auto& t) { return solve1(t, blockFills, ext); });
+  auto res1 = std::transform_reduce(tasks.begin(), tasks.end(), std::make_pair(0, 0), [](auto a, auto b) {
+    return a + b;
+  }, [&](const auto &t) { return solve1(t, blockFills, ext); });
   println("1: {}", res1);
 
   return 0;

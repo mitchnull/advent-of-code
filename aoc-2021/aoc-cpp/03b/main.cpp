@@ -34,12 +34,8 @@ getValue(V v, uint p, Commonity comm) {
   }
   char sel;
   switch (comm) {
-    case MostCommon:
-      sel = '0' + (ones >= zeros);
-      break;
-    case LeastCommon:
-      sel = '0' + (ones < zeros);
-      break;
+    case MostCommon: sel = '0' + (ones >= zeros); break;
+    case LeastCommon: sel = '0' + (ones < zeros); break;
   }
   V vv;
   for (const auto &s : v) {
@@ -61,7 +57,7 @@ int
 main() {
   V v;
   std::string s;
-  
+
   while ((std::cin >> s)) {
     v.push_back(s);
   }

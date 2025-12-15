@@ -15,7 +15,7 @@ solve1(std::string_view line) {
   }
 
   Num res = 0;
-  for (auto b = 0UZ, e = disk.size() - 1; b < e; ) {
+  for (auto b = 0UZ, e = disk.size() - 1; b < e;) {
     if (disk[b] >= 0) {
       res += disk[b] * b;
       ++b;
@@ -58,8 +58,8 @@ solve2(std::string_view line) {
 
   auto pos = 0UZ;
   Num res = 0;
-  for (auto b: blocks) {
-    Num id = (b.id > 0) ?  b.id : 0;
+  for (auto b : blocks) {
+    Num id = (b.id > 0) ? b.id : 0;
     res += id * (b.len * (2 * pos + b.len - 1) / 2);
     pos += b.len;
   }
@@ -98,9 +98,8 @@ solve2b(std::string_view line) {
   auto firsts = std::vector<decltype(frees.begin())>(10, frees.begin());
   Num res = 0;
   for (auto it = files.rbegin(), rend = files.rend(); it != rend; ++it) {
-    auto pos = std::find_if(firsts[it->len], frees.end(), [it](auto fb) {
-        return fb.pos >= it->pos || fb.len >= it->len;
-      });
+    auto pos =
+        std::find_if(firsts[it->len], frees.end(), [it](auto fb) { return fb.pos >= it->pos || fb.len >= it->len; });
     firsts[it->len] = pos;
     if (pos != frees.end() && pos->pos < it->pos) {
       res += it->id * (it->len * (2 * pos->pos + it->len - 1) / 2);

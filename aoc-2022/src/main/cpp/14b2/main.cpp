@@ -45,14 +45,14 @@ static const Row ALL_SET = Row().flip();
 using Map = std::vector<Row>;
 
 static void
-ensureRow(Map& map, uint row) {
+ensureRow(Map &map, uint row) {
   if (map.size() <= row) {
     map.resize(row + 1, ALL_SET);
   }
 }
 
 static void
-addLine(Map& map, const Line& line) {
+addLine(Map &map, const Line &line) {
   ensureRow(map, std::max(line.a.y, line.b.y));
   if (line.a.y == line.b.y) {
     uint sx = std::min(line.a.x, line.b.x);
@@ -69,9 +69,8 @@ addLine(Map& map, const Line& line) {
   }
 }
 
-
 static void
-parse(const string& line, Map& map) {
+parse(const string &line, Map &map) {
   uint x, y, lx, ly;
   string str;
   char c;

@@ -19,11 +19,10 @@ dir(char c) {
 }
 
 static Pos
-move(Board& board, Pos p, Dir d) {
+move(Board &board, Pos p, Dir d) {
   auto pp = p + d;
   switch (board[pp]) {
-    case '#':
-      return p;
+    case '#': return p;
     case 'O':
       if (move(board, pp, d) == pp) {
         return p;
@@ -34,13 +33,16 @@ move(Board& board, Pos p, Dir d) {
 }
 
 static int
-solve1(const std::vector<std::string>& lines, std::vector<char>& moves) {
+solve1(const std::vector<std::string> &lines, std::vector<char> &moves) {
   Board board = Board(lines);
-  Pos p = (board.iter() | views::filter([](auto i) { return i.v == '@'; }) | views::transform([](auto i) { return Pos{i.x, i.y}; })).front();
+  Pos p = (board.iter() | views::filter([](auto i) { return i.v == '@'; }) | views::transform([](auto i) {
+    return Pos{i.x, i.y};
+  })).front();
   for (char c : moves) {
     p = move(board, p, dir(c));
   }
-  auto gpsScores = board.iter() | views::filter([](auto i) { return i.v == 'O'; }) | views::transform([](auto i) { return i.y * 100 + i.x; });
+  auto gpsScores = board.iter() | views::filter([](auto i) { return i.v == 'O'; }) |
+      views::transform([](auto i) { return i.y * 100 + i.x; });
   return std::reduce(gpsScores.begin(), gpsScores.end(), 0);
 }
 
@@ -75,7 +77,7 @@ otherSide(char c, Pos p) {
 }
 
 static Pos
-move2(Board& board, Pos p, Dir d) {
+move2(Board &board, Pos p, Dir d) {
   auto po = d.dy == 0 ? p : otherSide(board[p], p);
   auto pn = p + d;
   auto pon = po + d;
@@ -99,21 +101,24 @@ move2(Board& board, Pos p, Dir d) {
 }
 
 static int
-solve2(const std::vector<std::string>& lines, std::vector<char>& moves) {
+solve2(const std::vector<std::string> &lines, std::vector<char> &moves) {
   Board board = Board(lines.front().size() * 2, lines.size());
   for (int y = 0; y < lines.size(); ++y) {
-    const auto& line = lines[y];
+    const auto &line = lines[y];
     for (int x = 0; x < line.size(); ++x) {
       board[2 * x, y] = left(line[x]);
       board[2 * x + 1, y] = right(line[x]);
     }
   }
 
-  Pos p = (board.iter() | views::filter([](auto i) { return i.v == '@'; }) | views::transform([](auto i) { return Pos{i.x, i.y}; })).front();
+  Pos p = (board.iter() | views::filter([](auto i) { return i.v == '@'; }) | views::transform([](auto i) {
+    return Pos{i.x, i.y};
+  })).front();
   for (char c : moves) {
     p = move2(board, p, dir(c));
   }
-  auto gpsScores = board.iter() | views::filter([](auto i) { return i.v == '['; }) | views::transform([](auto i) { return i.y * 100 + i.x; });
+  auto gpsScores = board.iter() | views::filter([](auto i) { return i.v == '['; }) |
+      views::transform([](auto i) { return i.y * 100 + i.x; });
   return std::reduce(gpsScores.begin(), gpsScores.end(), 0);
 }
 

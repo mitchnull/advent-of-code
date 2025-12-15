@@ -28,18 +28,16 @@ struct Coords {
 };
 
 static bool
-operator==(const Coords& a, const Coords& b) {
+operator==(const Coords &a, const Coords &b) {
   return a.x == b.x && a.y == b.y;
 }
 
 namespace std {
-  template<>
-  struct hash<Coords> {
-    std::size_t operator()(const Coords &c) const {
-      return std::hash<int>{}(c.x) ^ (std::hash<int>{}(c.y) << 1);
-    }
-  };
-}
+template <>
+struct hash<Coords> {
+  std::size_t operator()(const Coords &c) const { return std::hash<int>{}(c.x) ^ (std::hash<int>{}(c.y) << 1); }
+};
+} // namespace std
 
 static int
 d(int a, int b) {
@@ -52,7 +50,7 @@ sgn(int x) {
 }
 
 static void
-move(Coords& head, char dir) {
+move(Coords &head, char dir) {
   switch (dir) {
     case 'L': --head.x; return;
     case 'R': ++head.x; return;
@@ -62,7 +60,7 @@ move(Coords& head, char dir) {
 }
 
 static void
-follow(const Coords& head, Coords& tail) {
+follow(const Coords &head, Coords &tail) {
   if (d(head.x, tail.x) <= 1 && d(head.y, tail.y) <= 1) {
     return;
   }
@@ -78,7 +76,6 @@ main() {
   char dir;
   int count;
   Rope rope(10, Coords{});
-  
 
   CoordsSet visited;
   while (std::cin >> dir >> count) {

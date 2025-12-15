@@ -1,6 +1,6 @@
 CXX=clang++
 VPATH=../src/main
-#CXXFLAGS?=-Og -g -D_GLIBCXX_DEBUG
+#CXXFLAGS?=-Og -g -D_GLIBCXX_DEBUG -D_LIBCPP_DEBUG=1
 #CXXFLAGS?=-Og -g -fsanitize=address
 CXXFLAGS?=-O3
 
@@ -9,3 +9,6 @@ LDFLAGS+=-L/opt/homebrew/lib
 
 clean:
 	rm -rf build
+
+fmt:
+	clang-format -i src/main/cpp/*.h src/main/cpp/*/*.cpp

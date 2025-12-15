@@ -17,20 +17,24 @@ using Entries = std::vector<Entry>;
 static Dir
 toDir(char c) {
   switch (c) {
-    case 'U': case '3': return {0, -1};
-    case 'D': case '1': return {0, 1};
-    case 'L': case '2': return {-1, 0};
-    case 'R': case '0': return {1, 0};
+    case 'U':
+    case '3': return {0, -1};
+    case 'D':
+    case '1': return {0, 1};
+    case 'L':
+    case '2': return {-1, 0};
+    case 'R':
+    case '0': return {1, 0};
   }
   return {};
 }
 
 static Num
-shoelace(const Entries& entries) {
+shoelace(const Entries &entries) {
   Num x = 0, y = 0;
   Num area = 0;
   Num len = 0;
-  for (auto e: entries) {
+  for (auto e : entries) {
     Num xx = x + (e.dir.dx * e.steps);
     Num yy = y + (e.dir.dy * e.steps);
     area += x * yy - xx * y;

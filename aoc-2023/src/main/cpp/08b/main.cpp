@@ -41,7 +41,7 @@ struct Pos {
   Num count;
   std::string node;
 
-  friend auto operator<=>(const Pos&, const Pos&) = default;
+  friend auto operator<=>(const Pos &, const Pos &) = default;
 };
 
 static char
@@ -53,8 +53,8 @@ ignore(char c) {
 }
 
 static bool
-areWeThereYet(const std::vector<std::string>& nodes) {
-  for (const auto& node: nodes) {
+areWeThereYet(const std::vector<std::string> &nodes) {
+  for (const auto &node : nodes) {
     if (node.back() != 'Z') {
       return false;
     }
@@ -63,18 +63,21 @@ areWeThereYet(const std::vector<std::string>& nodes) {
 }
 
 static Z
-findZ(const std::string& steps, Nodes& nodes, const std::string& node) {
+findZ(const std::string &steps, Nodes &nodes, const std::string &node) {
   std::vector<Pos> visited;
   Pos curr = {0, node};
   while (true) {
     char step = steps[curr.count++ % steps.size()];
     curr.node = nodes[curr.node][step];
     if (curr.node.back() == 'Z') {
-      auto it = std::find_if(visited.begin(), visited.end(), [&](const auto& v) { return v.node == curr.node && (curr.count - v.count) % steps.size() == 0; });
+      auto it = std::find_if(visited.begin(), visited.end(), [&](const auto &v) {
+        return v.node == curr.node && (curr.count - v.count) % steps.size() == 0;
+      });
       if (it != visited.end()) {
         Num mod = curr.count - it->count;
         std::vector<Num> offsets;
-        std::transform(visited.begin(), visited.end(), std::back_inserter(offsets), [](const auto &v) { return v.count; });
+        std::transform(
+            visited.begin(), visited.end(), std::back_inserter(offsets), [](const auto &v) { return v.count; });
         return {mod, offsets};
       }
       visited.push_back(curr);
@@ -97,14 +100,14 @@ main() {
   }
 
   std::vector<std::string> currNodes;
-  for (const auto& node: nodes) {
+  for (const auto &node : nodes) {
     if (node.first.back() == 'A') {
       currNodes.push_back(node.first);
     }
   }
 
   Num lcm = 1;
-  for (const auto& node: currNodes) {
+  for (const auto &node : currNodes) {
     Z z = findZ(steps, nodes, node);
     if (z.offsets.size() == 1 && z.offsets.front() == z.mod) {
       lcm = std::lcm(lcm, z.mod);
@@ -121,9 +124,8 @@ main() {
   int count = 0;
   while (!areWeThereYet(currNodes)) {
     char step = steps[count++ % steps.size()];
-    std::transform(currNodes.begin(), currNodes.end(), currNodes.begin(), [&](const auto& node) {
-      return nodes[node][step];
-    });
+    std::transform(
+        currNodes.begin(), currNodes.end(), currNodes.begin(), [&](const auto &node) { return nodes[node][step]; });
   }
   std::cout << count << "\n";
   return 0;

@@ -14,7 +14,7 @@ struct Robot {
   Pos p;
   Dir v;
 
-  inline auto friend operator<=>(const Robot& a, const Robot& b) = default;
+  inline auto friend operator<=>(const Robot &a, const Robot &b) = default;
 };
 
 using Robots = std::vector<Robot>;
@@ -33,7 +33,7 @@ parse(std::string line) {
 /* ------------------------------------------------------------------------ */
 
 static int
-quad(const Pos& p, int w, int h) {
+quad(const Pos &p, int w, int h) {
   if (p.x < w / 2) {
     if (p.y < h / 2) {
       return 0;
@@ -53,7 +53,7 @@ quad(const Pos& p, int w, int h) {
 /* ------------------------------------------------------------------------ */
 
 static void
-render(const Map& map, int w, int h, int i) {
+render(const Map &map, int w, int h, int i) {
   std::cout << i << ":\n";
   for (int y = 0; y < h; y += 2) {
     for (int x = 0; x < w; ++x) {
@@ -74,18 +74,18 @@ render(const Map& map, int w, int h, int i) {
 }
 
 static Map
-render(const Robots& robots, int w, int h) {
+render(const Robots &robots, int w, int h) {
   auto map = Map(h);
-  for (const auto& r : robots) {
+  for (const auto &r : robots) {
     map[r.p.y][r.p.x] = true;
   }
   return map;
 }
 
 static bool
-isTree(const Map& map, int w, int h) {
+isTree(const Map &map, int w, int h) {
   constexpr const int len = 22;
-  for (auto row: map) {
+  for (auto row : map) {
     Row mask((1UL << (len + 1)) - 1);
     for (int i = 0; i < w - len; ++i, mask <<= 1) {
       if ((row & mask) == mask) {
@@ -97,10 +97,10 @@ isTree(const Map& map, int w, int h) {
 }
 
 static int
-findTree(Robots& robots, int w, int h) {
+findTree(Robots &robots, int w, int h) {
   Map map, startMap = render(robots, w, h);
   for (int res = 1; map != startMap; ++res) {
-    for (auto& r : robots) {
+    for (auto &r : robots) {
       r.p = {(r.p.x + r.v.dx + w) % w, (r.p.y + r.v.dy + h) % h};
     }
     map = render(robots, w, h);

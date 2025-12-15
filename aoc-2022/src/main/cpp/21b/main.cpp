@@ -31,7 +31,6 @@ using string = std::string;
 using namespace std::literals;
 using size_t = std::size_t;
 
-
 using Num = int64;
 
 struct Op {
@@ -45,7 +44,7 @@ using Node = std::variant<OptNum, Op>;
 using Map = std::unordered_map<string, Node>;
 
 static std::pair<string, Node>
-parse(const std::string& line) {
+parse(const std::string &line) {
   std::stringstream ss{line};
   string name, left, right;
   char op;
@@ -58,7 +57,7 @@ parse(const std::string& line) {
   ss.clear();
   ss.str(line);
   ss >> name >> left >> op >> right;
-  std::cout << "parsed2: " << name.substr(0, name.size() - 1) << ": " << left << op  << right << "\n";
+  std::cout << "parsed2: " << name.substr(0, name.size() - 1) << ": " << left << op << right << "\n";
   return {name.substr(0, name.size() - 1), Op{op, left, right}};
 }
 
@@ -75,12 +74,12 @@ eval(char op, Num left, Num right) {
 }
 
 static OptNum
-eval(Map& map, const string& name) {
-  const Node& node = map[name];
+eval(Map &map, const string &name) {
+  const Node &node = map[name];
   if (std::holds_alternative<OptNum>(node)) {
     return std::get<OptNum>(node);
   }
-  const Op& op = std::get<Op>(node);
+  const Op &op = std::get<Op>(node);
   OptNum left = eval(map, op.left);
   OptNum right = eval(map, op.right);
   if (left && right) {
@@ -92,7 +91,7 @@ eval(Map& map, const string& name) {
 }
 
 static string
-dbg(const string& name, const OptNum& value) {
+dbg(const string &name, const OptNum &value) {
   if (value.has_value()) {
     return std::to_string(*value);
   } else {
@@ -101,16 +100,18 @@ dbg(const string& name, const OptNum& value) {
 }
 
 static Num
-makeItSo(Map& map, const string& name, const Num& value) {
-  const Node& node = map[name];
+makeItSo(Map &map, const string &name, const Num &value) {
+  const Node &node = map[name];
   if (std::holds_alternative<OptNum>(node)) {
-    std::cout << "makeItSo(" << name << ", " << value << "): it is so: " << std::get<OptNum>(node).value_or(value) << "\n";
+    std::cout << "makeItSo(" << name << ", " << value << "): it is so: " << std::get<OptNum>(node).value_or(value)
+              << "\n";
     return std::get<OptNum>(node).value_or(value);
   }
-  const Op& op = std::get<Op>(node);
+  const Op &op = std::get<Op>(node);
   OptNum left = eval(map, op.left);
   OptNum right = eval(map, op.right);
-  std::cout << "makeItSo(" << name << ", " << value << "): " << dbg(op.left, left) << op.op << dbg(op.right, right) << "\n";
+  std::cout << "makeItSo(" << name << ", " << value << "): " << dbg(op.left, left) << op.op << dbg(op.right, right)
+            << "\n";
   if (!left.has_value()) {
     switch (op.op) {
       case '+': return makeItSo(map, op.left, value - *right);
@@ -132,8 +133,8 @@ makeItSo(Map& map, const string& name, const Num& value) {
   return value;
 }
 
-constexpr const char* ROOT = "root";
-constexpr const char* ME = "humn";
+constexpr const char *ROOT = "root";
+constexpr const char *ME = "humn";
 
 int
 main() {
@@ -144,7 +145,7 @@ main() {
     auto nn = parse(line);
     map[nn.first] = nn.second;
   }
-  Node& root = map[ROOT];
+  Node &root = map[ROOT];
   std::get<Op>(root).op = '=';
 
   map[ME] = OptNum{};

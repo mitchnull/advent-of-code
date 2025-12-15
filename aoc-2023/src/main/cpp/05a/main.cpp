@@ -28,24 +28,17 @@ using Num = int64;
 struct Range {
   Num b, e;
 
-  bool
-  contains(Num i) {
-    return b <= i && i < e;
-  }
+  bool contains(Num i) { return b <= i && i < e; }
 
-  friend auto operator<=>(const Range&, const Range&) = default;
-  friend bool operator<(const Range& range, Num i) {
-    return range.e <= i;
-  }
-  friend bool operator<(Num i, const Range& range) {
-    return i < range.b;
-  }
+  friend auto operator<=>(const Range &, const Range &) = default;
+  friend bool operator<(const Range &range, Num i) { return range.e <= i; }
+  friend bool operator<(Num i, const Range &range) { return i < range.b; }
 };
 
 using Ranges = std::map<Range, Range, std::less<>>;
 
 static Num
-map(const Ranges& ranges, Num i) {
+map(const Ranges &ranges, Num i) {
   auto it = ranges.find(i);
   if (it == ranges.end()) {
     return i;
@@ -54,8 +47,8 @@ map(const Ranges& ranges, Num i) {
 }
 
 static Num
-map(const std::vector<Ranges>& ranges, Num i) {
-  for (const auto& r: ranges) {
+map(const std::vector<Ranges> &ranges, Num i) {
+  for (const auto &r : ranges) {
     i = map(r, i);
   }
   return i;
@@ -91,7 +84,7 @@ main() {
     maps.push_back(ranges);
     ranges.clear();
   }
-  
+
   std::transform(seeds.begin(), seeds.end(), seeds.begin(), [&](Num i) { return map(maps, i); });
   Num min = *std::min_element(seeds.begin(), seeds.end());
   std::cout << min << "\n";

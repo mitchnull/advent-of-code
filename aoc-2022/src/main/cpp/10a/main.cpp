@@ -35,7 +35,7 @@ struct State {
 };
 
 static void
-updateState(State& state, uint cycle) {
+updateState(State &state, uint cycle) {
   while (state.cycleEnd < cycle) {
     state.x = state.nx;
     state.cycleStart = state.cycleEnd + 1;
@@ -54,7 +54,7 @@ updateState(State& state, uint cycle) {
 }
 
 static int
-signalStrength(State& state, uint cycle) {
+signalStrength(State &state, uint cycle) {
   updateState(state, cycle);
   return cycle * state.x;
 }

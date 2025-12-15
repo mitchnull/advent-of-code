@@ -23,7 +23,7 @@ namespace views = ranges::views;
 using Board = std::vector<std::string>;
 
 static void
-tilt(Board& board) {
+tilt(Board &board) {
   int height = board.size();
   int width = board.front().size();
   for (int i = 1; i < height; ++i) {
@@ -42,7 +42,7 @@ tilt(Board& board) {
 }
 
 static Num
-calcLoad(const Board& board) {
+calcLoad(const Board &board) {
   int height = board.size();
   int width = board.front().size();
   Num sum = 0;

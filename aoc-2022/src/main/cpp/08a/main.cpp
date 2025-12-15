@@ -31,12 +31,10 @@ struct Tree {
 using Forest = std::vector<std::vector<Tree>>;
 
 static uint
-countVisible(Forest& forest, int i, int j, int di, int dj) {
+countVisible(Forest &forest, int i, int j, int di, int dj) {
   uint res = 0;
-  for (int mh = -1;
-      0 <= i && i < forest.size() && 0 <= j && j < forest[i].size();
-      i+= di, j += dj) {
-    Tree& tree = forest[i][j];
+  for (int mh = -1; 0 <= i && i < forest.size() && 0 <= j && j < forest[i].size(); i += di, j += dj) {
+    Tree &tree = forest[i][j];
     if (tree.h > mh) {
       mh = tree.h;
       if (!tree.visible) {
@@ -49,10 +47,10 @@ countVisible(Forest& forest, int i, int j, int di, int dj) {
 }
 
 static void
-print(const Forest& forest) {
+print(const Forest &forest) {
   for (uint i = 0; i < forest.size(); ++i) {
     for (uint j = 0; j < forest[i].size(); ++j) {
-      const Tree& tree = forest[i][j];
+      const Tree &tree = forest[i][j];
       if (tree.visible) {
         std::cout << "\033[1m" << tree.h << "\033[0m";
       } else {
@@ -69,7 +67,8 @@ main() {
   Forest forest;
   while (std::cin >> line) {
     forest.push_back({});
-    std::transform(line.begin(), line.end(), std::back_inserter(forest.back()), [](auto c) { return Tree{c - '0', false}; });
+    std::transform(
+        line.begin(), line.end(), std::back_inserter(forest.back()), [](auto c) { return Tree{c - '0', false}; });
   }
   uint res = 0;
   for (uint i = 0; i < forest.size(); ++i) {

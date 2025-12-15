@@ -36,10 +36,7 @@ struct Point {
 struct Segment {
   int a, b;
 
-  friend bool
-  operator<(const Segment& a, const Segment& b) {
-    return a.a < b.a || (a.a == b.a && a.b < b.b);
-  }
+  friend bool operator<(const Segment &a, const Segment &b) { return a.a < b.a || (a.a == b.a && a.b < b.b); }
 };
 
 struct Sensor {
@@ -52,7 +49,7 @@ struct Line {
 };
 
 static auto
-d(auto a, auto b) { 
+d(auto a, auto b) {
   return std::abs(a - b);
 };
 
@@ -62,7 +59,7 @@ r(int sx, int sy, int bx, int by) {
 }
 
 static std::optional<Segment>
-isect(const Sensor& sensor, int ty) {
+isect(const Sensor &sensor, int ty) {
   uint dy = d(sensor.p.y, ty);
   if (dy > sensor.r) {
     return {};
@@ -81,7 +78,8 @@ main() {
   // Sensor at x=98246, y=1908027: closest beacon is at x=1076513, y=2000000
   std::vector<Sensor> sensors;
   std::vector<Point> beacons;
-  while (std::cin >> s >> s >> c >> c >> sx >> c >> c >> c >> sy >> c >> s >> s >> s >> s >> c >> c >> bx >> c >> c >> c >> by) {
+  while (std::cin >> s >> s >> c >> c >> sx >> c >> c >> c >> sy >> c >> s >> s >> s >> s >> c >> c >> bx >> c >> c >>
+      c >> by) {
     maxY = std::max(maxY, sx);
     sensors.emplace_back(Sensor{{sx, sy}, r(sx, sy, bx, by)});
     beacons.emplace_back(Point{bx, by});
@@ -90,38 +88,41 @@ main() {
 
   int ty = maxY < 2000000 ? 10 : 2000000;
   std::set<int> beaconsAtTy;
-  for (const auto& b: beacons) {
+  for (const auto &b : beacons) {
     if (b.y == ty) {
       beaconsAtTy.insert(b.x);
     }
   }
   std::vector<Segment> segments;
-  
-  for (const auto& s: sensors) {
+
+  for (const auto &s : sensors) {
     auto segment = isect(s, ty);
     if (segment.has_value()) {
       segments.push_back(*segment);
     }
   }
   std::sort(segments.begin(), segments.end());
-  for (const auto& s: segments) {
+  for (const auto &s : segments) {
     std::cout << "[" << s.a << ", " << s.b << "]\n";
   }
-  segments.erase(std::remove_if(segments.begin() + 1, segments.end(), [prev = segments.begin()](const Segment& s) mutable {
-        if (s.a <= prev->b) {
-          prev->b = std::max(s.b, prev->b);
-          return true;
-        }
-        ++prev;
-        return false;
-      }), segments.end());
+  segments.erase(std::remove_if(segments.begin() + 1,
+                     segments.end(),
+                     [prev = segments.begin()](const Segment &s) mutable {
+    if (s.a <= prev->b) {
+      prev->b = std::max(s.b, prev->b);
+      return true;
+    }
+    ++prev;
+    return false;
+  }),
+      segments.end());
   std::cout << "merged: \n";
-  for (const auto& s: segments) {
+  for (const auto &s : segments) {
     std::cout << "[" << s.a << ", " << s.b << "]\n";
   }
   uint res = std::accumulate(segments.begin(), segments.end(), 0U, [&](auto len, auto s) {
-      return len + s.b - s.a + 1 - 
+    return len + s.b - s.a + 1 -
         std::count_if(beaconsAtTy.begin(), beaconsAtTy.end(), [&](int bx) { return s.a <= bx && bx <= s.b; });
-    });
+  });
   std::cout << res << "\n";
 }

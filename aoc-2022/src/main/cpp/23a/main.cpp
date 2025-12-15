@@ -40,11 +40,9 @@ constexpr const uint TURNS = 10;
 struct Pos {
   Num x, y;
 
-  friend auto
-  operator<=>(const Pos& a, const Pos& b) = default;
+  friend auto operator<=>(const Pos &a, const Pos &b) = default;
 
-  friend Pos
-  operator+(Pos a, const Pos& b) {
+  friend Pos operator+(Pos a, const Pos &b) {
     a.x += b.x;
     a.y += b.y;
     return a;
@@ -58,39 +56,33 @@ struct ProposedPos : Pos {
 static constexpr const Pos Zero{};
 
 const std::array<Pos, 4> Dirs = {
-  Pos{0, -1},
-  Pos{0, 1},
-  Pos{-1, 0},
-  Pos{1, 0},
+    Pos{0, -1},
+    Pos{0, 1},
+    Pos{-1, 0},
+    Pos{1, 0},
 };
 
 namespace std {
-  template<>
-  struct hash<Pos> {
-    std::size_t operator()(const Pos &p) const {
-      return static_cast<size_t>(p.x) << 32 | p.y;
-    }
-  };
-}
+template <>
+struct hash<Pos> {
+  std::size_t operator()(const Pos &p) const { return static_cast<size_t>(p.x) << 32 | p.y; }
+};
+} // namespace std
 
 using Map = std::unordered_map<Pos, ProposedPos>;
 
 static Pos
-offset(Pos pos, const Pos& dir, int offset) {
-  return dir.x == 0
-    ? Pos{pos.x + offset, pos.y + dir.y}
-    : Pos{pos.x + dir.x, pos.y + offset};
+offset(Pos pos, const Pos &dir, int offset) {
+  return dir.x == 0 ? Pos{pos.x + offset, pos.y + dir.y} : Pos{pos.x + dir.x, pos.y + offset};
 }
 
 static bool
-isEmpty(const Map& map, const Pos& pos, const Pos& dir) {
-  return !map.contains(pos + dir)
-    && !map.contains(offset(pos, dir, -1))
-    && !map.contains(offset(pos, dir, +1));
+isEmpty(const Map &map, const Pos &pos, const Pos &dir) {
+  return !map.contains(pos + dir) && !map.contains(offset(pos, dir, -1)) && !map.contains(offset(pos, dir, +1));
 }
 
 static Pos
-propose(const Map& map, const Pos& pos, uint turn) {
+propose(const Map &map, const Pos &pos, uint turn) {
   bool isAllEmpty = true;
   Pos dir{};
   for (int i = 3; i >= 0; --i) {
@@ -105,12 +97,12 @@ propose(const Map& map, const Pos& pos, uint turn) {
 }
 
 static Map
-moveElves(const Map& map, uint turn) {
+moveElves(const Map &map, uint turn) {
   Map res;
-  for (const auto& [pos, ig]: map) {
+  for (const auto &[pos, ig] : map) {
     Pos next = propose(map, pos, turn);
     if (res.contains(next)) {
-      ProposedPos& other = res[next];
+      ProposedPos &other = res[next];
       if (!other.cancelled) {
         other.cancelled = true;
         res[other] = {};
@@ -120,16 +112,16 @@ moveElves(const Map& map, uint turn) {
       res[next] = {pos, false};
     }
   }
-  for (auto it = res.cbegin(), end = res.cend(); it != end; ) {
+  for (auto it = res.cbegin(), end = res.cend(); it != end;) {
     it = it->second.cancelled ? res.erase(it) : ++it;
   }
   return res;
 }
 
 static std::pair<Pos, Pos>
-bounds(const Map& map) {
+bounds(const Map &map) {
   Pos tl{Max, Max}, br{Min, Min};
-  for (const auto& [pos, ig]: map) {
+  for (const auto &[pos, ig] : map) {
     tl.x = std::min(tl.x, pos.x);
     tl.y = std::min(tl.y, pos.y);
     br.x = std::max(br.x, pos.x);
@@ -139,7 +131,7 @@ bounds(const Map& map) {
 }
 
 static void
-print(const Map& map) {
+print(const Map &map) {
   auto [tl, br] = bounds(map);
   for (Num y = tl.y; y <= br.y; ++y) {
     for (Num x = tl.x; x <= br.x; ++x) {
@@ -166,7 +158,8 @@ main() {
   print(map);
   for (uint turn = 0; turn < TURNS; ++turn) {
     map = moveElves(map, turn);
-    std::cout << (turn + 1) << ":\n"; print(map);
+    std::cout << (turn + 1) << ":\n";
+    print(map);
   }
   auto [tl, br] = bounds(map);
   uint all = (br.x - tl.x + 1) * (br.y - tl.y + 1);

@@ -55,18 +55,17 @@ struct Hand {
   std::string hand;
   Num bid;
 
-  friend auto operator<=>(const Hand&, const Hand&) = default;
+  friend auto operator<=>(const Hand &, const Hand &) = default;
 };
 
 static HandType
-type(const std::string& hand) {
+type(const std::string &hand) {
   std::map<char, int> counts;
   for (char c : hand) {
     ++counts[c];
   }
   switch (counts.size()) {
-    case 1:
-      return FiveOfAKind;
+    case 1: return FiveOfAKind;
     case 2: {
       int count = *ranges::max_element(views::values(counts));
       if (count == 4) {
@@ -83,10 +82,8 @@ type(const std::string& hand) {
         return TwoPairs;
       }
     }
-    case 4:
-      return OnePair;
-    default:
-      return HighCard;
+    case 4: return OnePair;
+    default: return HighCard;
   }
 }
 
@@ -103,7 +100,7 @@ main() {
   std::sort(hands.begin(), hands.end());
   Num res = 0;
   int rank = 0;
-  for (const auto& hand: hands) {
+  for (const auto &hand : hands) {
     res += ++rank * hand.bid;
   }
   std::cout << res << "\n";

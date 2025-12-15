@@ -33,7 +33,7 @@ struct Step {
 };
 
 static Num
-energize(const Board& board, int i, int j, Dir dir) {
+energize(const Board &board, int i, int j, Dir dir) {
   int h = board.size();
   int w = board.front().size();
   Visited v(h, std::vector<uint>(w));
@@ -45,7 +45,7 @@ energize(const Board& board, int i, int j, Dir dir) {
     if (s.i < 0 || s.j < 0 || s.i >= h || s.j >= w) {
       continue;
     }
-    auto& p = v[s.i][s.j];
+    auto &p = v[s.i][s.j];
     if (p & s.dir) {
       continue;
     }
@@ -71,7 +71,8 @@ energize(const Board& board, int i, int j, Dir dir) {
         switch (s.dir) {
           case North: steps.emplace_back(s.i - 1, s.j, North); break;
           case South: steps.emplace_back(s.i + 1, s.j, South); break;
-          case East: case West:
+          case East:
+          case West:
             steps.emplace_back(s.i - 1, s.j, North);
             steps.emplace_back(s.i + 1, s.j, South);
             break;
@@ -79,7 +80,8 @@ energize(const Board& board, int i, int j, Dir dir) {
         break;
       case '-':
         switch (s.dir) {
-          case North: case South:
+          case North:
+          case South:
             steps.emplace_back(s.i, s.j + 1, East);
             steps.emplace_back(s.i, s.j - 1, West);
             break;

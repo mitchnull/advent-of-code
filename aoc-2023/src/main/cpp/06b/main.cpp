@@ -26,7 +26,7 @@ using uint = uint32;
 using Num = int64;
 
 static Num
-readNum(std::istream& in) {
+readNum(std::istream &in) {
   std::string line;
   in >> line;
   std::getline(in, line);

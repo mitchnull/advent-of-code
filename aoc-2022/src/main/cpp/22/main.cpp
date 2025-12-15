@@ -9,10 +9,10 @@
 using Board = Grid<>;
 
 static constexpr const auto DIRSL = std::array<Dir, 4>{
-  Dir{1, 0},
-  Dir{0, 1},
-  Dir{-1, 0},
-  Dir{0, -1},
+    Dir{1, 0},
+    Dir{0, 1},
+    Dir{-1, 0},
+    Dir{0, -1},
 };
 
 using CubeConf = std::string;
@@ -28,14 +28,14 @@ struct PosDir {
   Pos pos;
   Dir dir;
 
-  friend auto operator<=>(const PosDir&, const PosDir&) = default;
+  friend auto operator<=>(const PosDir &, const PosDir &) = default;
 };
 
 struct CubeVertex {
   Pos pos;
   char name;
 
-  friend auto operator<=>(const CubeVertex& a, const CubeVertex& b) { return a.name <=> b.name; }
+  friend auto operator<=>(const CubeVertex &a, const CubeVertex &b) { return a.name <=> b.name; }
 };
 
 struct CubeEdge {
@@ -44,9 +44,7 @@ struct CubeEdge {
 
   std::string id() { return {a.name, b.name}; };
 
-  static CubeEdge ordered(CubeVertex a, CubeVertex b, Dir dir) {
-    return CubeEdge{std::min(a, b), std::max(a, b), dir};
-  }
+  static CubeEdge ordered(CubeVertex a, CubeVertex b, Dir dir) { return CubeEdge{std::min(a, b), std::max(a, b), dir}; }
 };
 
 /* ------------------------------------------------------------------------ */
@@ -62,7 +60,7 @@ turnRight(Dir d) {
 }
 
 static PosDir
-warpAroundBoard(const Board& board, PosDir pd) {
+warpAroundBoard(const Board &board, PosDir pd) {
   pd.pos.x = (pd.pos.x + board.w()) % board.w();
   pd.pos.y = (pd.pos.y + board.h()) % board.h();
   while (board[pd.pos] == ' ') {
@@ -79,19 +77,21 @@ hvLen(Dir d) {
 }
 
 static PosDir
-warpAtLines(const std::vector<WarpLine>& warpLines, PosDir pd) {
-  for (auto& wl : warpLines) {
-    if (pd.dir == wl.srcDir &&
-        std::min(wl.srcBegin.x, wl.srcEnd.x) <= pd.pos.x && pd.pos.x <= std::max(wl.srcBegin.x, wl.srcEnd.x) &&
-        std::min(wl.srcBegin.y, wl.srcEnd.y) <= pd.pos.y && pd.pos.y <= std::max(wl.srcBegin.y, wl.srcEnd.y)) {
-      return {wl.dstBegin + ((wl.dstEnd - wl.dstBegin) / (hvLen(wl.dstEnd - wl.dstBegin))) * hvLen(pd.pos - wl.srcBegin), wl.dstDir};
+warpAtLines(const std::vector<WarpLine> &warpLines, PosDir pd) {
+  for (auto &wl : warpLines) {
+    if (pd.dir == wl.srcDir && std::min(wl.srcBegin.x, wl.srcEnd.x) <= pd.pos.x &&
+        pd.pos.x <= std::max(wl.srcBegin.x, wl.srcEnd.x) && std::min(wl.srcBegin.y, wl.srcEnd.y) <= pd.pos.y &&
+        pd.pos.y <= std::max(wl.srcBegin.y, wl.srcEnd.y)) {
+      return {
+          wl.dstBegin + ((wl.dstEnd - wl.dstBegin) / (hvLen(wl.dstEnd - wl.dstBegin))) * hvLen(pd.pos - wl.srcBegin),
+          wl.dstDir};
     }
   }
   return pd;
 }
 
 static PosDir
-move(const Board& board, PosDir pd, int numMoves, auto warp) {
+move(const Board &board, PosDir pd, int numMoves, auto warp) {
   while (numMoves-- > 0) {
     auto npd = warp({pd.pos + pd.dir, pd.dir});
     if (board[npd.pos] != '.') {
@@ -103,8 +103,8 @@ move(const Board& board, PosDir pd, int numMoves, auto warp) {
 }
 
 static Pos
-findStart(const Board& board, auto pred) {
-  for (auto [x, y, v]: board.iter()) {
+findStart(const Board &board, auto pred) {
+  for (auto [x, y, v] : board.iter()) {
     if (pred(v)) {
       return {x, y};
     }
@@ -113,7 +113,7 @@ findStart(const Board& board, auto pred) {
 }
 
 static void
-addWarpLine(std::vector<WarpLine>& warpLines, CubeEdge src, CubeEdge dst) {
+addWarpLine(std::vector<WarpLine> &warpLines, CubeEdge src, CubeEdge dst) {
   auto srcBegin = src.a.pos + src.dir;
   auto srcEnd = src.b.pos + src.dir;
   if (srcBegin != dst.a.pos || srcEnd != dst.b.pos || src.dir != -dst.dir) {
@@ -122,19 +122,25 @@ addWarpLine(std::vector<WarpLine>& warpLines, CubeEdge src, CubeEdge dst) {
 }
 
 static void
-findWarpLines(std::vector<WarpLine>& warpLines, const Board& board, int bs, Pos pos, CubeConf cubeConf, std::unordered_map<std::string, CubeEdge>& edges, std::unordered_set<Pos>& visited) {
+findWarpLines(std::vector<WarpLine> &warpLines,
+    const Board &board,
+    int bs,
+    Pos pos,
+    CubeConf cubeConf,
+    std::unordered_map<std::string, CubeEdge> &edges,
+    std::unordered_set<Pos> &visited) {
   static constexpr const auto cubeRotations = std::array<CubeConf, 4>{
-    // match order with DIRSL
-    "EFBAHGCD",
-    "BFGCAEHD",
-    "DCGHABFE",
-    "EADHFBCG",
+      // match order with DIRSL
+      "EFBAHGCD",
+      "BFGCAEHD",
+      "DCGHABFE",
+      "EADHFBCG",
   };
   const auto corners = std::array<Dir, 4>{
-    Dir{bs - 1, 0},
-    Dir{bs - 1, bs - 1},
-    Dir{0, bs - 1},
-    Dir{0, 0},
+      Dir{bs - 1, 0},
+      Dir{bs - 1, bs - 1},
+      Dir{0, bs - 1},
+      Dir{0, 0},
   };
 
   visited.insert(pos);
@@ -152,16 +158,15 @@ findWarpLines(std::vector<WarpLine>& warpLines, const Board& board, int bs, Pos 
   for (int i = 0; i < 4; ++i) {
     auto pp = pos + (bs * DIRSL[i]);
     if (board[pp] != ' ' && !visited.contains(pp)) {
-      CubeConf rotated = cubeRotations[i]
-        | views::transform([&](auto c) { return cubeConf[c - 'A']; })
-        | std::ranges::to<CubeConf>();
+      CubeConf rotated =
+          cubeRotations[i] | views::transform([&](auto c) { return cubeConf[c - 'A']; }) | std::ranges::to<CubeConf>();
       findWarpLines(warpLines, board, bs, pp, rotated, edges, visited);
     }
   }
 }
 
 static std::vector<WarpLine>
-findWarpLines(const Board& board, int bs) {
+findWarpLines(const Board &board, int bs) {
   std::vector<WarpLine> warpLines;
   Pos pos = findStart(board, [](char c) { return c != ' '; });
   std::unordered_set<Pos> visited;
@@ -171,7 +176,7 @@ findWarpLines(const Board& board, int bs) {
 }
 
 static int
-solve(const Board& board, const std::string& steps, auto warp) {
+solve(const Board &board, const std::string &steps, auto warp) {
   PosDir pd = {findStart(board, [](char c) { return c == '.'; }), {1, 0}};
 
   auto ss = std::stringstream(steps);
@@ -183,15 +188,9 @@ solve(const Board& board, const std::string& steps, auto warp) {
     }
     if (ss >> turnDir) {
       switch (turnDir) {
-        case 'L':
-          pd = { pd.pos, turnLeft(pd.dir) };
-          break;
-        case 'R':
-          pd = { pd.pos, turnRight(pd.dir) };
-          break;
-        default:
-          std::cerr << "ERROR: unknown turn: " << turnDir << std::endl;
-          exit(1);
+        case 'L': pd = {pd.pos, turnLeft(pd.dir)}; break;
+        case 'R': pd = {pd.pos, turnRight(pd.dir)}; break;
+        default: std::cerr << "ERROR: unknown turn: " << turnDir << std::endl; exit(1);
       }
     }
   }
@@ -207,9 +206,8 @@ main() {
   while (std::getline(std::cin, line) && !line.empty()) {
     lines.push_back(line);
   }
-  auto len = std::max_element(lines.begin(), lines.end(),
-      [](auto a, auto b) { return a.size() < b.size(); })->size();
-  for (auto& line : lines) {
+  auto len = std::max_element(lines.begin(), lines.end(), [](auto a, auto b) { return a.size() < b.size(); })->size();
+  for (auto &line : lines) {
     line.resize(len, ' ');
   }
   auto board = Board(lines, ' ');

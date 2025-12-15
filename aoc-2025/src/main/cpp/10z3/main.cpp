@@ -16,7 +16,7 @@ struct Machine {
 };
 
 static int
-solve1(const Machine& m) {
+solve1(const Machine &m) {
   z3::context ctx;
   z3::optimize opt{ctx};
   z3::expr_vector v{ctx};
@@ -40,7 +40,7 @@ solve1(const Machine& m) {
 }
 
 static int
-solve2(const Machine& m) {
+solve2(const Machine &m) {
   z3::context ctx;
   z3::optimize opt{ctx};
   z3::expr_vector v{ctx};
@@ -103,8 +103,8 @@ main() {
     machines.emplace_back(lights, wirings, jolts);
   }
 
-  int res1 = ranges::fold_left(machines | views::transform([](const auto& m) { return solve1(m); }), 0, std::plus<>());
-  int res2 = ranges::fold_left(machines | views::transform([](const auto& m) { return solve2(m); }), 0, std::plus<>());
+  int res1 = ranges::fold_left(machines | views::transform([](const auto &m) { return solve1(m); }), 0, std::plus<>());
+  int res2 = ranges::fold_left(machines | views::transform([](const auto &m) { return solve2(m); }), 0, std::plus<>());
 
   println("1: {}", res1);
   println("2: {}", res2);

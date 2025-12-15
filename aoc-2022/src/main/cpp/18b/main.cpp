@@ -33,52 +33,52 @@ using size_t = std::size_t;
 using Point = std::tuple<int, int, int>;
 
 static const std::vector<Point> dirs = {
-  { 1,  0,  0},
-  {-1,  0,  0},
-  { 0,  1,  0},
-  { 0, -1,  0},
-  { 0,  0,  1},
-  { 0,  0, -1},
+    {1, 0, 0},
+    {-1, 0, 0},
+    {0, 1, 0},
+    {0, -1, 0},
+    {0, 0, 1},
+    {0, 0, -1},
 };
 
-template<typename Tuple, typename Op, size_t... I>
+template <typename Tuple, typename Op, size_t... I>
 static Tuple
-tupleOp(const Tuple& a, const Tuple& b, Op &&op, std::index_sequence<I...>) {
+tupleOp(const Tuple &a, const Tuple &b, Op &&op, std::index_sequence<I...>) {
   return {op(std::get<I>(a), std::get<I>(b))...};
 }
 
 static Point
-operator+(const Point& a, const Point& b) {
+operator+(const Point &a, const Point &b) {
   return tupleOp(a, b, std::plus<>(), std::make_index_sequence<std::tuple_size_v<Point>>{});
 }
 
-static int&
-x(Point& p) {
+static int &
+x(Point &p) {
   return std::get<0>(p);
 }
 
-static int&
-y(Point& p) {
+static int &
+y(Point &p) {
   return std::get<1>(p);
 }
 
-static int&
-z(Point& p) {
+static int &
+z(Point &p) {
   return std::get<2>(p);
 }
 
-static const int&
-x(const Point& p) {
+static const int &
+x(const Point &p) {
   return std::get<0>(p);
 }
 
-static const int&
-y(const Point& p) {
+static const int &
+y(const Point &p) {
   return std::get<1>(p);
 }
 
-static const int&
-z(const Point& p) {
+static const int &
+z(const Point &p) {
   return std::get<2>(p);
 }
 
@@ -86,11 +86,8 @@ static constexpr const int MIN = std::numeric_limits<int>::min();
 static constexpr const int MAX = std::numeric_limits<int>::max();
 
 static bool
-isInside(const Point& p, const Point& minP, const Point& maxP) {
-  return
-    x(minP) <= x(p) && x(p) <= x(maxP) &&
-    y(minP) <= y(p) && y(p) <= y(maxP) &&
-    z(minP) <= z(p) && z(p) <= z(maxP);
+isInside(const Point &p, const Point &minP, const Point &maxP) {
+  return x(minP) <= x(p) && x(p) <= x(maxP) && y(minP) <= y(p) && y(p) <= y(maxP) && z(minP) <= z(p) && z(p) <= z(maxP);
 }
 
 int
@@ -112,9 +109,14 @@ main() {
     y(maxP) = std::max(y(maxP), y(p));
     z(maxP) = std::max(z(maxP), z(p));
   }
-  --x(minP); --y(minP); --z(minP);
-  ++x(maxP); ++y(maxP); ++z(maxP);
-  // std::cout << "min: (" << x(minP) << ", " << y(minP) << ", " << z(minP) << "), max: (" << x(maxP) << ", " << y(maxP) << ", " << z(maxP) << ")\n";
+  --x(minP);
+  --y(minP);
+  --z(minP);
+  ++x(maxP);
+  ++y(maxP);
+  ++z(maxP);
+  // std::cout << "min: (" << x(minP) << ", " << y(minP) << ", " << z(minP) << "), max: (" << x(maxP) << ", " << y(maxP)
+  // << ", " << z(maxP) << ")\n";
 
   std::deque<Point> queue{minP};
 
@@ -122,7 +124,7 @@ main() {
     Point p = queue.front();
     queue.pop_front();
     outer.insert(p);
-    for (const auto& d: dirs) {
+    for (const auto &d : dirs) {
       Point pp = p + d;
       if (!outer.contains(pp) && !cubes.contains(pp) && isInside(pp, minP, maxP)) {
         outer.insert(pp);
@@ -133,8 +135,8 @@ main() {
   }
 
   uint res = 0;
-  for (const auto& cube: cubes) {
-    for (const auto& d: dirs) {
+  for (const auto &cube : cubes) {
+    for (const auto &d : dirs) {
       if (outer.contains(cube + d)) {
         ++res;
       }

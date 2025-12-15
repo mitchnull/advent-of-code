@@ -20,21 +20,15 @@ main() {
   std::string s;
   V ones = V();
   V zeros = V();
-  
+
   while ((std::cin >> s)) {
     ones.resize(s.size());
     zeros.resize(s.size());
     for (auto i = 0U; i < s.length(); ++i) {
       switch (s[i]) {
-        case '0':
-          ++zeros[i];
-          break;
-        case '1':
-          ++ones[i];
-          break;
-        default:
-          std::cerr << "ERROR" << s << "\n";
-          return -1;
+        case '0': ++zeros[i]; break;
+        case '1': ++ones[i]; break;
+        default: std::cerr << "ERROR" << s << "\n"; return -1;
       }
     }
   }

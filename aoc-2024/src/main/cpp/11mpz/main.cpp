@@ -14,7 +14,7 @@ numDigits(auto n) {
 }
 
 static auto
-numDigits(const mpz_class& n) {
+numDigits(const mpz_class &n) {
   return n.get_str().size();
 }
 
@@ -45,7 +45,7 @@ main() {
   while (std::cin >> n) {
     ++counts[n];
   }
-  
+
   std::cout << "1: " << solve(counts, 25) << "\n";
   std::cout << "2: " << solve(counts, 75) << "\n";
   std::cout << "999: " << solve(counts, 999) << "\n";

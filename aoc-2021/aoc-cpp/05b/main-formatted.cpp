@@ -24,10 +24,8 @@ class Board {
   std::vector<uint> items;
 
   uint idx(uint x, uint y) const { return y * width + x; }
-
 public:
-  Board(uint width, uint height)
-      : width(width), height(height), items(width * height, 0) {}
+  Board(uint width, uint height) : width(width), height(height), items(width * height, 0) {}
 
   uint &operator()(uint x, uint y) { return items[idx(x, y)]; }
 
@@ -58,18 +56,21 @@ struct Line {
 
 using Lines = std::vector<Line>;
 
-static uint check(const Board &board) {
+static uint
+check(const Board &board) {
   return std::ranges::count_if(board, [](auto i) { return i > 1; });
 }
 
-static int step(uint a, uint b) {
+static int
+step(uint a, uint b) {
   if (a == b) {
     return 0;
   }
   return a < b ? 1 : -1;
 }
 
-static void draw(Board &board, const Line &line) {
+static void
+draw(Board &board, const Line &line) {
   int hStep = step(line.a.x, line.b.x);
   int vStep = step(line.a.y, line.b.y);
   uint i = line.a.x;
@@ -82,11 +83,13 @@ static void draw(Board &board, const Line &line) {
   ++board(i, j);
 }
 
-static bool isValid(const Line &line) {
+static bool
+isValid(const Line &line) {
   return line.a.x == line.b.x || line.a.y == line.b.y;
 }
 
-int main() {
+int
+main() {
   uint ax, ay, bx, by;
   char c;
   std::string str;

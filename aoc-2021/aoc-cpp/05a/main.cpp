@@ -23,36 +23,17 @@ class Board {
   uint width, height;
   std::vector<uint> items;
 
-  uint
-  idx(uint x, uint y) const {
-    return y * width + x;
-  }
+  uint idx(uint x, uint y) const { return y * width + x; }
 public:
-  Board(uint width, uint height) :
-    width(width),
-    height(height),
-    items(width * height, 0) {
-  }
+  Board(uint width, uint height) : width(width), height(height), items(width * height, 0) {}
 
-  uint &
-  operator()(uint x, uint y) {
-    return items[idx(x, y)];
-  }
+  uint &operator()(uint x, uint y) { return items[idx(x, y)]; }
 
-  uint
-  operator()(uint x, uint y) const {
-    return items[idx(x, y)];
-  }
+  uint operator()(uint x, uint y) const { return items[idx(x, y)]; }
 
-  auto
-  begin() const {
-    return items.begin();
-  }
+  auto begin() const { return items.begin(); }
 
-  auto
-  end() const {
-    return items.end();
-  }
+  auto end() const { return items.end(); }
 
   friend std::ostream &operator<<(std::ostream &os, const Board &board) {
     for (uint y = 0; y < board.height; ++y) {
@@ -76,7 +57,7 @@ struct Line {
 using Lines = std::vector<Line>;
 
 static uint
-check(const Board& board) {
+check(const Board &board) {
   return std::ranges::count_if(board, [](auto i) { return i > 1; });
 }
 

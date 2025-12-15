@@ -22,7 +22,7 @@ startsWith(auto b1, auto e1, auto b2, auto e2) {
 }
 
 static Num
-countMatches(std::string_view text, const Strings& patterns) {
+countMatches(std::string_view text, const Strings &patterns) {
   auto ways = std::vector<Num>(text.size() + 1);
   ways[text.size()] = 1;
   for (int i = text.size() - 1; i >= 0; --i) {
@@ -37,7 +37,6 @@ countMatches(std::string_view text, const Strings& patterns) {
 
 int
 main() {
-
   std::string line;
   std::getline(std::cin, line);
   std::transform(line.begin(), line.end(), line.begin(), [](auto c) { return c == ',' ? ' ' : c; });
@@ -45,9 +44,11 @@ main() {
   Strings patterns;
   std::copy(std::istream_iterator<std::string>(ss), std::istream_iterator<std::string>(), std::back_inserter(patterns));
   Strings targets;
-  std::copy(std::istream_iterator<std::string>(std::cin), std::istream_iterator<std::string>(), std::back_inserter(targets));
+  std::copy(
+      std::istream_iterator<std::string>(std::cin), std::istream_iterator<std::string>(), std::back_inserter(targets));
 
-  auto counts = targets | std::views::transform([&patterns](std::string_view t) { return countMatches(t, patterns); }) | std::ranges::to<std::vector<Num>>();
+  auto counts = targets | std::views::transform([&patterns](std::string_view t) { return countMatches(t, patterns); }) |
+      std::ranges::to<std::vector<Num>>();
   auto res1 = std::count_if(counts.begin(), counts.end(), std::identity());
   auto res2 = std::reduce(counts.begin(), counts.end(), Num{});
   std::cout << "1: " << res1 << "\n";

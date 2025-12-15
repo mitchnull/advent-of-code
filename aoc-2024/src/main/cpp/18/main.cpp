@@ -11,7 +11,7 @@ struct Node {
   Pos pos;
   Num cost;
 
-  friend bool operator<(const Node&a, const Node&b) { return a.cost > b.cost; };
+  friend bool operator<(const Node &a, const Node &b) { return a.cost > b.cost; };
 };
 
 using Queue = std::priority_queue<Node>;
@@ -19,7 +19,7 @@ using Queue = std::priority_queue<Node>;
 /* ------------------------------------------------------------------------ */
 
 static std::pair<Num, Board>
-solve(const Board& board, Pos start, Pos end) {
+solve(const Board &board, Pos start, Pos end) {
   auto path = Board(board);
   auto costs = Grid<Num>(board.w(), board.h(), std::numeric_limits<Num>::max(), std::numeric_limits<Num>::max());
   auto prevs = Grid<Pos>(board.w(), board.h(), {-1, -1});
@@ -63,7 +63,7 @@ main() {
   std::vector<Pos> blocks;
   Pos p;
   char c;
-  while (std::cin >> p.x >> c >>  p.y) {
+  while (std::cin >> p.x >> c >> p.y) {
     blocks.push_back(p);
   }
   Board board = Board(endPos.x + 1, endPos.y + 1, '.', '#');

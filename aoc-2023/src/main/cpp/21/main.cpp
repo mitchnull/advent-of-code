@@ -39,10 +39,12 @@ main() {
   std::vector<std::string> lines;
   std::string line;
   while (std::getline(std::cin, line)) {
-    lines.push_back(line); 
+    lines.push_back(line);
   }
   Board board = Board(lines, '#');
-  Pos startPos = (board.iter() | views::filter([](auto i) { return i.v == 'S'; }) | views::transform([](auto i) { return Pos{i.x, i.y}; })).front();
+  Pos startPos = (board.iter() | views::filter([](auto i) { return i.v == 'S'; }) | views::transform([](auto i) {
+    return Pos{i.x, i.y};
+  })).front();
 
   auto [res1, board1] = solve1(board, startPos, 5);
   std::cout << "@@@ 5: " << res1 << std::endl << board1 << std::endl;
@@ -51,7 +53,6 @@ main() {
   std::cout << "@@@ 16: " << res2 << std::endl << board2 << std::endl;
   auto [res3, board3] = solve1(board, startPos, 27);
   std::cout << "@@@ 27: " << res3 << std::endl << board3 << std::endl;
-
 
   auto [res1000, board1000] = solve1(board, startPos, 1000);
   std::cout << "@@@ 1000: " << res1000 << std::endl << board1000 << std::endl;

@@ -41,7 +41,7 @@ struct Edge {
   string node;
   uint len = 1;
 
-  friend auto operator<=>(const Edge&, const Edge&) = default;
+  friend auto operator<=>(const Edge &, const Edge &) = default;
 };
 
 using Edges = std::vector<Edge>;
@@ -58,7 +58,7 @@ using Map = std::unordered_map<string, Node>;
 struct IEdge {
   uint node;
   uint len;
-  friend auto operator<=>(const IEdge&, const IEdge&) = default;
+  friend auto operator<=>(const IEdge &, const IEdge &) = default;
 };
 
 using IEdges = std::vector<IEdge>;
@@ -75,14 +75,17 @@ using INodes = std::vector<INode>;
 // Valve AA has flow rate=0; tunnels lead to valves DD, II, BB
 // Valve AA has flow rate=0; tunnel leads to valve DD
 static void
-parse(const string& line, Map& map) {
+parse(const string &line, Map &map) {
   std::regex regex("Valve (..) has flow rate=([0-9]*); tunnels? leads? to valves? (.*)");
   std::smatch match;
   if (std::regex_match(line, match, regex) && match.size() > 2) {
     Node node{match[1], (uint)std::stoi(match[2])};
     string paths = match[3];
     std::regex pathsRegex("[A-Z][A-Z]");
-    for (auto it = std::sregex_token_iterator(paths.begin(), paths.end(), pathsRegex), end = std::sregex_token_iterator(); it != end; ++it) {
+    for (auto it = std::sregex_token_iterator(paths.begin(), paths.end(), pathsRegex),
+              end = std::sregex_token_iterator();
+        it != end;
+        ++it) {
       node.edges.push_back({it->str()});
     }
     map[node.name] = node;
@@ -98,9 +101,9 @@ reachableNodes(Map map, string node) {
   while (!queue.empty()) {
     auto curr = queue.front();
     queue.pop();
-    Node& n = map[curr.node];
-    for (const Edge& edge: n.edges) {
-      Node& next = map[edge.node];
+    Node &n = map[curr.node];
+    for (const Edge &edge : n.edges) {
+      Node &next = map[edge.node];
       if (!next.visited) {
         next.visited = true;
         Edge newEdge{edge.node, curr.len + 1};
@@ -112,20 +115,21 @@ reachableNodes(Map map, string node) {
     }
   }
   std::sort(res.begin(), res.end());
-  res.erase(std::unique(res.begin(), res.end(), [](const auto& a, const auto& b) { return a.node == b.node; }), res.end());
+  res.erase(
+      std::unique(res.begin(), res.end(), [](const auto &a, const auto &b) { return a.node == b.node; }), res.end());
   return res;
 }
 
 static uint
-findId(const string& node, const std::vector<string>& nodes) {
+findId(const string &node, const std::vector<string> &nodes) {
   return std::find(nodes.begin(), nodes.end(), node) - nodes.begin();
 }
 
 static IEdges
-convertToIEdges(const Edges& edges, const std::vector<string>& nodes) {
+convertToIEdges(const Edges &edges, const std::vector<string> &nodes) {
   IEdges res;
   res.reserve(edges.size());
-  for (const auto& edge: edges) {
+  for (const auto &edge : edges) {
     uint id = findId(edge.node, nodes);
     res.push_back({id, edge.len});
   }
@@ -133,9 +137,9 @@ convertToIEdges(const Edges& edges, const std::vector<string>& nodes) {
 }
 
 static std::vector<string>
-nodeNames(const Map& map) {
+nodeNames(const Map &map) {
   std::vector<string> res{START};
-  for (const auto& [name, node]: map) {
+  for (const auto &[name, node] : map) {
     if (node.rate <= 0 || name == START) {
       continue;
     }
@@ -146,18 +150,18 @@ nodeNames(const Map& map) {
 }
 
 static INodes
-simplify(const Map& map) {
+simplify(const Map &map) {
   INodes res;
   auto nodes = nodeNames(map);
-  for (const auto& nodeName: nodes) {
-    const auto& [name, node] = *map.find(nodeName);
+  for (const auto &nodeName : nodes) {
+    const auto &[name, node] = *map.find(nodeName);
     uint id = findId(name, nodes);
     res.push_back({
         id,
         name,
         node.rate,
         convertToIEdges(reachableNodes(map, name), nodes),
-      });
+    });
   }
   return res;
 }
@@ -165,16 +169,16 @@ simplify(const Map& map) {
 using Visited = std::bitset<64>;
 
 static uint
-maxPressure(const INodes& nodes, uint node, uint turns, Visited& visited) {
+maxPressure(const INodes &nodes, uint node, uint turns, Visited &visited) {
   if (visited[node]) {
     return 0;
   }
   visited[node] = true;
   --turns;
-  const INode& n = nodes[node];
+  const INode &n = nodes[node];
   uint pressure = turns * n.rate;
   uint mp = 0;
-  for (const auto& edge: n.edges) {
+  for (const auto &edge : n.edges) {
     if (turns > edge.len) {
       mp = std::max(mp, maxPressure(nodes, edge.node, turns - edge.len, visited));
     }

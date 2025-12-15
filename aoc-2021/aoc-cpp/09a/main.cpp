@@ -24,31 +24,15 @@ class Board {
 public:
   const uint width, height;
 
-  Board(uint width, uint height) :
-    width(width),
-    height(height),
-    items(width * height, 0) {
-  }
+  Board(uint width, uint height) : width(width), height(height), items(width * height, 0) {}
 
-  Item &
-  operator()(uint x, uint y) {
-    return items[idx(x, y)];
-  }
+  Item &operator()(uint x, uint y) { return items[idx(x, y)]; }
 
-  Item
-  operator()(uint x, uint y) const {
-    return items[idx(x, y)];
-  }
+  Item operator()(uint x, uint y) const { return items[idx(x, y)]; }
 
-  auto
-  begin() const {
-    return items.begin();
-  }
+  auto begin() const { return items.begin(); }
 
-  auto
-  end() const {
-    return items.end();
-  }
+  auto end() const { return items.end(); }
 
   friend std::ostream &operator<<(std::ostream &os, const Board &board) {
     for (uint y = 0; y < board.height; ++y) {
@@ -62,10 +46,7 @@ public:
 private:
   std::vector<Item> items;
 
-  uint
-  idx(uint x, uint y) const {
-    return y * width + x;
-  }
+  uint idx(uint x, uint y) const { return y * width + x; }
 };
 
 struct Point {
@@ -85,18 +66,15 @@ get(const Board &board, uint x, uint y) {
 static uint
 riskLevel(const Board &board, uint x, uint y) {
   uint level = board(x, y);
-  if (get(board, x - 1, y) <= level
-      || get(board, x + 1, y) <= level
-      || get(board, x, y - 1) <= level
-      || get(board, x, y + 1) <= level) {
+  if (get(board, x - 1, y) <= level || get(board, x + 1, y) <= level || get(board, x, y - 1) <= level ||
+      get(board, x, y + 1) <= level) {
     return 0;
   }
   return level + 1;
 }
 
-
 static uint
-check(const Board& board) {
+check(const Board &board) {
   uint res = 0;
   for (uint y = 0; y < board.height; ++y) {
     for (uint x = 0; x < board.width; ++x) {

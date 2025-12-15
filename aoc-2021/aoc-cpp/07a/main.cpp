@@ -25,7 +25,7 @@ using Positions = std::vector<Num>;
 static Num
 calc(const Positions &positions, Num p) {
   Num res = 0;
-  for (auto i: positions) {
+  for (auto i : positions) {
     res += std::abs(i - p);
   }
   return res;

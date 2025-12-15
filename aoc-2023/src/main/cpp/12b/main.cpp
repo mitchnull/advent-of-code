@@ -49,7 +49,7 @@ substr(std::string_view sv, size_t pos) {
 
 template <typename It>
 static Num
-arrangements(std::string_view rec, It lensBegin, It lensEnd, std::map<std::pair<std::string_view, It>, Num>& cache) {
+arrangements(std::string_view rec, It lensBegin, It lensEnd, std::map<std::pair<std::string_view, It>, Num> &cache) {
   auto key = make_pair(rec, lensBegin);
   auto cached = cache.find(key);
   if (cached != cache.end()) {

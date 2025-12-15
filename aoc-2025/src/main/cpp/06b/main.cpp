@@ -6,10 +6,9 @@
 using Num = int64_t;
 using Nums = std::vector<Num>;
 
-
 static bool
 isDataLine(std::string_view line) {
-  for (auto c: line) {
+  for (auto c : line) {
     if (c == ' ') {
       continue;
     }
@@ -29,28 +28,33 @@ calc(char op, Num a, Num b) {
 
 #if HAS_FOLD_LEFT_FIRST
 static Num
-solve1(const std::vector<Nums>& allNums, const std::vector<char>& ops) {
+solve1(const std::vector<Nums> &allNums, const std::vector<char> &ops) {
   return *ranges::fold_left_first(views::iota(0UZ, ops.size()) | views::transform([&](auto i) {
-    return *ranges::fold_left_first(allNums | views::transform([i](auto &ns) { return ns[i]; }), [&](auto a, auto b) { return calc(ops[i], a, b); });
-  }), std::plus<>{});
+    return *ranges::fold_left_first(allNums | views::transform([i](auto &ns) { return ns[i]; }),
+        [&](auto a, auto b) { return calc(ops[i], a, b); });
+  }),
+      std::plus<>{});
 }
 #else
 static Num
-solve1(const std::vector<Nums>& allNums, const std::vector<char>& ops) {
+solve1(const std::vector<Nums> &allNums, const std::vector<char> &ops) {
   return ranges::fold_left(views::iota(0UZ, ops.size()) | views::transform([&](auto i) {
-    auto v = allNums | views::transform([i](auto& ns) { return ns[i]; });
+    auto v = allNums | views::transform([i](auto &ns) { return ns[i]; });
     return std::reduce(v.begin() + 1, v.end(), v.front(), [&](auto a, auto b) { return calc(ops[i], a, b); });
-  }), Num{}, std::plus<>{});
+  }),
+      Num{},
+      std::plus<>{});
 }
 #endif
 
 static Num
-solve2(const std::vector<std::string>& dataLines, const std::vector<char>& ops) {
+solve2(const std::vector<std::string> &dataLines, const std::vector<char> &ops) {
   Num res{}, r{};
   auto it = ops.begin();
   for (int i = 0, e = dataLines.front().size(); i < e; ++i) {
     Num n = ranges::fold_left(dataLines | views::transform([&](auto &d) { return d[i]; }) | views::filter(isdigit),
-        Num{}, [](auto r, auto a) { return r * 10 + a - '0'; });
+        Num{},
+        [](auto r, auto a) { return r * 10 + a - '0'; });
     if (n != 0) {
       r = r == 0 ? n : calc(*it, r, n);
     } else {
@@ -70,7 +74,7 @@ main() {
   std::vector<Nums> allNums;
   std::vector<char> ops;
   std::string line;
-  
+
   while (std::getline(std::cin, line)) {
     std::istringstream ss{line};
     if (isDataLine(line)) {

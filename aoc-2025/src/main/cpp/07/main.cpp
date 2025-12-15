@@ -5,9 +5,10 @@ using Num = int64_t;
 using Board = Grid<>;
 
 static std::pair<Num, Num>
-solve(const Board& board) {
+solve(const Board &board) {
   Num splits{};
-  auto ways = ranges::subrange(board.begin(), board.begin() + board.w()) | views::transform([](auto c) { return c == 'S'; }) | ranges::to<std::vector<Num>>();
+  auto ways = ranges::subrange(board.begin(), board.begin() + board.w()) |
+      views::transform([](auto c) { return c == 'S'; }) | ranges::to<std::vector<Num>>();
   for (int y = 1; y < board.h(); ++y) {
     for (int x = 0; x < board.w(); ++x) {
       if (board[x, y] == '^') {

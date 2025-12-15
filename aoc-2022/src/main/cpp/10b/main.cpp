@@ -33,7 +33,7 @@ struct State {
 };
 
 static void
-updateState(State& state, uint cycle) {
+updateState(State &state, uint cycle) {
   while (state.cycleEnd < cycle) {
     state.x = state.nx;
     state.cycleStart = state.cycleEnd + 1;
@@ -52,7 +52,7 @@ updateState(State& state, uint cycle) {
 }
 
 static void
-plot(State& state, uint cycle) {
+plot(State &state, uint cycle) {
   updateState(state, cycle);
   int px = (cycle - 1) % M;
   std::cout << ((state.x - 1 <= px && px <= state.x + 1) ? '#' : '.');

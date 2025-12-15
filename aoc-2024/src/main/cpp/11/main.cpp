@@ -35,7 +35,7 @@ main() {
   while (std::cin >> n) {
     ++counts[n];
   }
-  
+
   std::cout << "1: " << solve(counts, 25) << "\n";
   std::cout << "2: " << solve(counts, 75) << "\n";
   return 0;

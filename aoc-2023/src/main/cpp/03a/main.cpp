@@ -25,7 +25,7 @@ using uint = uint32;
 using Board = std::vector<std::string>;
 
 static int
-parseNum(const char* first, const char* last, int base = 10) {
+parseNum(const char *first, const char *last, int base = 10) {
   int res = 0;
   std::from_chars(first, last, res, base);
   return res;
@@ -37,15 +37,15 @@ isSymbol(char ch) {
 }
 
 static bool
-isAdjacent(const Board& board, int i, int j, int k) {
-  const std::string& line = board[i];
+isAdjacent(const Board &board, int i, int j, int k) {
+  const std::string &line = board[i];
   int h = board.size();
   int w = line.size();
-  if ((j > 0 && isSymbol(line[j -1])) || (k < w && isSymbol(line[k]))) {
+  if ((j > 0 && isSymbol(line[j - 1])) || (k < w && isSymbol(line[k]))) {
     return true;
   }
   if (i > 0) {
-    const std::string& line = board[i - 1];
+    const std::string &line = board[i - 1];
     for (int jj = std::max(j - 1, 0); jj < std::min(k + 1, w); ++jj) {
       if (isSymbol(line[jj])) {
         return true;
@@ -53,7 +53,7 @@ isAdjacent(const Board& board, int i, int j, int k) {
     }
   }
   if (i < h - 1) {
-    const std::string& line = board[i + 1];
+    const std::string &line = board[i + 1];
     for (int jj = std::max(j - 1, 0); jj < std::min(k + 1, w); ++jj) {
       if (isSymbol(line[jj])) {
         return true;

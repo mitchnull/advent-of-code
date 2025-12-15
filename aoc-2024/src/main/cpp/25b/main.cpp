@@ -15,7 +15,7 @@ main() {
     Num h = 0;
     while (std::getline(std::cin, line) && !line.empty()) {
       for (auto c : line) {
-        h = (h <<  1) | (c == '#');
+        h = (h << 1) | (c == '#');
       }
     }
     if (h & 0x01) {
@@ -26,8 +26,8 @@ main() {
   }
 
   Num res = 0;
-  for (auto& k: keys) {
-    for (auto& l: locks) {
+  for (auto &k : keys) {
+    for (auto &l : locks) {
       res += !(l & k);
     }
   }

@@ -27,35 +27,45 @@ struct CachedChunkedPath {
 
 template <>
 struct std::hash<Edge> {
-  std::size_t operator()(const Edge& e) const {
-    return e.first * 11 + e.second;
-  }
+  std::size_t operator()(const Edge &e) const { return e.first * 11 + e.second; }
 };
 
 template <>
 struct std::hash<ChunkedPath> {
-  std::size_t operator()(const ChunkedPath& cp) const {
-    return std::accumulate(cp.begin(), cp.end(), 0, [](auto h, auto& e) {
-        return hashCombine(h, std::hash<Path>{}(e.first) * e.second); });
+  std::size_t operator()(const ChunkedPath &cp) const {
+    return std::accumulate(
+        cp.begin(), cp.end(), 0, [](auto h, auto &e) { return hashCombine(h, std::hash<Path>{}(e.first) * e.second); });
   }
 };
 
-static const auto ABUTTONS = std::vector {
-  '7', '8', '9',
-  '4', '5', '6',
-  '1', '2', '3',
-  'X', '0', 'A',
+static const auto ABUTTONS = std::vector{
+    '7',
+    '8',
+    '9',
+    '4',
+    '5',
+    '6',
+    '1',
+    '2',
+    '3',
+    'X',
+    '0',
+    'A',
 };
 
-static const auto BBUTTONS = std::vector {
-  'X', '^', 'A',
-  '<', 'v', '>',
+static const auto BBUTTONS = std::vector{
+    'X',
+    '^',
+    'A',
+    '<',
+    'v',
+    '>',
 };
 
 /* ------------------------------------------------------------------------ */
 
-static std::ostream&
-operator<<(auto& os, const ChunkedPath& chunks) {
+static std::ostream &
+operator<<(auto &os, const ChunkedPath &chunks) {
   if (chunks.empty()) {
     return os << "{}";
   }
@@ -66,8 +76,8 @@ operator<<(auto& os, const ChunkedPath& chunks) {
   return os << "}";
 }
 
-static std::ostream&
-operator<<(auto& os, const Paths& paths) {
+static std::ostream &
+operator<<(auto &os, const Paths &paths) {
   if (paths.empty()) {
     return os << "{}";
   }
@@ -78,26 +88,26 @@ operator<<(auto& os, const Paths& paths) {
   return os << "}";
 }
 
-static std::ostream&
-operator<<(auto& os, const ChunkedPaths& chunkedPaths) {
+static std::ostream &
+operator<<(auto &os, const ChunkedPaths &chunkedPaths) {
   if (chunkedPaths.empty()) {
     return os << "[]";
   }
   os << "[\n";
-  for (auto& p : chunkedPaths) {
-   os << "  " << p << ",\n";
+  for (auto &p : chunkedPaths) {
+    os << "  " << p << ",\n";
   }
   return os << "]";
 }
 
-static std::ostream&
-operator<<(auto& os, const BasePaths& basePaths) {
+static std::ostream &
+operator<<(auto &os, const BasePaths &basePaths) {
   if (basePaths.empty()) {
     return os << "{}";
   }
   os << "{\n";
-  for (auto& [e, cp] : basePaths) {
-   os << "  " << e.first << e.second << ": " << cp << ",\n";
+  for (auto &[e, cp] : basePaths) {
+    os << "  " << e.first << e.second << ": " << cp << ",\n";
   }
   return os << "}";
 }
@@ -105,7 +115,7 @@ operator<<(auto& os, const BasePaths& basePaths) {
 /* ------------------------------------------------------------------------ */
 
 static ChunkedPath
-chunked(const Path& path, Num count = 1) {
+chunked(const Path &path, Num count = 1) {
   ChunkedPath chunks;
   for (std::size_t b = 0, p = path.find('A', b); p != Path::npos; b = p + 1, p = path.find('A', b)) {
     auto chunk = path.substr(b, p + 1 - b);
@@ -115,7 +125,7 @@ chunked(const Path& path, Num count = 1) {
 }
 
 static Paths
-findBasePaths(const Buttons& buttons, Button f, Button t) {
+findBasePaths(const Buttons &buttons, Button f, Button t) {
   if (f == 'X' || t == 'X') {
     return {};
   }
@@ -165,14 +175,15 @@ findBasePaths(const Buttons& buttons, Button f, Button t) {
 }
 
 static BasePaths
-findBasePaths(const Buttons& buttons) {
+findBasePaths(const Buttons &buttons) {
   BasePaths basePaths;
   for (auto f : buttons) {
     for (auto t : buttons) {
       Paths paths = findBasePaths(buttons, f, t);
       ChunkedPaths chunkedPaths;
-      std::transform(paths.begin(), paths.end(), std::back_inserter<>(chunkedPaths),
-          [](const auto &p) { return chunked(p + 'A'); });
+      std::transform(paths.begin(), paths.end(), std::back_inserter<>(chunkedPaths), [](const auto &p) {
+        return chunked(p + 'A');
+      });
       basePaths[{f, t}] = chunkedPaths;
     }
   }
@@ -180,39 +191,38 @@ findBasePaths(const Buttons& buttons) {
 }
 
 static Num
-len(const ChunkedPath& path) {
-  return std::transform_reduce(path.begin(), path.end(), Num{}, std::plus<>(),
-      [](auto& i) { return i.first.size() * i.second; });
+len(const ChunkedPath &path) {
+  return std::transform_reduce(
+      path.begin(), path.end(), Num{}, std::plus<>(), [](auto &i) { return i.first.size() * i.second; });
 }
 
 static ChunkedPath
-nextChunkedPath(const BasePaths& basePaths, const ChunkedPath& chunkedPath, int depth) {
+nextChunkedPath(const BasePaths &basePaths, const ChunkedPath &chunkedPath, int depth) {
   static std::unordered_map<ChunkedPath, CachedChunkedPath> cache;
   ChunkedPath res;
   Button pb = 'A';
-  for (const auto& [p, count] : chunkedPath) {
+  for (const auto &[p, count] : chunkedPath) {
     for (Button b : p) {
-      const auto& bps = basePaths.at({pb, b});
+      const auto &bps = basePaths.at({pb, b});
       auto sel = bps.begin();
       if (bps.size() > 1 && depth > 0) {
         ChunkedPaths expandedPaths = bps;
         for (int d = depth; d > 0; --d) {
-          std::transform(expandedPaths.begin(), expandedPaths.end(), expandedPaths.begin(),
-              [&](auto& cp) {
-                if (auto it = cache.find(cp); it != cache.end() && it->second.depth >= depth) {
-                  return it->second.cp;
-                }
-                return (cache[cp] = {nextChunkedPath(basePaths, cp, d - 1), depth}).cp;
-              });
-          auto [itMin, itMax] = std::minmax_element(expandedPaths.begin(), expandedPaths.end(),
-              [](auto& a, auto& b) { return len(a) < len(b); });
+          std::transform(expandedPaths.begin(), expandedPaths.end(), expandedPaths.begin(), [&](auto &cp) {
+            if (auto it = cache.find(cp); it != cache.end() && it->second.depth >= depth) {
+              return it->second.cp;
+            }
+            return (cache[cp] = {nextChunkedPath(basePaths, cp, d - 1), depth}).cp;
+          });
+          auto [itMin, itMax] = std::minmax_element(
+              expandedPaths.begin(), expandedPaths.end(), [](auto &a, auto &b) { return len(a) < len(b); });
           if (len(*itMin) != len(*itMax)) {
             sel += itMin - expandedPaths.begin();
             break;
           }
         }
       }
-      for (auto& [k, v] : *sel) {
+      for (auto &[k, v] : *sel) {
         res[k] += v * count;
       }
       pb = b;
@@ -222,7 +232,7 @@ nextChunkedPath(const BasePaths& basePaths, const ChunkedPath& chunkedPath, int 
 }
 
 static Num
-solve(const BasePaths basePaths, const std::string& line, int rounds) {
+solve(const BasePaths basePaths, const std::string &line, int rounds) {
   auto chunkedPath = chunked(line);
   for (int i = 0; i <= rounds; ++i) {
     chunkedPath = nextChunkedPath(basePaths, chunkedPath, rounds - i);
@@ -233,7 +243,7 @@ solve(const BasePaths basePaths, const std::string& line, int rounds) {
 }
 
 static Num
-solve(const BasePaths basePaths, const std::vector<std::string>& lines, int rounds) {
+solve(const BasePaths basePaths, const std::vector<std::string> &lines, int rounds) {
   Num res = 0;
   for (auto line : lines) {
     res += solve(basePaths, line, rounds);
@@ -246,7 +256,8 @@ solve(const BasePaths basePaths, const std::vector<std::string>& lines, int roun
 int
 main() {
   std::vector<std::string> lines;
-  std::copy(std::istream_iterator<std::string>(std::cin), std::istream_iterator<std::string>(), std::back_inserter<>(lines));
+  std::copy(
+      std::istream_iterator<std::string>(std::cin), std::istream_iterator<std::string>(), std::back_inserter<>(lines));
 
   auto basePaths = findBasePaths(ABUTTONS);
   basePaths.merge(findBasePaths(BBUTTONS));

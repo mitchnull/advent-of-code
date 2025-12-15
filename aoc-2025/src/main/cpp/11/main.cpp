@@ -10,7 +10,7 @@ using Set = std::unordered_set<Node>;
 using Map = std::unordered_map<Node, List>;
 
 static void
-topOrder(const Map& g, Set& nodes, List& ordered, Node n) {
+topOrder(const Map &g, Set &nodes, List &ordered, Node n) {
   if (!nodes.contains(n)) {
     return;
   }
@@ -26,7 +26,7 @@ topOrder(const Map& g, Set& nodes, List& ordered, Node n) {
 }
 
 static List
-topOrder(const Map& g) {
+topOrder(const Map &g) {
   List res;
   Set nodes = g | views::transform([](auto e) { return e.first; }) | ranges::to<Set>();
   while (!nodes.empty()) {
@@ -38,7 +38,7 @@ topOrder(const Map& g) {
 }
 
 static Num
-solve(const Map& g, const List& order, Node src, Node dst) {
+solve(const Map &g, const List &order, Node src, Node dst) {
   std::unordered_map<Node, Num> ways;
   ways[src] = 1;
   for (auto it = std::find(order.begin(), order.end(), src); it != order.end() && *it != dst; ++it) {
@@ -71,9 +71,9 @@ main() {
   auto dac = std::find(order.begin(), order.end(), "dac");
   auto fft = std::find(order.begin(), order.end(), "fft");
   if (dac != order.end() && fft != order.end()) {
-    println("2: {}", solve(g, order, "svr", *std::min(dac, fft))
-        * solve(g, order, *std::min(dac, fft), *std::max(dac, fft))
-        * solve(g, order, *std::max(dac, fft), "out"));
+    println("2: {}",
+        solve(g, order, "svr", *std::min(dac, fft)) * solve(g, order, *std::min(dac, fft), *std::max(dac, fft)) *
+            solve(g, order, *std::max(dac, fft), "out"));
   }
 
   return 0;

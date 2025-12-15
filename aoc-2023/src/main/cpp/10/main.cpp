@@ -36,7 +36,8 @@ toDir(char c) {
   return Z;
 }
 
-static Dir rev(Dir dir) {
+static Dir
+rev(Dir dir) {
   switch (dir) {
     case U: return D;
     case D: return U;
@@ -61,7 +62,7 @@ step(Pos p, Dir dir) {
   }
 }
 
-template<typename T>
+template <typename T>
 struct Map {
   std::vector<std::vector<T>> lines;
 
@@ -69,27 +70,27 @@ struct Map {
     if (i < 0 || i >= (int)lines.size()) {
       return {};
     }
-    auto& line = lines[i];
+    auto &line = lines[i];
     if (j < 0 || j >= (int)line.size()) {
       return {};
     }
     return line[j];
   }
 
-  T& operator()(int i, int j) {
+  T &operator()(int i, int j) {
     static T def{};
     if (i < 0 || i >= (int)lines.size()) {
       return def;
     }
-    auto& line = lines[i];
+    auto &line = lines[i];
     if (j < 0 || j >= (int)line.size()) {
       return def;
     }
     return line[j];
   }
-  
+
   template <typename U>
-  Map& resize(const Map<U>& m) {
+  Map &resize(const Map<U> &m) {
     lines.resize(m.lines.size());
     for (int i = 0, e = lines.size(); i != e; ++i) {
       lines[i].resize(m.lines[i].size());
@@ -97,7 +98,7 @@ struct Map {
     return *this;
   }
 
-  Map& resize(int w, int h) {
+  Map &resize(int w, int h) {
     lines.resize(h);
     for (int i = 0, e = lines.size(); i != e; ++i) {
       lines[i].resize(w);
@@ -111,27 +112,19 @@ using ScaledMap = Map<std::uint8_t>;
 static const std::vector<Dir> Dirs{U, D, L, R};
 
 static const auto Figs = std::vector<ScaledMap>{
-    {{{0,1,0},
-      {0,1,0},
-      {0,0,0}}},
+    {{{0, 1, 0}, {0, 1, 0}, {0, 0, 0}}},
 
-    {{{0,0,0},
-      {0,1,0},
-      {0,1,0}}},
+    {{{0, 0, 0}, {0, 1, 0}, {0, 1, 0}}},
 
-    {{{0,0,0},
-      {1,1,0},
-      {0,0,0}}},
+    {{{0, 0, 0}, {1, 1, 0}, {0, 0, 0}}},
 
-    {{{0,0,0},
-      {0,1,1},
-      {0,0,0}}},
-  };
+    {{{0, 0, 0}, {0, 1, 1}, {0, 0, 0}}},
+};
 
 static Pos
-findStart(const Map<Dir>& map) {
+findStart(const Map<Dir> &map) {
   for (int i = 0, e = map.lines.size(); i < e; ++i) {
-    const auto& line = map.lines[i];
+    const auto &line = map.lines[i];
     for (int j = 0, e = line.size(); j < e; ++j) {
       if (line[j] == S) {
         return {i, j};
@@ -142,12 +135,12 @@ findStart(const Map<Dir>& map) {
 }
 
 static void
-scaleUp(const Map<Dir>& map, Pos p, Dir curr, ScaledMap& scaledMap) {
+scaleUp(const Map<Dir> &map, Pos p, Dir curr, ScaledMap &scaledMap) {
   for (int di = 0; di < Dirs.size(); ++di) {
     Dir dir = Dirs[di];
     if (curr & dir) {
-      auto& fig = Figs[di];
-      for (int i = 0 ; i < 3; ++i) {
+      auto &fig = Figs[di];
+      for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
           scaledMap(p.i * 3 + i, p.j * 3 + j) |= fig(i, j);
         }
@@ -157,7 +150,7 @@ scaleUp(const Map<Dir>& map, Pos p, Dir curr, ScaledMap& scaledMap) {
 }
 
 static int
-findDist(const Map<Dir>& map, Map<int>& dists, ScaledMap& scaledMap) {
+findDist(const Map<Dir> &map, Map<int> &dists, ScaledMap &scaledMap) {
   Pos p = findStart(map);
   int count = 0;
   while (dists(p.i, p.j) == 0) {
@@ -180,7 +173,7 @@ findDist(const Map<Dir>& map, Map<int>& dists, ScaledMap& scaledMap) {
 }
 
 static void
-fill(ScaledMap& scaledMap, Pos p) {
+fill(ScaledMap &scaledMap, Pos p) {
   if (scaledMap(p.i, p.j)) {
     return;
   }

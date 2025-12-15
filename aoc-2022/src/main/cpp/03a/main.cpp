@@ -21,9 +21,7 @@ using uint = uint32;
 
 static uint
 prio(char c) {
-  return c > 'Z'
-    ? c - 'a' + 1
-    : c - 'A' + 27;
+  return c > 'Z' ? c - 'a' + 1 : c - 'A' + 27;
 }
 
 static auto

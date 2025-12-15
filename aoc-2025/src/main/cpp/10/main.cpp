@@ -21,7 +21,7 @@ struct Machine {
 /* ------------------------------------------------------------------------ */
 
 static int
-solve1(const Machine& m) {
+solve1(const Machine &m) {
   auto visited = std::unordered_set<Lights>{Lights{}};
   auto q = std::deque<std::pair<Lights, int>>{{}};
   while (!q.empty()) {
@@ -42,7 +42,7 @@ solve1(const Machine& m) {
 /* ------------------------------------------------------------------------ */
 
 static void
-degauss(Mat& g, VA& limits) {
+degauss(Mat &g, VA &limits) {
   for (int i = 0; i < g.size();) {
     if (g[i][i] == 0) {
       for (int k = i + 1; k < g.front().size() - 1; ++k) {
@@ -70,7 +70,7 @@ degauss(Mat& g, VA& limits) {
 }
 
 static bool
-inc(VA& v, int n, const VA& limits) {
+inc(VA &v, int n, const VA &limits) {
   for (int i = v.size() - 1; i >= n; --i) {
     if (++v[i] <= limits[i]) {
       return true;
@@ -81,7 +81,7 @@ inc(VA& v, int n, const VA& limits) {
 }
 
 static int
-check(const Mat& g, VA v) {
+check(const Mat &g, VA v) {
   for (int i = g.size() - 1; i >= 0; --i) {
     auto c = g[i][i];
     int xv = 0;
@@ -98,7 +98,7 @@ check(const Mat& g, VA v) {
 }
 
 static int
-solve2(const Machine& m) {
+solve2(const Machine &m) {
   VA limits = VA(std::numeric_limits<int>::max(), m.wirings.size());
   Mat g;
   for (int i = 0; i < m.jolts.size(); ++i) {
@@ -159,8 +159,8 @@ main() {
     machines.emplace_back(lights, wirings, jolts);
   }
 
-  int res1 = ranges::fold_left(machines | views::transform([](const auto& m) { return solve1(m); }), 0, std::plus<>());
-  int res2 = ranges::fold_left(machines | views::transform([](const auto& m) { return solve2(m); }), 0, std::plus<>());
+  int res1 = ranges::fold_left(machines | views::transform([](const auto &m) { return solve1(m); }), 0, std::plus<>());
+  int res2 = ranges::fold_left(machines | views::transform([](const auto &m) { return solve2(m); }), 0, std::plus<>());
 
   println("1: {}", res1);
   println("2: {}", res2);

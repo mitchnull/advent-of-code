@@ -42,14 +42,14 @@ constexpr const uint W = P + P;
 using Map = std::vector<std::vector<bool>>;
 
 static void
-ensureRow(Map& map, uint row) {
+ensureRow(Map &map, uint row) {
   if (map.size() <= row) {
     map.resize(row + 1, std::vector<bool>(W));
   }
 }
 
 static void
-addLine(Map& map, const Line& line) {
+addLine(Map &map, const Line &line) {
   ensureRow(map, std::max(line.a.y, line.b.y));
   if (line.a.y == line.b.y) {
     uint sx = std::min(line.a.x, line.b.x);
@@ -66,9 +66,8 @@ addLine(Map& map, const Line& line) {
   }
 }
 
-
 static void
-parse(const string& line, Map& map) {
+parse(const string &line, Map &map) {
   uint x, y, lx, ly;
   string str;
   char c;
@@ -82,7 +81,7 @@ parse(const string& line, Map& map) {
 }
 
 static bool
-fall(Map& map, Point& p) {
+fall(Map &map, Point &p) {
   uint y1 = p.y + 1;
   if (!map[y1][p.x]) {
     p.y = y1;

@@ -22,7 +22,7 @@ namespace views = ranges::views;
 using V = std::vector<uint>;
 
 static bool
-inc(V& gaps, const V& lens, uint len, uint maxLen) {
+inc(V &gaps, const V &lens, uint len, uint maxLen) {
   uint i = gaps.size();
   while (i-- > 0) {
     ++gaps[i];
@@ -37,7 +37,7 @@ inc(V& gaps, const V& lens, uint len, uint maxLen) {
 }
 
 static std::string
-expand(const V& gaps, const V& lens, uint maxLen) {
+expand(const V &gaps, const V &lens, uint maxLen) {
   std::string res;
   for (auto git = gaps.begin(), lit = lens.begin(), end = gaps.end(); git != end; ++git, ++lit) {
     for (uint i = 0; i < *git; ++i) {
@@ -54,7 +54,7 @@ expand(const V& gaps, const V& lens, uint maxLen) {
 }
 
 static bool
-check(const std::string& rec, const std::string exp) {
+check(const std::string &rec, const std::string exp) {
   for (auto rit = rec.begin(), eit = exp.begin(), end = rec.end(); rit != end; ++rit, ++eit) {
     if (*rit != *eit && *rit != '?') {
       return false;
@@ -64,7 +64,7 @@ check(const std::string& rec, const std::string exp) {
 }
 
 static Num
-arrangements(const std::string& rec, const V& lens) {
+arrangements(const std::string &rec, const V &lens) {
   uint maxLen = rec.size();
   uint len = std::accumulate(lens.begin(), lens.end(), 0);
   V gaps(lens.size(), 1);

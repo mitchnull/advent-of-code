@@ -17,7 +17,7 @@ struct Check {
   int value;
   string out;
 
-  OptString eval(const Item& item) {
+  OptString eval(const Item &item) {
     if (op == '<' && item.at(var) < value) {
       return out;
     }
@@ -34,14 +34,14 @@ struct Rule {
   string last;
   Num count = 0;
 
-  OptString eval(const Item& item) {
+  OptString eval(const Item &item) {
     if (checks.empty()) {
       for (auto [k, v] : item) {
         count += v;
       }
       return {};
     }
-    for (auto& check : checks) {
+    for (auto &check : checks) {
       auto out = check.eval(item);
       if ((out)) {
         return out;
@@ -54,7 +54,7 @@ struct Rule {
 using Rules = std::unordered_map<string, Rule>;
 
 static void
-eval(Rules& rules, OptString q, const Item& item) {
+eval(Rules &rules, OptString q, const Item &item) {
   while ((q)) {
     q = rules.at(*q).eval(item);
   }
@@ -75,7 +75,9 @@ main() {
     std::regex_search(line, sm, ruleRegex);
     auto rule = Rule{sm[1], {}, sm[3]};
     string checks = sm[2];
-    for (auto it = std::sregex_iterator(checks.begin(), checks.end(), checkRegex), end = std::sregex_iterator(); it != end; ++it) {
+    for (auto it = std::sregex_iterator(checks.begin(), checks.end(), checkRegex), end = std::sregex_iterator();
+        it != end;
+        ++it) {
       rule.checks.push_back(Check{it->str(2).front(), it->str(1).front(), std::stoi(it->str(3)), it->str(4)});
     }
     rules[rule.name] = std::move(rule);
@@ -86,13 +88,14 @@ main() {
   Items items;
   while (std::getline(std::cin, line)) {
     Item item;
-    for (auto it = std::sregex_iterator(line.begin(), line.end(), itemRegex), end = std::sregex_iterator(); it != end; ++it) {
+    for (auto it = std::sregex_iterator(line.begin(), line.end(), itemRegex), end = std::sregex_iterator(); it != end;
+        ++it) {
       item[it->str(1).front()] = std::stoi(it->str(2));
     }
     items.push_back(std::move(item));
   }
 
-  for (auto& item : items) {
+  for (auto &item : items) {
     eval(rules, "in", item);
   }
 

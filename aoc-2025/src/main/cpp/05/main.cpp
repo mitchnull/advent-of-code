@@ -6,10 +6,9 @@ using Num = uint64_t;
 using Range = std::pair<Num, Num>;
 using Ranges = std::vector<Range>;
 
-
 static bool
-isFresh(const Ranges& ranges, Num i) {
-  for (const auto& r: ranges) {
+isFresh(const Ranges &ranges, Num i) {
+  for (const auto &r : ranges) {
     if (r.first <= i && i <= r.second) {
       return true;
     }
@@ -22,7 +21,7 @@ solve2(Ranges ranges) {
   Num res{};
   std::sort(ranges.begin(), ranges.end(), [](auto a, auto b) { return a.first < b.first; });
   Range mr = ranges.front();
-  for (const auto& r: ranges) {
+  for (const auto &r : ranges) {
     if (r.first > mr.second) {
       res += mr.second - mr.first + 1;
       mr = r;
@@ -46,7 +45,7 @@ main() {
     std::istringstream in{line};
     Num a, b;
     char c;
-    in >> a >> c >> b; 
+    in >> a >> c >> b;
     ranges.emplace_back(a, b);
   }
   Num res1{};

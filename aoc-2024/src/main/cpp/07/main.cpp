@@ -18,9 +18,7 @@ check1(Num res, auto b, auto e) {
   if (b == e) {
     return res == n;
   }
-  return
-    (res >= n && check1(res - n, b, e)) ||
-    (res % n == 0 && check1(res / n, b, e));
+  return (res >= n && check1(res - n, b, e)) || (res % n == 0 && check1(res / n, b, e));
 }
 
 static bool
@@ -30,18 +28,14 @@ check2(Num res, auto b, auto e) {
     return res == n;
   }
   Num mask = std::pow(10, std::floor(std::log10(n)) + 1);
-  return
-    (res >= n && check2(res - n, b, e)) ||
-    (res % n == 0 && check2(res / n, b, e)) ||
-    (res % mask == n && check2(res / mask, b, e));
-
+  return (res >= n && check2(res - n, b, e)) || (res % n == 0 && check2(res / n, b, e)) ||
+      (res % mask == n && check2(res / mask, b, e));
 }
 
 // ------------------------------------------------------------------------ //
 
 int
 main() {
-
   std::vector<Data> input;
   std::string line;
   while (std::getline(std::cin, line)) {
@@ -58,7 +52,7 @@ main() {
 
   Num res1 = 0;
   Num res2 = 0;
-  for (const auto& d: input) {
+  for (const auto &d : input) {
     res1 += d.res * check1(d.res, d.nums.rbegin(), d.nums.rend());
     res2 += d.res * check2(d.res, d.nums.rbegin(), d.nums.rend());
   }

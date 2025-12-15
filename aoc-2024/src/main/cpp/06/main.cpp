@@ -19,7 +19,7 @@ public:
     }
     return 0;
   }
-  char& operator()(int x, int y) {
+  char &operator()(int x, int y) {
     static char off;
     if (0 <= x && x < w_ && 0 <= y && y < h_) {
       return lines_[y][x];
@@ -38,17 +38,17 @@ struct Pos {
   int x, y, d;
 };
 
-const auto DIRS = std::vector<Dir> {
-  { 0, -1},
-  { 1, 0},
-  { 0, 1},
-  { -1, 0},
+const auto DIRS = std::vector<Dir>{
+    {0, -1},
+    {1, 0},
+    {0, 1},
+    {-1, 0},
 };
 
 // ------------------------------------------------------------------------ //
 
 static Pos
-findStart(const Map& map) {
+findStart(const Map &map) {
   for (int x = 0; x < map.w(); ++x) {
     for (int y = 0; y < map.h(); ++y) {
       if (map(x, y) == '^') {
@@ -60,7 +60,7 @@ findStart(const Map& map) {
 }
 
 static Pos
-move(const Map& map, const Pos& pos, Map& visited) {
+move(const Map &map, const Pos &pos, Map &visited) {
   visited(pos.x, pos.y) |= 1 << pos.d;
   Dir d = DIRS[pos.d];
   Pos np = {pos.x + d.dx, pos.y + d.dy, pos.d};
@@ -71,7 +71,7 @@ move(const Map& map, const Pos& pos, Map& visited) {
 }
 
 static int
-countVisited(const Map& map) {
+countVisited(const Map &map) {
   int res = 0;
   for (int x = 0; x < map.w(); ++x) {
     for (int y = 0; y < map.h(); ++y) {
@@ -84,7 +84,7 @@ countVisited(const Map& map) {
 }
 
 static int
-countSteps(const Map& map, Pos pos, Map& visited) {
+countSteps(const Map &map, Pos pos, Map &visited) {
   while (map(pos.x, pos.y)) {
     pos = move(map, pos, visited);
   }
@@ -94,7 +94,7 @@ countSteps(const Map& map, Pos pos, Map& visited) {
 // ------------------------------------------------------------------------ //
 
 static bool
-isLoop(const Map& map, Pos pos) {
+isLoop(const Map &map, Pos pos) {
   auto visited = Map(map.w(), map.h());
   while (map(pos.x, pos.y)) {
     if (visited(pos.x, pos.y) & (1 << pos.d)) {
@@ -106,7 +106,7 @@ isLoop(const Map& map, Pos pos) {
 }
 
 static int
-countLoops(Map map, const Pos& start, const Map& visited) {
+countLoops(Map map, const Pos &start, const Map &visited) {
   int res = 0;
   for (int x = 0; x < map.w(); ++x) {
     for (int y = 0; y < map.h(); ++y) {

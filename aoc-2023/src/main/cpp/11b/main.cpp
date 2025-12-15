@@ -21,7 +21,7 @@ namespace ranges = std::ranges;
 namespace views = ranges::views;
 
 static auto
-operator<=>(const Num& a, const Num &b) {
+operator<=>(const Num &a, const Num &b) {
   return sgn(a - b) <=> 0;
 }
 
@@ -29,14 +29,14 @@ static const Num M = 1'000'000 - 1;
 
 struct Pos {
   Num i, j;
-  friend auto operator<=>(const Pos& a, const Pos& b) = default;
+  friend auto operator<=>(const Pos &a, const Pos &b) = default;
 };
 
 using V = std::vector<Pos>;
 
 static void
-expand(V& v, Num Pos::* proj) {
-  std::sort(v.begin(), v.end(), [&](auto& a, auto& b) { return a.*proj < b.*proj; });
+expand(V &v, Num Pos::*proj) {
+  std::sort(v.begin(), v.end(), [&](auto &a, auto &b) { return a.*proj < b.*proj; });
   Num k = 0;
   for (auto it = v.begin(), end = v.end(); it < end; ++it) {
     Num offset = ((*it).*proj - k) - 1;
@@ -51,13 +51,13 @@ expand(V& v, Num Pos::* proj) {
 }
 
 static Num
-d(const Pos& a, const Pos& b) {
+d(const Pos &a, const Pos &b) {
   return abs(a.i - b.i) + abs(a.j - b.j);
 }
 
 int
 main() {
-  Num i =0;
+  Num i = 0;
   Num j = 0;
 
   V v;
@@ -68,9 +68,7 @@ main() {
         ++i;
         j = 0;
         continue;
-      case '#':
-        v.emplace_back(i, j);
-        break;
+      case '#': v.emplace_back(i, j); break;
     }
     ++j;
   }

@@ -41,34 +41,34 @@ using Rock = std::vector<Bits>;
 using Board = std::vector<Bits>;
 
 const std::vector<Rock> rocks{
-  {
-    0b000111100,
-  },
-  {
-    0b000010000,
-    0b000111000,
-    0b000010000,
-  },
-  {
-    0b000001000,
-    0b000001000,
-    0b000111000,
-  },
-  {
-    0b000100000,
-    0b000100000,
-    0b000100000,
-    0b000100000,
-  },
-  {
-    0b000110000,
-    0b000110000,
-  },
+    {
+        0b000111100,
+    },
+    {
+        0b000010000,
+        0b000111000,
+        0b000010000,
+    },
+    {
+        0b000001000,
+        0b000001000,
+        0b000111000,
+    },
+    {
+        0b000100000,
+        0b000100000,
+        0b000100000,
+        0b000100000,
+    },
+    {
+        0b000110000,
+        0b000110000,
+    },
 };
 
 static void
-grow(Board& board, const Rock& r) {
-  for (uint y = board.size(); y-- > 0; ) {
+grow(Board &board, const Rock &r) {
+  for (uint y = board.size(); y-- > 0;) {
     if ((board[y] & mask).any()) {
       uint ns = y + VD + r.size() + 1;
       while (board.size() < ns) {
@@ -83,7 +83,7 @@ grow(Board& board, const Rock& r) {
 }
 
 static bool
-coll(const Board& board, const Rock& rock, int x, uint y) {
+coll(const Board &board, const Rock &rock, int x, uint y) {
   for (uint j = 0; j < rock.size(); ++j) {
     Bits rb = (x < 0) ? (rock[j] << -x) : (rock[j] >> x);
     if ((board[y - j] & rb).any()) {
@@ -94,7 +94,7 @@ coll(const Board& board, const Rock& rock, int x, uint y) {
 }
 
 static void
-merge(Board& board, const Rock& rock, int x, uint y) {
+merge(Board &board, const Rock &rock, int x, uint y) {
   for (uint j = 0; j < rock.size(); ++j) {
     Bits rb = (x < 0) ? (rock[j] << -x) : (rock[j] >> x);
     board[y - j] |= rb;
@@ -102,11 +102,11 @@ merge(Board& board, const Rock& rock, int x, uint y) {
 }
 
 static void
-print(const Board& board, const char* title) {
+print(const Board &board, const char *title) {
   std::cout << title << ":\n";
-  for (uint y = board.size(); y-- > 0; ) {
-    const Bits& b = board[y];
-    for (uint i = b.size(); i-- > 0; ) {
+  for (uint y = board.size(); y-- > 0;) {
+    const Bits &b = board[y];
+    for (uint i = b.size(); i-- > 0;) {
       std::cout << ((b[i]) ? '#' : '.');
     }
     std::cout << "\n";
@@ -122,7 +122,7 @@ main() {
   const uint amod = air.size();
   uint ai = 0;
   for (uint c = 0; c < N; ++c) {
-    const Rock& r = rocks[c % rmod];
+    const Rock &r = rocks[c % rmod];
     grow(board, r);
     uint y = board.size() - 1;
     int x = 0;

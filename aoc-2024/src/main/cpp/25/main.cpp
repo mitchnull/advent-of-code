@@ -18,10 +18,10 @@ fits(Heights key, Heights lock, int hmax) {
 }
 
 static Num
-solve1(const HeightsList& keys, const HeightsList& locks, int hmax) {
+solve1(const HeightsList &keys, const HeightsList &locks, int hmax) {
   Num res = 0;
-  for (auto& k: keys) {
-    for (auto& l: locks) {
+  for (auto &k : keys) {
+    for (auto &l : locks) {
       res += fits(l, k, hmax);
     }
   }

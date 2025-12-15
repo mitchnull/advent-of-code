@@ -11,3 +11,6 @@ cpp/11b/main: LDFLAGS+=-lgmpxx -lgmp
 
 clean:
 	rm -rf build
+
+fmt:
+	clang-format -i src/main/cpp/*.h src/main/cpp/*/*.cpp

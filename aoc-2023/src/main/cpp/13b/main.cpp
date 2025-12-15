@@ -24,48 +24,42 @@ using Board = std::vector<std::string>;
 struct Dir {
   int di, dj;
 
-  Dir swap() const {
-    return {dj, di};
-  }
+  Dir swap() const { return {dj, di}; }
 };
 
 struct Pos {
   int i, j;
 
-  Pos& operator+=(Dir dir) {
+  Pos &operator+=(Dir dir) {
     i += dir.di;
     j += dir.dj;
     return *this;
   }
-  Pos& operator-=(Dir dir) {
+  Pos &operator-=(Dir dir) {
     i -= dir.di;
     j -= dir.dj;
     return *this;
   }
-  Pos proj(Dir dir) const {
-    return {i * dir.di, j * dir.dj};
-  }
+  Pos proj(Dir dir) const { return {i * dir.di, j * dir.dj}; }
 
-  friend auto operator<=>(const Pos&, const Pos&) = default;
+  friend auto operator<=>(const Pos &, const Pos &) = default;
 
-  bool allLess(const Pos& other) const {
-    return i < other.i && j < other.j;
-  }
+  bool allLess(const Pos &other) const { return i < other.i && j < other.j; }
 };
 
 static void
-swap(Pos& a, Pos& b) {
+swap(Pos &a, Pos &b) {
   std::swap(a.i, b.i);
   std::swap(a.j, b.j);
 }
 
 static Pos
-endPos(const Board& board) {
+endPos(const Board &board) {
   return Pos(board.size(), board.front().size());
 }
 
 static bool
-isSame(const Board& board, Pos p, Pos q, Dir dir) {
+isSame(const Board &board, Pos p, Pos q, Dir dir) {
   const Pos end = endPos(board);
   while (p.allLess(end)) {
     if (board[p.i][p.j] != board[q.i][q.j]) {
@@ -78,7 +72,7 @@ isSame(const Board& board, Pos p, Pos q, Dir dir) {
 }
 
 static bool
-check(const Board& board, Pos first, Pos last, Dir dir) {
+check(const Board &board, Pos first, Pos last, Dir dir) {
   if (last < first) {
     swap(last, first);
   }
@@ -94,7 +88,7 @@ check(const Board& board, Pos first, Pos last, Dir dir) {
 }
 
 static Pos
-findSame(const Board& board, Pos edge, Dir dir, Pos pos) {
+findSame(const Board &board, Pos edge, Dir dir, Pos pos) {
   const Pos end = endPos(board).proj(dir);
   Dir xdir = dir.swap();
   while (pos < end && !isSame(board, edge, pos, xdir)) {
@@ -104,12 +98,13 @@ findSame(const Board& board, Pos edge, Dir dir, Pos pos) {
 }
 
 static Pos
-calc(const Board& board, Dir dir, Pos ignored) {
+calc(const Board &board, Dir dir, Pos ignored) {
   const Pos end = endPos(board);
   for (Pos edge : {Pos{0, 0}, end.proj(dir) -= dir}) {
-    for (auto pos = findSame(board, edge, dir, {0, 0}); pos.allLess(end); pos = findSame(board, edge, dir, pos += dir)) {
+    for (auto pos = findSame(board, edge, dir, {0, 0}); pos.allLess(end);
+        pos = findSame(board, edge, dir, pos += dir)) {
       if (pos != edge && check(board, edge, pos, dir)) {
-        Pos res = {dir.di * ((pos.i + edge.i) / 2 + 1),  dir.dj * ((pos.j + edge.j) /2  + 1)};
+        Pos res = {dir.di * ((pos.i + edge.i) / 2 + 1), dir.dj * ((pos.j + edge.j) / 2 + 1)};
         if (res != ignored) {
           return res;
         }
@@ -120,7 +115,7 @@ calc(const Board& board, Dir dir, Pos ignored) {
 }
 
 static Pos
-calc(const Board& board, Pos ignored = {}) {
+calc(const Board &board, Pos ignored = {}) {
   if (board.empty()) {
     return {};
   }
@@ -128,7 +123,7 @@ calc(const Board& board, Pos ignored = {}) {
 }
 
 static void
-smudge(Board& board, int i, int j) {
+smudge(Board &board, int i, int j) {
   board[i][j] ^= '#' ^ '.';
 }
 
@@ -138,7 +133,7 @@ value(Pos pos) {
 }
 
 static Pos
-calcSmudged(Board& board) {
+calcSmudged(Board &board) {
   Pos orig = calc(board);
   Pos end = endPos(board);
   for (int i = 0; i < end.i; ++i) {

@@ -23,7 +23,7 @@ using Board = std::vector<std::pair<uint, bool>>;
 static constexpr uint N = 5;
 
 static bool
-isWinner(const Board& b, uint row, uint col) {
+isWinner(const Board &b, uint row, uint col) {
   auto horiz = true;
   for (uint j = 0; j < N; ++j) {
     horiz = horiz & b[row * N + j].second;
@@ -42,11 +42,11 @@ isWinner(const Board& b, uint row, uint col) {
 }
 
 static uint
-check(Board& board, uint n) {
+check(Board &board, uint n) {
   bool winner = false;
   for (uint i = 0; i < N; ++i) {
     for (uint j = 0; j < N; ++j) {
-      auto& b = board[i * N + j];
+      auto &b = board[i * N + j];
       if (b.first == n) {
         b.second = true;
         winner = winner || isWinner(board, i, j);
@@ -66,7 +66,7 @@ check(Board& board, uint n) {
 }
 
 static bool
-readBoard(std::vector<Board>& boards) {
+readBoard(std::vector<Board> &boards) {
   Board board;
   for (uint i = 0; i < N * N; ++i) {
     int n;
@@ -96,7 +96,7 @@ main() {
     continue;
   }
   for (auto n : draws) {
-    for (auto it = boards.begin(); it != boards.end(); ) {
+    for (auto it = boards.begin(); it != boards.end();) {
       auto res = check(*it, n);
       if (res != 0) {
         if (boards.size() == 1) {

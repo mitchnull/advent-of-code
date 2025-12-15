@@ -23,7 +23,7 @@ using uint = uint32;
 using Range = std::pair<uint, uint>;
 
 static Range
-parseRange(const std::string_view& sv) {
+parseRange(const std::string_view &sv) {
   auto mid = std::ranges::find(sv, '-');
   uint a, b;
   std::from_chars(sv.begin(), mid, a);
@@ -32,7 +32,7 @@ parseRange(const std::string_view& sv) {
 }
 
 static std::pair<Range, Range>
-parse(const std::string& line) {
+parse(const std::string &line) {
   auto mid = std::ranges::find(line, ',');
   return {parseRange({line.begin(), mid}), parseRange({mid + 1, line.end()})};
 }

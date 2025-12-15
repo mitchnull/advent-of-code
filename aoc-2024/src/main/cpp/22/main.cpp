@@ -29,7 +29,7 @@ struct Buyer {
   std::vector<Num> secrets;
   String changeLog;
 
-  Buyer (Num seed, int rounds) : secrets{seed}, changeLog{} {
+  Buyer(Num seed, int rounds) : secrets{seed}, changeLog{} {
     int last = seed % 10;
     for (int i = 0; i < rounds; ++i) {
       seed = nextSecret(seed);
@@ -45,7 +45,7 @@ using Prices = std::unordered_map<String, int>;
 using StringSet = std::unordered_set<String>;
 
 static void
-updatePrices(Prices& prices, const Buyer& buyer) {
+updatePrices(Prices &prices, const Buyer &buyer) {
   StringSet visited{};
   for (int i = 0; i < buyer.changeLog.size() - 4; ++i) {
     auto pattern = buyer.changeLog.substr(i, 4);
@@ -65,11 +65,12 @@ main() {
   std::vector<Buyer> buyers;
   std::transform(seeds.begin(), seeds.end(), std::back_inserter(buyers), [](Num seed) { return Buyer(seed, 2000); });
 
-  Num res1 = std::transform_reduce(buyers.begin(), buyers.end(), Num{}, std::plus<>(), [](auto b) { return b.secrets.back(); });
+  Num res1 = std::transform_reduce(
+      buyers.begin(), buyers.end(), Num{}, std::plus<>(), [](auto b) { return b.secrets.back(); });
   std::cout << "1: " << res1 << std::endl;
 
   Prices prices;
-  for (const auto& b : buyers) {
+  for (const auto &b : buyers) {
     updatePrices(prices, b);
   }
   auto it = std::max_element(prices.begin(), prices.end(), [](auto a, auto b) { return a.second < b.second; });

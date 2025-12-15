@@ -36,10 +36,8 @@ using Num = int64;
 static Num
 from5d(char c) {
   switch (c) {
-    case '=':
-      return -2;
-    case '-':
-      return -1;
+    case '=': return -2;
+    case '-': return -1;
   }
   return c - '0';
 }
@@ -47,16 +45,14 @@ from5d(char c) {
 static char
 to5d(Num d) {
   switch (d) {
-    case -2:
-      return '=';
-    case -1:
-      return '-';
+    case -2: return '=';
+    case -1: return '-';
   }
   return '0' + d;
 }
 
 static Num
-from5(const string& str) {
+from5(const string &str) {
   Num res = 0;
   for (auto it = str.cbegin(), end = str.cend(); it != end; ++it) {
     res *= 5;

@@ -15,7 +15,7 @@ struct Tup {
 using Tups = std::vector<Tup>;
 
 static Num
-d2(const Pos3& a, const Pos3& b) {
+d2(const Pos3 &a, const Pos3 &b) {
   Num res{};
   for (int i = 0; i < a.size(); ++i) {
     res += (a[i] - b[i]) * (a[i] - b[i]);
@@ -23,11 +23,10 @@ d2(const Pos3& a, const Pos3& b) {
   return res;
 }
 
-
 static Num
-solve1(const Groups& groups) {
+solve1(const Groups &groups) {
   auto groupCounts = std::unordered_map<int, Num>{};
-  for (const auto& g : groups) {
+  for (const auto &g : groups) {
     if (g != 0) {
       ++groupCounts[g];
     }
@@ -55,7 +54,7 @@ main() {
       tups.emplace_back(i, j, d2(v[i], v[j]));
     }
   }
-  auto comp = [](const auto& a, const auto& b) { return a.d2 > b.d2; };
+  auto comp = [](const auto &a, const auto &b) { return a.d2 > b.d2; };
   std::make_heap(tups.begin(), tups.end(), comp);
 
   auto groups = Groups(v.size(), 0);
@@ -75,9 +74,9 @@ main() {
       groups[t.a] = groups[t.b] = ++g;
     } else if (g1 == 0) {
       groups[t.a] = g2;
-    } else if (g2 ==0) {
+    } else if (g2 == 0) {
       groups[t.b] = g1;
-    } else if (g1 == g2 ) {
+    } else if (g1 == g2) {
       continue;
     } else {
       std::replace(groups.begin(), groups.end(), g1, g2);

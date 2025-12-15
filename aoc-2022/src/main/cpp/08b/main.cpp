@@ -30,14 +30,13 @@ struct Tree {
 using Forest = std::vector<std::vector<Tree>>;
 
 static uint
-viewingDistance(const Forest& forest, int i, int j, int di, int dj) {
+viewingDistance(const Forest &forest, int i, int j, int di, int dj) {
   uint res = 0;
   int mh = forest[i][j].h;
   i += di;
   j += dj;
-  for (; 0 <= i && i < forest.size() && 0 <= j && j < forest[i].size();
-      i+= di, j += dj) {
-    const Tree& tree = forest[i][j];
+  for (; 0 <= i && i < forest.size() && 0 <= j && j < forest[i].size(); i += di, j += dj) {
+    const Tree &tree = forest[i][j];
     ++res;
     if (tree.h >= mh) {
       break;
@@ -47,20 +46,16 @@ viewingDistance(const Forest& forest, int i, int j, int di, int dj) {
 }
 
 static uint
-scenicScore(const Forest& forest, int i, int j) {
-  return
-    viewingDistance(forest, i, j, -1, 0) *
-    viewingDistance(forest, i, j, +1, 0) *
-    viewingDistance(forest, i, j, 0, -1) *
-    viewingDistance(forest, i, j, 0, +1);
-
+scenicScore(const Forest &forest, int i, int j) {
+  return viewingDistance(forest, i, j, -1, 0) * viewingDistance(forest, i, j, +1, 0) *
+      viewingDistance(forest, i, j, 0, -1) * viewingDistance(forest, i, j, 0, +1);
 }
 
 static void
-print(const Forest& forest) {
+print(const Forest &forest) {
   for (uint i = 0; i < forest.size(); ++i) {
     for (uint j = 0; j < forest[i].size(); ++j) {
-      const Tree& tree = forest[i][j];
+      const Tree &tree = forest[i][j];
       std::cout << tree.h;
     }
     std::cout << "\n";
