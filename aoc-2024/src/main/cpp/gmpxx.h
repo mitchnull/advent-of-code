@@ -22,3 +22,7 @@ struct std::hash<mpz_class> {
   }
 };
 
+inline static auto
+operator<=>(const mpz_class& a, const mpz_class& b) {
+  return sgn(a - b) <=> 0;
+}

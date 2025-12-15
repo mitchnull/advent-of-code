@@ -5,6 +5,7 @@
 #include <iterator>
 #include <unordered_map>
 #include <unordered_set>
+#include <numeric>
 
 using Num = std::uint64_t;
 using String = std::string;

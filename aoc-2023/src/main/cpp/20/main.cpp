@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <queue>
 #include <sstream>
+#include <numeric>
 
 /* ------------------------------------------------------------------------ */
 

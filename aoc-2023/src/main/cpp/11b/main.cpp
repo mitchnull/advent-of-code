@@ -20,6 +20,10 @@ using Num = mpz_class;
 namespace ranges = std::ranges;
 namespace views = ranges::views;
 
+static auto
+operator<=>(const Num& a, const Num &b) {
+  return sgn(a - b) <=> 0;
+}
 
 static const Num M = 1'000'000 - 1;
 

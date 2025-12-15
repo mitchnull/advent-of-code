@@ -1,4 +1,5 @@
 #!/bin/bash
+year=$(pwd | grep -o '[0-9]*$')
 if [ "$1" = "--asan" ]; then
   KIND=.asan
   export CXXFLAGS="-Og -g -fsanitize=address"
@@ -21,24 +22,31 @@ input=$2
 if [ -z "$input" ]; then
   input="input.txt"
 fi
-d="input/$1"
-if [ ! -d "$d" ]; then
+if [ "$input" = "-" ]; then
+  input="/dev/stdin"
+elif [ "$input" = $(basename "$input") ]; then
+  d="input/$1"
+  if [ ! -d "$d" ]; then
   d="input/`echo $1 | sed 's/\([0-9]*\).*/\1/'`"
+  fi
+  input="$d/$input"
 fi
+fail=0
 if [ -f "src/main/cpp/$1/main.cpp" ]; then
   echo "C++ version:"
   mkdir -p build/cpp/$1 >/dev/null
   make -C build -f ../Makefile cpp/$1/main >/dev/null &&
-  time build/cpp/$1/main < $d/$input
+  time build/cpp/$1/main < "$input" || fail=1
   if [ -n "$KIND" ]; then
     mv build/cpp/$1/main{,$KIND}
   fi
 fi
-if [ -f "src/main/kotlin/hu/desnull/aoc2025/p$1/Main.kt" ]; then
+if [ -f "src/main/kotlin/hu/desnull/$year/p$1/Main.kt" ]; then
   echo "Kotlin verion:"
-  time gradle --console=plain -q -PmainClassName=hu.desnull.aoc2025.p$p.MainKt run < $d/$input
+  time gradle --console=plain -q -PmainClassName=hu.desnull.aoc$year.p$p.MainKt run < "$input" || fail=2
 fi
 if [ -f "src/main/lua/$1.lua" ]; then
   echo "Lua verion:"
-  time luajit src/main/lua/$1.lua < $d/$input
+  time luajit src/main/lua/$1.lua < "$input" || fail=3
 fi
+exit $fail

@@ -2,6 +2,7 @@
 #include <numeric>
 #include <sstream>
 #include <algorithm>
+#include <vector>
 
 using Num = std::int64_t;
 using String = std::string;

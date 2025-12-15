@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <iostream>
 #include <string>
+#include <vector>
 
 using uint = std::uint32_t;
 

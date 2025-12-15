@@ -7,8 +7,8 @@
 using Num = std::int64_t;
 using Nums = std::unordered_set<Num>;
 
-int
-static digits(Num n) {
+static int
+digits(Num n) {
   return static_cast<int>(std::log10(n)) + 1;
 }
 

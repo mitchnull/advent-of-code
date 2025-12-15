@@ -35,7 +35,7 @@ constexpr const uint VD = 3;
 using Bits = std::bitset<9>;
 constexpr const Bits wall = Bits(0b100000001);
 constexpr const Bits mask = Bits(0b011111110);
-constexpr const Bits floor = Bits(0b111111111);
+constexpr const Bits bottom = Bits(0b111111111);
 
 using Rock = std::vector<Bits>;
 using Board = std::vector<Bits>;
@@ -117,7 +117,7 @@ int
 main() {
   string air;
   std::cin >> air;
-  Board board{floor};
+  Board board{bottom};
   const uint rmod = rocks.size();
   const uint amod = air.size();
   uint ai = 0;

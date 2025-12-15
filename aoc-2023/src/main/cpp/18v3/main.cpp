@@ -2,6 +2,7 @@
 #include <string>
 #include <algorithm>
 #include <unordered_map>
+#include <numeric>
 #include "../utils.h"
 
 /* ------------------------------------------------------------------------ */
