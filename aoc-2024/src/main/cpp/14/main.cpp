@@ -1,9 +1,9 @@
+#include "../utils.h"
 #include <bitset>
 #include <iostream>
 #include <numeric>
 #include <sstream>
 #include <string>
-#include "../utils.h"
 
 using Row = std::bitset<128>;
 using Map = std::vector<Row>;

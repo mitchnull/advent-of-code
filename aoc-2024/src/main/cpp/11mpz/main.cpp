@@ -1,9 +1,9 @@
+#include "../gmpxx.h"
 #include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <numeric>
 #include <unordered_map>
-#include "../gmpxx.h"
 
 using Num = mpz_class;
 using Counts = std::unordered_map<Num, Num>;

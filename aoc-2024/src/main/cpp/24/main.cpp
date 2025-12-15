@@ -1,7 +1,7 @@
+#include <algorithm>
 #include <iostream>
 #include <numeric>
 #include <sstream>
-#include <algorithm>
 #include <vector>
 
 using Num = std::int64_t;

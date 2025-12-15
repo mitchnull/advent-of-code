@@ -1,8 +1,8 @@
-#include <iostream>
-#include <cstdint>
-#include <cmath>
-#include <unordered_set>
 #include "../utils.h"
+#include <cmath>
+#include <cstdint>
+#include <iostream>
+#include <unordered_set>
 
 using Num = std::int64_t;
 using Nums = std::unordered_set<Num>;

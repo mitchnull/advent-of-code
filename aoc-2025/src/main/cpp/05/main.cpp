@@ -1,6 +1,6 @@
 #include "../utils.h"
-#include <sstream>
 #include <algorithm>
+#include <sstream>
 
 using Num = uint64_t;
 using Range = std::pair<Num, Num>;

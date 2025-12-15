@@ -1,6 +1,6 @@
+#include "../utils.h"
 #include <iostream>
 #include <string>
-#include "../utils.h"
 
 /* ------------------------------------------------------------------------ */
 

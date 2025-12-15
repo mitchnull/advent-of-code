@@ -1,11 +1,11 @@
 #include "../utils.h"
-#include <sstream>
 #include <algorithm>
-#include <deque>
 #include <bitset>
-#include <valarray>
+#include <deque>
 #include <numeric>
+#include <sstream>
 #include <unordered_set>
+#include <valarray>
 
 using Lights = std::bitset<16>;
 using V = std::vector<int>;

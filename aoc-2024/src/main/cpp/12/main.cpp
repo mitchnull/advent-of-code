@@ -1,8 +1,8 @@
+#include "../utils.h"
 #include <cstdint>
 #include <deque>
 #include <iostream>
 #include <string>
-#include "../utils.h"
 
 using Num = uint64_t;
 

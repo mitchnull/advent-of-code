@@ -1,7 +1,7 @@
 #include "../utils.h"
+#include <algorithm>
 #include <numeric>
 #include <sstream>
-#include <algorithm>
 
 using Num = int64_t;
 using Nums = std::vector<Num>;

@@ -1,8 +1,8 @@
+#include "../utils.h"
 #include <cstdint>
 #include <iostream>
 #include <set>
 #include <string>
-#include "../utils.h"
 
 using uint = std::uint32_t;
 

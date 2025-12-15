@@ -1,7 +1,7 @@
-#include <iostream>
-#include <cstdint>
-#include <print>
 #include <algorithm>
+#include <cstdint>
+#include <iostream>
+#include <print>
 
 using Num = std::int64_t;
 using std::println;

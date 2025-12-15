@@ -1,5 +1,5 @@
-#include <algorithm>
 #include "../utils.h"
+#include <algorithm>
 
 using Board = Grid<>;
 

@@ -1,19 +1,19 @@
+#include <algorithm>
+#include <bitset>
+#include <cctype>
+#include <charconv>
+#include <cstdint>
+#include <deque>
 #include <ios>
 #include <iostream>
-#include <cctype>
-#include <cstdint>
 #include <limits>
-#include <deque>
-#include <numeric>
-#include <string>
-#include <vector>
 #include <map>
-#include <bitset>
-#include <algorithm>
+#include <numeric>
 #include <ranges>
-#include <unordered_map>
 #include <sstream>
-#include <charconv>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 using uint8 = std::uint8_t;
 using int8 = std::int8_t;

@@ -1,7 +1,7 @@
+#include "../utils.h"
 #include <iostream>
 #include <numeric>
 #include <string>
-#include "../utils.h"
 
 using Board = Grid<>;
 

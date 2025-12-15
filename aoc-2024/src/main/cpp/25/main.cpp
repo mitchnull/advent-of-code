@@ -1,7 +1,7 @@
 #include <iostream>
+#include <ranges>
 #include <string>
 #include <vector>
-#include <ranges>
 
 using Num = std::int64_t;
 using Heights = std::vector<int>;

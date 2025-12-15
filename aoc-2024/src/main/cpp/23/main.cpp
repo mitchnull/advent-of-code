@@ -1,9 +1,9 @@
-#include <iostream>
 #include <algorithm>
-#include <numeric>
-#include <vector>
+#include <iostream>
 #include <iterator>
+#include <numeric>
 #include <unordered_map>
+#include <vector>
 
 using Num = int;
 

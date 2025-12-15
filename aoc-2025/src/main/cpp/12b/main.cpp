@@ -1,7 +1,7 @@
 #include "../utils.h"
+#include <iterator>
 #include <numeric>
 #include <sstream>
-#include <iterator>
 
 using Num = int64_t;
 using Box = Grid<>;

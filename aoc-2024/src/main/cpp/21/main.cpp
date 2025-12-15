@@ -1,14 +1,14 @@
+#include "../utils.h"
 #include <algorithm>
 #include <cstdint>
 #include <iostream>
-#include <vector>
-#include <unordered_map>
-#include <map>
 #include <iterator>
-#include <string>
+#include <map>
 #include <numeric>
 #include <ranges>
-#include "../utils.h"
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 using Num = std::uint64_t;
 using Button = char;

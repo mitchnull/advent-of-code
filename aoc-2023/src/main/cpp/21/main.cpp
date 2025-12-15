@@ -1,6 +1,6 @@
+#include "../utils.h"
 #include <iostream>
 #include <unordered_set>
-#include "../utils.h"
 
 /* ------------------------------------------------------------------------ */
 

@@ -1,5 +1,5 @@
-#include <iostream>
 #include <cctype>
+#include <iostream>
 #include <limits>
 
 using uint8 = std::uint8_t;

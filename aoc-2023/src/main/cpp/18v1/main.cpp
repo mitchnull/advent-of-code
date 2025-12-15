@@ -1,8 +1,8 @@
-#include <iostream>
-#include <string>
-#include <algorithm>
-#include <numeric>
 #include "../utils.h"
+#include <algorithm>
+#include <iostream>
+#include <numeric>
+#include <string>
 
 /* ------------------------------------------------------------------------ */
 

@@ -1,19 +1,19 @@
-#include <ios>
-#include <iostream>
+#include <algorithm>
+#include <bitset>
 #include <cctype>
 #include <cstdint>
-#include <limits>
 #include <deque>
-#include <string>
-#include <vector>
+#include <gmpxx.h>
+#include <ios>
+#include <iostream>
+#include <limits>
 #include <map>
-#include <unordered_map>
-#include <bitset>
-#include <algorithm>
+#include <numeric>
 #include <ranges>
 #include <sstream>
-#include <numeric>
-#include <gmpxx.h>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 using Num = mpz_class;
 

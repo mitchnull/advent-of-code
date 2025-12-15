@@ -1,8 +1,8 @@
 #include "../utils.h"
 #include <algorithm>
+#include <iterator>
 #include <numeric>
 #include <sstream>
-#include <iterator>
 
 struct Task {
   int w, h;

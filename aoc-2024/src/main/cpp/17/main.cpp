@@ -2,7 +2,6 @@
 #include <iostream>
 #include <vector>
 
-
 using Num = std::int64_t;
 using byte = std::uint8_t;
 using Bytes = std::vector<byte>;

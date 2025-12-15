@@ -1,8 +1,8 @@
-#include <iostream>
+#include <algorithm>
 #include <cstdint>
+#include <iostream>
 #include <string>
 #include <vector>
-#include <algorithm>
 
 using Num = std::int64_t;
 

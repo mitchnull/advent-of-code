@@ -1,10 +1,10 @@
 #include "../utils.h"
-#include <sstream>
 #include <algorithm>
-#include <deque>
 #include <bitset>
-#include <z3++.h>
+#include <deque>
+#include <sstream>
 #include <unordered_set>
+#include <z3++.h>
 
 using Lights = std::bitset<16>;
 using V = std::vector<std::int16_t>;
