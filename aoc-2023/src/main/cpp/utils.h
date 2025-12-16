@@ -3,11 +3,14 @@
 
 #include <functional>
 #include <iostream>
+#include <print>
 #include <ranges>
 #include <string>
 #include <vector>
 
 namespace views = std::views;
+namespace ranges = std::ranges;
+using std::print, std::println;
 
 /* ------------------------------------------------------------------------ */
 
@@ -53,6 +56,15 @@ struct std::hash<Dir> {
   std::size_t operator()(const Dir &d) const { return hashCombine(d.dx, d.dy); }
 };
 
+template <>
+struct std::formatter<Dir> {
+  constexpr auto parse(std::format_parse_context &ctx) { return ctx.begin(); }
+
+  auto format(const Dir &d, std::format_context &ctx) const {
+    return std::format_to(ctx.out(), "{{{}, {}}}", d.dx, d.dy);
+  }
+};
+
 /* ------------------------------------------------------------------------ */
 
 struct Pos {
@@ -77,6 +89,15 @@ struct std::hash<Pos> {
   std::size_t operator()(const Pos &p) const { return hashCombine(p.x, p.y); }
 };
 
+template <>
+struct std::formatter<Pos> {
+  constexpr auto parse(std::format_parse_context &ctx) { return ctx.begin(); }
+
+  auto format(const Pos &pos, std::format_context &ctx) const {
+    return std::format_to(ctx.out(), "{{{}, {}}}", pos.x, pos.y);
+  }
+};
+
 /* ------------------------------------------------------------------------ */
 
 template <typename T = char>
@@ -94,7 +115,9 @@ struct Grid {
     }
   }
 
-  Grid(int w, int h, T init = {}, T off = {}) : w_(w), h_(h), data_(w * h, init), off_(off) {}
+  Grid(int w, int h, T init = {}, T off = {}) : w_(w), h_(h), data_(w_ * h_, init), off_(off) {}
+
+  Grid &operator=(const Grid &other) = default;
 
   const value_type &operator[](int x, int y) const {
     if (0 <= x && x < w_ && 0 <= y && y < h_) {
@@ -131,8 +154,20 @@ struct Grid {
     }
     return os;
   }
+
+  template <typename Tr = std::identity>
+  static Grid read(std::istream &in = std::cin, value_type off = {}, Tr tr = {}) {
+    std::vector<std::string> lines;
+    std::string line;
+    while (std::getline(in, line)) {
+      lines.push_back(line);
+    }
+    return Grid(lines, off, tr);
+  }
+
+  auto friend operator<=>(const Grid &a, const Grid &b) = default;
 private:
-  int w_, h_;
+  std::size_t w_, h_;
   std::vector<value_type> data_;
   value_type off_;
 
@@ -147,6 +182,65 @@ private:
         views::transform([&map](int i) { return Iter<decltype(map[0, 0])>{i % map.w_, i / map.w_, map.data_[i]}; });
   }
 };
+
+template <typename T>
+struct std::hash<Grid<T>> {
+  std::size_t operator()(const Grid<T> &grid) const {
+    std::size_t h = hashCombine(grid.w(), grid.h());
+    for (const auto &v : grid) {
+      h = hashCombine(h, v);
+    }
+    return h;
+  }
+};
+
+template <typename T>
+struct std::formatter<Grid<T>> {
+  constexpr auto parse(std::format_parse_context &ctx) { return ctx.begin(); }
+
+  auto format(const Grid<T> &m, std::format_context &ctx) const {
+    for (int y = 0; y < m.h(); ++y) {
+      for (int x = 0; x < m.w(); ++x) {
+        std::format_to(ctx.out(), "{}", m[x, y]);
+      }
+      std::format_to(ctx.out(), "\n");
+    }
+    return ctx.out();
+  }
+};
+
+/* ------------------------------------------------------------------------ */
+
+static auto
+piecewise_apply(auto a, auto b, auto op) {
+  return [&]<size_t... Is>(std::index_sequence<Is...>) {
+    return std::make_tuple(op(std::get<Is>(a), std::get<Is>(b))...);
+  }(std::make_index_sequence<std::tuple_size_v<decltype(a)>>());
+}
+
+template <typename... As, typename... Bs>
+static auto
+operator+(const std::tuple<As...> &a, const std::tuple<Bs...> &b) {
+  return piecewise_apply(a, b, std::plus<>());
+}
+
+template <typename... As, typename... Bs>
+static auto
+operator+=(std::tuple<As...> &a, const std::tuple<Bs...> &b) {
+  return a = piecewise_apply(a, b, std::plus<>());
+}
+
+template <typename A, typename B>
+static auto
+operator+(const std::pair<A, B> &a, const std::pair<A, B> &b) {
+  return piecewise_apply(a, b, std::plus<>());
+}
+
+template <typename A, typename B>
+static auto
+operator+=(std::pair<A, B> &a, const std::pair<A, B> &b) {
+  return a = piecewise_apply(a, b, std::plus<>());
+}
 
 /* ------------------------------------------------------------------------ */
 
