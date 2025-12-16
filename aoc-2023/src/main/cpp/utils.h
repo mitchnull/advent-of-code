@@ -10,7 +10,8 @@
 
 namespace views = std::views;
 namespace ranges = std::ranges;
-using std::print, std::println;
+using std::print, std::println, std::string, std::size_t;
+using sv = std::string_view;
 
 /* ------------------------------------------------------------------------ */
 
@@ -179,7 +180,7 @@ private:
   template <typename M>
   static auto iter_(M &map) {
     return views::iota(0UZ, map.data_.size()) |
-        views::transform([&map](int i) { return Iter<decltype(map[0, 0])>{i % map.w_, i / map.w_, map.data_[i]}; });
+        views::transform([&map](int i) { return Iter<decltype(map[0, 0])>{i % map.w(), i / map.w(), map.data_[i]}; });
   }
 };
 

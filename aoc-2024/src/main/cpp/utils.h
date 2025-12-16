@@ -3,11 +3,15 @@
 
 #include <functional>
 #include <iostream>
+#include <print>
 #include <ranges>
 #include <string>
 #include <vector>
 
 namespace views = std::views;
+namespace ranges = std::ranges;
+using std::print, std::println, std::string, std::size_t;
+using sv = std::string_view;
 
 /* ------------------------------------------------------------------------ */
 
@@ -112,7 +116,9 @@ struct Grid {
     }
   }
 
-  Grid(int w, int h, T init = {}, T off = {}) : w_(w), h_(h), data_(w * h, init), off_(off) {}
+  Grid(int w, int h, T init = {}, T off = {}) : w_(w), h_(h), data_(w_ * h_, init), off_(off) {}
+
+  Grid &operator=(const Grid &other) = default;
 
   const value_type &operator[](int x, int y) const {
     if (0 <= x && x < w_ && 0 <= y && y < h_) {
@@ -149,8 +155,20 @@ struct Grid {
     }
     return os;
   }
+
+  template <typename Tr = std::identity>
+  static Grid read(std::istream &in = std::cin, value_type off = {}, Tr tr = {}) {
+    std::vector<std::string> lines;
+    std::string line;
+    while (std::getline(in, line)) {
+      lines.push_back(line);
+    }
+    return Grid(lines, off, tr);
+  }
+
+  auto friend operator<=>(const Grid &a, const Grid &b) = default;
 private:
-  int w_, h_;
+  std::size_t w_, h_;
   std::vector<value_type> data_;
   value_type off_;
 
@@ -162,7 +180,18 @@ private:
   template <typename M>
   static auto iter_(M &map) {
     return views::iota(0UZ, map.data_.size()) |
-        views::transform([&map](int i) { return Iter<decltype(map[0, 0])>{i % map.w_, i / map.w_, map.data_[i]}; });
+        views::transform([&map](int i) { return Iter<decltype(map[0, 0])>{i % map.w(), i / map.w(), map.data_[i]}; });
+  }
+};
+
+template <typename T>
+struct std::hash<Grid<T>> {
+  std::size_t operator()(const Grid<T> &grid) const {
+    std::size_t h = hashCombine(grid.w(), grid.h());
+    for (const auto &v : grid) {
+      h = hashCombine(h, v);
+    }
+    return h;
   }
 };
 
@@ -180,6 +209,39 @@ struct std::formatter<Grid<T>> {
     return ctx.out();
   }
 };
+
+/* ------------------------------------------------------------------------ */
+
+static auto
+piecewise_apply(auto a, auto b, auto op) {
+  return [&]<size_t... Is>(std::index_sequence<Is...>) {
+    return std::make_tuple(op(std::get<Is>(a), std::get<Is>(b))...);
+  }(std::make_index_sequence<std::tuple_size_v<decltype(a)>>());
+}
+
+template <typename... As, typename... Bs>
+static auto
+operator+(const std::tuple<As...> &a, const std::tuple<Bs...> &b) {
+  return piecewise_apply(a, b, std::plus<>());
+}
+
+template <typename... As, typename... Bs>
+static auto
+operator+=(std::tuple<As...> &a, const std::tuple<Bs...> &b) {
+  return a = piecewise_apply(a, b, std::plus<>());
+}
+
+template <typename A, typename B>
+static auto
+operator+(const std::pair<A, B> &a, const std::pair<A, B> &b) {
+  return piecewise_apply(a, b, std::plus<>());
+}
+
+template <typename A, typename B>
+static auto
+operator+=(std::pair<A, B> &a, const std::pair<A, B> &b) {
+  return a = piecewise_apply(a, b, std::plus<>());
+}
 
 /* ------------------------------------------------------------------------ */
 

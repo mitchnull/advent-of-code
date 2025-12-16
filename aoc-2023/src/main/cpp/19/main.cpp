@@ -8,33 +8,32 @@
 
 /* ------------------------------------------------------------------------ */
 
-using std::string;
-using Item = std::unordered_map<char, int>;
-using Items = std::vector<Item>;
 using Num = std::int64_t;
-using OptString = std::optional<string>;
+using std::string;
 
 enum Props {
   X, M, A, S
 };
 
-constexpr const auto PROPS = {'x', 'm', 'a', 's'};
-// constexpr const auto PROPS = {X, M, A, S};
+constexpr const auto PROPS = {X, M, A, S};
+
+using Item = std::array<int, PROPS.size()>;
+using Items = std::vector<Item>;
 
 struct Check {
   char op;
   char var;
   int value;
-  string out;
+  std::string out;
 };
 
 struct Rule {
-  string name;
+  std::string name;
   std::vector<Check> checks;
-  string last;
+  std::string last;
 };
 
-using Rules = std::unordered_map<string, Rule>;
+using Rules = std::unordered_map<std::string, Rule>;
 
 struct Range {
   int b = 1, e = 4001;
@@ -52,7 +51,7 @@ using Ranges = std::vector<RangeByProp>;
 /* ------------------------------------------------------------------------ */
 
 void
-process(const Rules &rules, const string &n, RangeByProp rp, Ranges &res) {
+process(const Rules &rules, const std::string &n, RangeByProp rp, Ranges &res) {
   if (n == "A") {
     res.push_back(rp);
     return;
@@ -96,13 +95,13 @@ main() {
   auto checkRegex = std::regex("([xmas])([<>])([0-9]*):([a-zAR]*),");
   auto itemRegex = std::regex("([xmas])=([0-9]*),?");
 
-  string line;
+  std::string line;
   Rules rules;
   while (std::getline(std::cin, line) && !line.empty()) {
     std::smatch sm;
     std::regex_search(line, sm, ruleRegex);
     auto rule = Rule{sm[1], {}, sm[3]};
-    string checks = sm[2];
+    std::string checks = sm[2];
     for (auto it = std::sregex_iterator(checks.begin(), checks.end(), checkRegex), end = std::sregex_iterator();
         it != end;
         ++it) {
