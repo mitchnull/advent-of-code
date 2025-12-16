@@ -17,73 +17,20 @@ using OptString = std::optional<string>;
 constexpr const auto PROPS = {'x', 'm', 'a', 's'};
 constexpr const int M = 4000;
 
-template <>
-struct std::formatter<Item> {
-  constexpr auto parse(std::format_parse_context &ctx) { return ctx.begin(); }
-
-  auto format(const Item &i, std::format_context &ctx) const {
-    std::format_to(ctx.out(), "{{");
-    string sep = "";
-    for (auto p : PROPS) {
-      std::format_to(ctx.out(), "{}{}={}", sep, p, i.at(p));
-      sep = ",";
-    }
-    return std::format_to(ctx.out(), "}}");
-  }
-};
-
-static Num
-sumValues(const Item &item) {
-  return std::transform_reduce(item.begin(), item.end(), 0, std::plus<>(), [](const auto &e) { return e.second; });
-}
-
 struct Check {
   char op;
   char var;
   int value;
   string out;
-
-  OptString eval(const Item &item) const {
-    if (op == '<' && item.at(var) < value) {
-      return out;
-    }
-    if (op == '>' && item.at(var) > value) {
-      return out;
-    }
-    return {};
-  }
 };
 
 struct Rule {
   string name;
   std::vector<Check> checks;
   string last;
-
-  OptString eval(const Item &item) const {
-    if (checks.empty()) {
-      return {};
-    }
-    for (const auto &check : checks) {
-      auto out = check.eval(item);
-      if ((out)) {
-        return out;
-      }
-    }
-    return last;
-  }
 };
 
 using Rules = std::unordered_map<string, Rule>;
-
-static bool
-eval(const Rules &rules, OptString q, const Item &item) {
-  while ((q) && *q != "A") {
-    q = rules.at(*q).eval(item);
-  }
-  return *q == "A";
-}
-
-/* ------------------------------------------------------------------------ */
 
 struct Range {
   int b, e;
@@ -95,39 +42,10 @@ struct Range {
   int size() const { return std::max(e - b, 0); };
 };
 
-template <>
-struct std::formatter<Range> {
-  constexpr auto parse(std::format_parse_context &ctx) { return ctx.begin(); }
-
-  auto format(const Range &r, std::format_context &ctx) const {
-    return std::format_to(ctx.out(), "[{}, {})", r.b, r.e);
-  }
-};
-
 using RangeByProp = std::unordered_map<char, Range>;
-
-static RangeByProp
-initRanges() {
-  return PROPS | views::transform([](auto p) { return std::make_pair(p, Range{1, M + 1}); }) |
-      ranges::to<RangeByProp>();
-}
-
-template <>
-struct std::formatter<RangeByProp> {
-  constexpr auto parse(std::format_parse_context &ctx) { return ctx.begin(); }
-
-  auto format(const RangeByProp &rp, std::format_context &ctx) const {
-    std::format_to(ctx.out(), "{{");
-    string sep = "";
-    for (auto p : PROPS) {
-      std::format_to(ctx.out(), "{}{}:{}", sep, p, rp.at(p));
-      sep = ", ";
-    }
-    return std::format_to(ctx.out(), "}}");
-  }
-};
-
 using Ranges = std::vector<RangeByProp>;
+
+/* ------------------------------------------------------------------------ */
 
 void
 process(const Rules &rules, const string &n, RangeByProp rp, Ranges &res) {
@@ -201,20 +119,19 @@ main() {
     items.push_back(std::move(item));
   }
 
-  Num res1 = std::transform_reduce(items.begin(), items.end(), Num{0}, std::plus<>(), [&](const auto &i) {
-    return eval(rules, "in", i) ? sumValues(i) : 0;
-  });
-  println("1: {}", res1);
-
+  RangeByProp init = PROPS | views::transform([](auto p) { return std::make_pair(p, Range{1, M + 1}); }) | ranges::to<RangeByProp>();
   Ranges matching;
-  process(rules, "in", initRanges(), matching);
-  // res1 = std::transform_reduce(items.begin(), items.end(), 0, std::plus<>(), [&](const auto &i) {
-  //     return (std::find_if(matching.begin(), matching.end(), [&](const auto &m) { return matches(m, i); }) !=
-  //     matching.end()) ? sumValues(i) : 0; });
-  // println("1: {}", res1);
+  process(rules, "in", init, matching);
+
+  Num res1 = std::transform_reduce(items.begin(), items.end(), Num{0}, std::plus<>(), [&](const auto &i) {
+      return (std::find_if(matching.begin(), matching.end(), [&](const auto &m) { return matches(m, i); }) !=
+      matching.end()) ? std::transform_reduce(i.begin(), i.end(), 0, std::plus<>(), [](const auto &e) { return e.second; }) : 0; });
   Num res2 = std::transform_reduce(matching.begin(), matching.end(), Num{0}, std::plus<>(), [](const auto &m) {
     return std::transform_reduce(
         m.begin(), m.end(), Num{1}, std::multiplies<>(), [](const auto &e) { return e.second.size(); });
   });
+
+  println("1: {}", res1);
   println("2: {}", res2);
+  return 0;
 }
