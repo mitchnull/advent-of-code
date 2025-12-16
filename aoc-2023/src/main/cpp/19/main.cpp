@@ -14,8 +14,12 @@ using Items = std::vector<Item>;
 using Num = std::int64_t;
 using OptString = std::optional<string>;
 
+enum Props {
+  X, M, A, S
+};
+
 constexpr const auto PROPS = {'x', 'm', 'a', 's'};
-constexpr const int M = 4000;
+// constexpr const auto PROPS = {X, M, A, S};
 
 struct Check {
   char op;
@@ -33,7 +37,7 @@ struct Rule {
 using Rules = std::unordered_map<string, Rule>;
 
 struct Range {
-  int b, e;
+  int b = 1, e = 4001;
 
   bool isEmpty() const { return b >= e; }
   bool contains(int v) const { return b <= v && v < e; }
@@ -119,7 +123,7 @@ main() {
     items.push_back(std::move(item));
   }
 
-  RangeByProp init = PROPS | views::transform([](auto p) { return std::make_pair(p, Range{1, M + 1}); }) | ranges::to<RangeByProp>();
+  RangeByProp init = PROPS | views::transform([](auto p) { return std::make_pair(p, Range{}); }) | ranges::to<RangeByProp>();
   Ranges matching;
   process(rules, "in", init, matching);
 
