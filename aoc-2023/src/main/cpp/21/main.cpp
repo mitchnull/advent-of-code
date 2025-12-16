@@ -9,22 +9,22 @@ using Num = int64_t;
 using Places = std::unordered_set<Pos>;
 
 static std::pair<Num, Board>
-solve1(Board board, Pos pos, Num steps) {
+solve1(Board board, Pos pos, Num steps, bool wrap = false) {
   Places curr{pos};
   for (int i = 0; i < steps; ++i) {
     Places next;
     for (auto p : curr) {
       for (auto dir : DIRS) {
         auto pp = p + dir;
+        if (wrap) {
+          pp = { (pp.x + board.w()) % board.w(), (pp.y + board.h()) % board.h() };
+        }
         if (board[pp] != '#') {
           next.insert(pp);
         }
       }
     }
     std::swap(curr, next);
-    // if (curr.size() == next.size()) {
-    //   break;
-    // }
   }
   for (auto p : curr) {
     board[p] = 'O';
@@ -46,32 +46,23 @@ main() {
     return Pos{i.x, i.y};
   })).front();
 
-  auto [res1, board1] = solve1(board, startPos, 5);
-  std::cout << "@@@ 5: " << res1 << std::endl << board1 << std::endl;
-  std::cout << "---" << std::endl;
-  auto [res2, board2] = solve1(board, startPos, 16);
-  std::cout << "@@@ 16: " << res2 << std::endl << board2 << std::endl;
-  auto [res3, board3] = solve1(board, startPos, 27);
-  std::cout << "@@@ 27: " << res3 << std::endl << board3 << std::endl;
+  auto [res1, board1] = solve1(board, startPos, 64);
 
-  auto [res1000, board1000] = solve1(board, startPos, 1000);
-  std::cout << "@@@ 1000: " << res1000 << std::endl << board1000 << std::endl;
-  auto [res1001, board1001] = solve1(board, startPos, 1001);
-  std::cout << "@@@ 1001: " << res1001 << std::endl << board1001 << std::endl;
-
-  return 0;
-
-  std::cout << "---" << std::endl;
-  auto [all, fullBoard] = solve1(board, startPos, board.w() + board.h());
-
-  for (int i = 0; i < board.w() + board.h(); ++i) {
-    auto [resi, bi] = solve1(board, {board.w() / 2, 0}, i);
-    std::cout << "@@@ " << i << ": " << resi << std::endl;
-    std::cout << bi << std::endl;
+  // Notes:
+  // - board size is 131x131
+  // - board gets filled as the obstacles do not create closed areas
+  // - we can reach all sides in a straight line
+  // - step count is 26501365 = 131 * 202300 + 65, so we reach to just the edges of the tiles with 1 step is on a new tiles
+  for (int steps : { 10, 11, 31, 32 }) {
+    const int TS = 7;
+    const int EXT = (steps - (TS / 2)) / TS + 1;
+    const int N = (EXT * 2 + 1) * TS;
+    Board tb = Board(N, N, '.', '#');
+    auto [tr, tbr] = solve1(tb, Pos{N / 2, N / 2}, steps);
+    println("test board {}x{} steps {}: \n{}", TS, TS, steps, tbr);
   }
 
   // const Num STEPS2 = 26501365L;
 
   std::cout << res1 << std::endl;
-  std::cout << all << std::endl;
 }
