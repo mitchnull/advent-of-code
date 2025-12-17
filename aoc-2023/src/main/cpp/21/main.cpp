@@ -9,16 +9,13 @@ using Num = int64_t;
 using Places = std::unordered_set<Pos>;
 
 static std::pair<Num, Board>
-solve1(Board board, Pos pos, Num steps, bool wrap = false) {
+solve1(Board board, Pos pos, Num steps) {
   Places curr{pos};
   for (int i = 0; i < steps; ++i) {
     Places next;
     for (auto p : curr) {
       for (auto dir : DIRS) {
         auto pp = p + dir;
-        if (wrap) {
-          pp = { (pp.x + board.w()) % board.w(), (pp.y + board.h()) % board.h() };
-        }
         if (board[pp] != '#') {
           next.insert(pp);
         }
@@ -30,6 +27,46 @@ solve1(Board board, Pos pos, Num steps, bool wrap = false) {
     board[p] = 'O';
   }
   return {curr.size(), board};
+}
+
+static Num
+solve2(const Board& board, Pos pos, Num steps) {
+  // Notes:
+  // - board size is 131x131
+  // - we can reach the extents as the obstacles do not create too much disturbance anywhere
+  // - there's also a nice "clear path" where the iteration stops
+  // - we can reach all sides in a straight line
+  // - step count is 26501365 = 131 * 202300 + 65, so we reach to just the edges of the tiles
+  // - there are a few kinds of "small boards" stitched together to create the large board
+  // - we sum up the values for these small boards in appropriate quantities (see samples)
+  int bs = board.h();
+  int half = bs - pos.y - 1;
+  int rep = (steps - half) / bs;
+
+  Num odds1 = rep - 1;
+  Num odds = (odds1 - 1) * (rep - 1);
+  Num evens1 = rep;
+  Num evens = ((evens1 - 1) * rep);
+
+  auto [odd, oddBoard] = solve1(board, pos, bs + half - 1);
+  auto [even, evenBoard] = solve1(board, pos, bs + half);
+
+  auto [slb, slbBoard] = solve1(board, Pos{bs - 1, bs - 1}, half - 1);
+  auto [srb, srbBoard] = solve1(board, Pos{0, bs - 1}, half - 1);
+  auto [llb, llbBoard] = solve1(board, Pos{bs - 1, bs - 1}, bs + half - 1);
+  auto [lrb, lrbBoard] = solve1(board, Pos{0, bs - 1}, bs + half - 1);
+
+  auto [slt, sltBoard] = solve1(board, Pos{0, 0}, half - 1);
+  auto [srt, srtBoard] = solve1(board, Pos{bs - 1, 0}, half - 1);
+  auto [llt, lltBoard] = solve1(board, Pos{0, 0}, bs + half - 1);
+  auto [lrt, lrtBoard] = solve1(board, Pos{bs - 1, 0}, bs + half - 1);
+
+  auto [left, lBoard] = solve1(board, Pos{bs - 1, bs / 2}, bs - 1);
+  auto [right, rBoard] = solve1(board, Pos{0, bs / 2}, bs - 1);
+  auto [top, tBoard] = solve1(board, Pos{bs / 2,bs - 1}, bs - 1);
+  auto [bottom, bBoard] = solve1(board, Pos{bs / 2, 0}, bs - 1);
+
+  return (odds + odds1) * odd + (evens + evens1) * even + (slb + srb + slt + srt) * rep + (llb + lrb + llt + lrt) * (rep - 1) + top + bottom + left + right;
 }
 
 /* ------------------------------------------------------------------------ */
@@ -47,22 +84,8 @@ main() {
   })).front();
 
   auto [res1, board1] = solve1(board, startPos, 64);
+  auto res2 = solve2(board, startPos, 26501365L);
 
-  // Notes:
-  // - board size is 131x131
-  // - board gets filled as the obstacles do not create closed areas
-  // - we can reach all sides in a straight line
-  // - step count is 26501365 = 131 * 202300 + 65, so we reach to just the edges of the tiles with 1 step is on a new tiles
-  for (int steps : { 10, 11, 31, 32 }) {
-    const int TS = 7;
-    const int EXT = (steps - (TS / 2)) / TS + 1;
-    const int N = (EXT * 2 + 1) * TS;
-    Board tb = Board(N, N, '.', '#');
-    auto [tr, tbr] = solve1(tb, Pos{N / 2, N / 2}, steps);
-    println("test board {}x{} steps {}: \n{}", TS, TS, steps, tbr);
-  }
-
-  // const Num STEPS2 = 26501365L;
-
-  std::cout << res1 << std::endl;
+  println("1: {}", res1);
+  println("2: {}", res2);
 }
