@@ -30,7 +30,7 @@ solve1(Board board, Pos pos, Num steps) {
 }
 
 static Num
-solve2(const Board& board, Pos pos, Num steps) {
+solve2(const Board &board, Pos pos, Num steps) {
   // Notes:
   // - board size is 131x131
   // - we can reach the extents as the obstacles do not create too much disturbance anywhere
@@ -63,10 +63,11 @@ solve2(const Board& board, Pos pos, Num steps) {
 
   auto [left, lBoard] = solve1(board, Pos{bs - 1, bs / 2}, bs - 1);
   auto [right, rBoard] = solve1(board, Pos{0, bs / 2}, bs - 1);
-  auto [top, tBoard] = solve1(board, Pos{bs / 2,bs - 1}, bs - 1);
+  auto [top, tBoard] = solve1(board, Pos{bs / 2, bs - 1}, bs - 1);
   auto [bottom, bBoard] = solve1(board, Pos{bs / 2, 0}, bs - 1);
 
-  return (odds + odds1) * odd + (evens + evens1) * even + (slb + srb + slt + srt) * rep + (llb + lrb + llt + lrt) * (rep - 1) + top + bottom + left + right;
+  return (odds + odds1) * odd + (evens + evens1) * even + (slb + srb + slt + srt) * rep +
+      (llb + lrb + llt + lrt) * (rep - 1) + top + bottom + left + right;
 }
 
 /* ------------------------------------------------------------------------ */
