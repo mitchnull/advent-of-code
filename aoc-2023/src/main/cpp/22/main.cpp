@@ -1,5 +1,6 @@
 #include "../utils.h"
 #include <algorithm>
+#include <numeric>
 
 using Num = int64_t;
 
@@ -27,6 +28,15 @@ struct Brick {
   Pos3d b, e;
 };
 
+template <>
+struct std::formatter<Brick> {
+  constexpr auto parse(std::format_parse_context &ctx) { return ctx.begin(); }
+
+  auto format(const Brick &b, std::format_context &ctx) const {
+    return std::format_to(ctx.out(), "{}~{}", b.b, b.e);
+  }
+};
+
 using Bricks = std::vector<Brick>;
 
 /* ------------------------------------------------------------------------ */
@@ -49,10 +59,10 @@ dropDown(Bricks &bricks, int i) {
 }
 
 static int
-supporters(const Bricks &bricks, int i) {
+supporters(const Bricks &bricks, const std::vector<bool>& disintegrated, int i) {
   int res = 0;
   for (int j = i - 1; j >= 0; --j) {
-    res += (bricks[j].e.z == bricks[i].b.z - 1) && isOverlapping(bricks[i], bricks[j]);
+    res += !disintegrated[j] && (bricks[j].e.z == bricks[i].b.z - 1) && isOverlapping(bricks[i], bricks[j]);
   }
   return res;
 }
@@ -65,6 +75,32 @@ isFree(const Bricks &bricks, const std::vector<int> &supps, int i) {
     }
   }
   return true;
+}
+
+static Num
+disintegrate(const Bricks &bricks, int i) {
+  Num res = 0;
+  auto disintegrated = std::vector<bool>(bricks.size());
+  disintegrated[i] = true;
+  for (bool changed = true; changed; ) {
+    changed = false;
+    for (int j = i + 1; j < bricks.size(); ++j) {
+      if (!disintegrated[j] && bricks[j].b.z > 1 && supporters(bricks, disintegrated, j) == 0) {
+        disintegrated[j] = changed = true;
+        ++res;
+      }
+    }
+  };
+  return res;
+}
+
+static Num
+solve2(const Bricks &bricks, const std::vector<int> &supps) {
+  Num res = 0;
+  for (int i = 0; i < bricks.size(); ++i) {
+    res += disintegrate(bricks, i);
+  }
+  return res;
 }
 
 /* ------------------------------------------------------------------------ */
@@ -90,13 +126,16 @@ main() {
   // for (const auto &b : bricks) {
   //   println("@@@1 {}~{}", b.b, b.e);
   // }
-  auto supps = views::iota(0UZ, bricks.size()) | views::transform([&](auto i) { return supporters(bricks, i); }) |
+  auto none = std::vector<bool>(bricks.size(), false);
+  auto supps = views::iota(0UZ, bricks.size()) | views::transform([&](auto i) { return supporters(bricks, none, i); }) |
       ranges::to<std::vector<int>>();
   Num res1 = ranges::count(
       views::iota(0UZ, bricks.size()) | views::transform([&](auto i) { return isFree(bricks, supps, i); }), true);
 
+  Num res2 = solve2(bricks, supps);
+
   println("1: {}", res1);
-  // println("2: {}", res2);
+  println("2: {}", res2);
 
   return 0;
 }
