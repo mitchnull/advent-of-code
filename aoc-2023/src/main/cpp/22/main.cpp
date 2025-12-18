@@ -41,16 +41,6 @@ supporters(const Bricks &bricks, int i) {
   return res;
 }
 
-static bool
-isFree(const Bricks &bricks, const std::vector<int> &supps, int i) {
-  for (int j = i + 1; j < bricks.size(); ++j) {
-    if (supps[j] == 1 && bricks[j].b.z == bricks[i].e.z + 1 && isOverlapping(bricks[i], bricks[j])) {
-      return false;
-    }
-  }
-  return true;
-}
-
 static Num
 disintegrate(Bricks bricks, int i) {
   Num res = 0;
@@ -68,13 +58,15 @@ disintegrate(Bricks bricks, int i) {
   return res;
 }
 
-static Num
-solve2(const Bricks &bricks) {
-  Num res = 0;
+static auto
+solve(const Bricks &bricks) {
+  Num res1 = 0, res2 = 0;
   for (int i = 0; i < bricks.size(); ++i) {
-    res += disintegrate(bricks, i);
+    Num d = disintegrate(bricks, i);
+    res1 += d == 0;
+    res2 += d;
   }
-  return res;
+  return std::make_pair(res1, res2);
 }
 
 /* ------------------------------------------------------------------------ */
@@ -94,12 +86,7 @@ main() {
     dropDown(bricks, i);
   }
 
-  auto supps = views::iota(0UZ, bricks.size()) | views::transform([&](auto i) { return supporters(bricks, i); }) |
-      ranges::to<std::vector<int>>();
-  Num res1 = ranges::count(
-      views::iota(0UZ, bricks.size()) | views::transform([&](auto i) { return isFree(bricks, supps, i); }), true);
-
-  Num res2 = solve2(bricks);
+  auto [res1, res2] = solve(bricks);
 
   println("1: {}", res1);
   println("2: {}", res2);
