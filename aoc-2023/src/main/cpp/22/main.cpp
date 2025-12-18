@@ -1,38 +1,14 @@
 #include "../utils.h"
 #include <algorithm>
-#include <numeric>
 
 using Num = int64_t;
 
 struct Pos3d {
   int x, y, z;
-
-  auto friend operator<=>(const Pos3d &a, const Pos3d &b) = default;
-};
-
-template <>
-struct std::hash<Pos3d> {
-  std::size_t operator()(const Pos3d &p) const { return hashCombine(hashCombine(p.x, p.y), p.z); }
-};
-
-template <>
-struct std::formatter<Pos3d> {
-  constexpr auto parse(std::format_parse_context &ctx) { return ctx.begin(); }
-
-  auto format(const Pos3d &pos, std::format_context &ctx) const {
-    return std::format_to(ctx.out(), "{{{}, {}, {}}}", pos.x, pos.y, pos.z);
-  }
 };
 
 struct Brick {
   Pos3d b, e;
-};
-
-template <>
-struct std::formatter<Brick> {
-  constexpr auto parse(std::format_parse_context &ctx) { return ctx.begin(); }
-
-  auto format(const Brick &b, std::format_context &ctx) const { return std::format_to(ctx.out(), "{}~{}", b.b, b.e); }
 };
 
 using Bricks = std::vector<Brick>;
@@ -111,17 +87,11 @@ main() {
         Pos3d{std::max(x1, x2), std::max(y1, y2), std::max(z1, z2)});
   }
   ranges::sort(bricks, [](const auto &a, const auto &b) { return a.b.z < b.b.z; });
-  // for (const auto &b : bricks) {
-  //   println("@@@0 {}~{}", b.b, b.e);
-  // }
 
   for (int i = 0; i < bricks.size(); ++i) {
     dropDown(bricks, i);
   }
 
-  // for (const auto &b : bricks) {
-  //   println("@@@1 {}~{}", b.b, b.e);
-  // }
   auto none = std::vector<bool>(bricks.size(), false);
   auto supps = views::iota(0UZ, bricks.size()) | views::transform([&](auto i) { return supporters(bricks, none, i); }) |
       ranges::to<std::vector<int>>();
