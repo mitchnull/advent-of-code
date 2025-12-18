@@ -32,9 +32,7 @@ template <>
 struct std::formatter<Brick> {
   constexpr auto parse(std::format_parse_context &ctx) { return ctx.begin(); }
 
-  auto format(const Brick &b, std::format_context &ctx) const {
-    return std::format_to(ctx.out(), "{}~{}", b.b, b.e);
-  }
+  auto format(const Brick &b, std::format_context &ctx) const { return std::format_to(ctx.out(), "{}~{}", b.b, b.e); }
 };
 
 using Bricks = std::vector<Brick>;
@@ -59,7 +57,7 @@ dropDown(Bricks &bricks, int i) {
 }
 
 static int
-supporters(const Bricks &bricks, const std::vector<bool>& disintegrated, int i) {
+supporters(const Bricks &bricks, const std::vector<bool> &disintegrated, int i) {
   int res = 0;
   for (int j = i - 1; j >= 0; --j) {
     res += !disintegrated[j] && (bricks[j].e.z == bricks[i].b.z - 1) && isOverlapping(bricks[i], bricks[j]);
@@ -82,15 +80,13 @@ disintegrate(const Bricks &bricks, int i) {
   Num res = 0;
   auto disintegrated = std::vector<bool>(bricks.size());
   disintegrated[i] = true;
-  for (bool changed = true; changed; ) {
-    changed = false;
-    for (int j = i + 1; j < bricks.size(); ++j) {
-      if (!disintegrated[j] && bricks[j].b.z > 1 && supporters(bricks, disintegrated, j) == 0) {
-        disintegrated[j] = changed = true;
-        ++res;
-      }
+
+  for (int j = i + 1; j < bricks.size(); ++j) {
+    if (bricks[j].b.z > 1 && supporters(bricks, disintegrated, j) == 0) {
+      disintegrated[j] = true;
+      ++res;
     }
-  };
+  }
   return res;
 }
 
