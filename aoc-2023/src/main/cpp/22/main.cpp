@@ -33,10 +33,10 @@ dropDown(Bricks &bricks, int i) {
 }
 
 static int
-supporters(const Bricks &bricks, const std::vector<bool> &disintegrated, int i) {
+supporters(const Bricks &bricks, int i) {
   int res = 0;
   for (int j = i - 1; j >= 0; --j) {
-    res += !disintegrated[j] && (bricks[j].e.z == bricks[i].b.z - 1) && isOverlapping(bricks[i], bricks[j]);
+    res += (bricks[j].e.z == bricks[i].b.z - 1) && isOverlapping(bricks[i], bricks[j]);
   }
   return res;
 }
@@ -52,22 +52,24 @@ isFree(const Bricks &bricks, const std::vector<int> &supps, int i) {
 }
 
 static Num
-disintegrate(const Bricks &bricks, int i) {
+disintegrate(Bricks bricks, int i) {
   Num res = 0;
-  auto disintegrated = std::vector<bool>(bricks.size());
-  disintegrated[i] = true;
 
-  for (int j = i + 1; j < bricks.size(); ++j) {
-    if (bricks[j].b.z > 1 && supporters(bricks, disintegrated, j) == 0) {
-      disintegrated[j] = true;
+  bricks.erase(bricks.begin() + i);
+
+  for (int j = i; j < bricks.size();) {
+    if (bricks[j].b.z > 1 && supporters(bricks, j) == 0) {
+      bricks.erase(bricks.begin() + j);
       ++res;
+    } else {
+      ++j;
     }
   }
   return res;
 }
 
 static Num
-solve2(const Bricks &bricks, const std::vector<int> &supps) {
+solve2(const Bricks &bricks) {
   Num res = 0;
   for (int i = 0; i < bricks.size(); ++i) {
     res += disintegrate(bricks, i);
@@ -92,13 +94,12 @@ main() {
     dropDown(bricks, i);
   }
 
-  auto none = std::vector<bool>(bricks.size(), false);
-  auto supps = views::iota(0UZ, bricks.size()) | views::transform([&](auto i) { return supporters(bricks, none, i); }) |
+  auto supps = views::iota(0UZ, bricks.size()) | views::transform([&](auto i) { return supporters(bricks, i); }) |
       ranges::to<std::vector<int>>();
   Num res1 = ranges::count(
       views::iota(0UZ, bricks.size()) | views::transform([&](auto i) { return isFree(bricks, supps, i); }), true);
 
-  Num res2 = solve2(bricks, supps);
+  Num res2 = solve2(bricks);
 
   println("1: {}", res1);
   println("2: {}", res2);
