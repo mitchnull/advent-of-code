@@ -23,4 +23,3 @@ struct std::formatter<mpz_class> {
     return format_to(ctx.out(), "{}", n.get_str());
   }
 };
-
