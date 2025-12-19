@@ -59,10 +59,14 @@ struct std::hash<Dir> {
 
 template <>
 struct std::formatter<Dir> {
-  constexpr auto parse(std::format_parse_context &ctx) { return ctx.begin(); }
+  template <typename FormatContext>
+  constexpr auto parse(FormatContext &ctx) {
+    return ctx.begin();
+  }
 
-  auto format(const Dir &d, std::format_context &ctx) const {
-    return std::format_to(ctx.out(), "{{{}, {}}}", d.dx, d.dy);
+  template <typename FormatContext>
+  constexpr auto format(const Dir &d, FormatContext &ctx) const {
+    return format_to(ctx.out(), "{{{}, {}}}", d.dx, d.dy);
   }
 };
 
@@ -92,10 +96,14 @@ struct std::hash<Pos> {
 
 template <>
 struct std::formatter<Pos> {
-  constexpr auto parse(std::format_parse_context &ctx) { return ctx.begin(); }
+  template <typename FormatContext>
+  constexpr auto parse(FormatContext &ctx) {
+    return ctx.begin();
+  }
 
-  auto format(const Pos &pos, std::format_context &ctx) const {
-    return std::format_to(ctx.out(), "{{{}, {}}}", pos.x, pos.y);
+  template <typename FormatContext>
+  constexpr auto format(const Pos &pos, FormatContext &ctx) const {
+    return format_to(ctx.out(), "{{{}, {}}}", pos.x, pos.y);
   }
 };
 
@@ -197,14 +205,18 @@ struct std::hash<Grid<T>> {
 
 template <typename T>
 struct std::formatter<Grid<T>> {
-  constexpr auto parse(std::format_parse_context &ctx) { return ctx.begin(); }
+  template <typename FormatContext>
+  constexpr auto parse(FormatContext &ctx) {
+    return ctx.begin();
+  }
 
-  auto format(const Grid<T> &m, std::format_context &ctx) const {
+  template <typename FormatContext>
+  constexpr auto format(const Grid<T> &m, FormatContext &ctx) const {
     for (int y = 0; y < m.h(); ++y) {
       for (int x = 0; x < m.w(); ++x) {
-        std::format_to(ctx.out(), "{}", m[x, y]);
+        format_to(ctx.out(), "{}", m[x, y]);
       }
-      std::format_to(ctx.out(), "\n");
+      format_to(ctx.out(), "\n");
     }
     return ctx.out();
   }
