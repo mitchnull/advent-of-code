@@ -1,5 +1,4 @@
 #include "../utils.h"
-#include <deque>
 
 using Num = int;
 using Board = Grid<>;
@@ -18,63 +17,53 @@ struct Node2 : public Node {
 static const auto DIR_SYMS = "^>v<";
 
 static Num
-solve1(const Board &b) {
+solve1(const Board &b, const Pos &dst, Pos pos = {1, 0}, int dir = 2, Num len = 0) {
+  if (pos == dst) {
+    return len;
+  }
   Num res = 0;
-  Pos dst = {b.w() - 2, b.h() - 1};
-  std::deque<Node> q{Node{Pos{1, 0}, 2, 0}};
-  while (!q.empty()) {
-    auto n = q.front();
-    q.pop_front();
-    if (n.pos == dst) {
-      res = std::max(res, n.len);
+  for (int d = 0; d < 4; ++d) {
+    if (d != dir && ((d + dir) % 2 == 0)) {
+      continue;
     }
-    for (int d = 0; d < 4; ++d) {
-      if (d != n.dir && ((d + n.dir) % 2 == 0)) {
-        continue;
-      }
-      Pos np = n.pos + DIRS[d];
-      if (b[np] == '.' || b[np] == DIR_SYMS[d]) {
-        q.emplace_back(np, d, n.len + 1);
-      }
+    Pos np = pos + DIRS[d];
+    if (b[np] == '.' || b[np] == DIR_SYMS[d]) {
+      res = std::max(res, solve1(b, dst, np, d, len + 1));
     }
   }
   return res;
 }
 
 static Num
-solve2(const Board &b) {
-  Num res = 0;
-  Pos dst = {b.w() - 2, b.h() - 1};
-  std::deque<Node2> q{{{Pos{1, 0}, 2, 0}}};
-  while (!q.empty()) {
-    auto n = q.front();
-    q.pop_front();
-    if (n.pos == dst) {
-      res = std::max(res, n.len);
-    }
-    std::vector<int> ways;
-    for (int d = 0; d < 4; ++d) {
-      if (d != n.dir && ((d + n.dir) % 2 == 0)) {
-        continue;
-      }
-      if (b[n.pos + DIRS[d]] != '#') {
-        ways.push_back(d);
-      }
-    }
-    if (ways.empty()) {
+solve2(const Board &b, const Pos &dst, Path &path, Pos pos = {1, 0}, int dir = 2, Num len = 0) {
+  if (pos == dst) {
+    return len;
+  }
+  std::vector<int> ways;
+  for (int d = 0; d < 4; ++d) {
+    if (d != dir && ((d + dir) % 2 == 0)) {
       continue;
     }
-    Path path = n.path;
-    if (ways.size() > 1) {
-      if (std::find(path.begin(), path.end(), n.pos) != path.end()) {
-        continue;
-      }
-      path.push_back(n.pos);
+    if (b[pos + DIRS[d]] != '#') {
+      ways.push_back(d);
     }
-    for (auto d : ways) {
-      Pos np = n.pos + DIRS[d];
-      q.push_back({{np, d, n.len + 1}, path});
+  }
+  if (ways.empty()) {
+    return 0;
+  }
+  if (ways.size() > 1) {
+    if (std::find(path.begin(), path.end(), pos) != path.end()) {
+      return 0;
     }
+    path.push_back(pos);
+  }
+  Num res = 0;
+  for (auto d : ways) {
+    Pos np = pos + DIRS[d];
+    res = std::max(res, solve2(b, dst, path, np, d, len + 1));
+  }
+  if (ways.size() > 1) {
+    path.pop_back();
   }
   return res;
 }
@@ -85,7 +74,9 @@ int
 main() {
   Board board = Board::read(std::cin, '#');
 
-  println("1: {}", solve1(board));
-  println("2: {}", solve2(board));
+  Pos dst{board.w() - 2, board.h() - 1};
+  println("1: {}", solve1(board, dst));
+  Path path;
+  println("2: {}", solve2(board, dst, path));
   return 0;
 }
