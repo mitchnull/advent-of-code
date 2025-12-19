@@ -21,6 +21,12 @@ hashCombine(std::size_t seed, const T &v) {
   return seed ^ (std::hash<T>{}(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2));
 }
 
+template <typename T>
+int
+sgn(const T &n) {
+  return n < 0 ? -1 : n > 0;
+}
+
 /* ------------------------------------------------------------------------ */
 
 struct Dir {
