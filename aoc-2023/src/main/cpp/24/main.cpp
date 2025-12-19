@@ -43,6 +43,11 @@ struct HailStone {
 
 using HailStones = std::vector<HailStone>;
 
+static auto
+val(z3::context &ctx, const Num &n) {
+  return ctx.int_val(std::format("{}", n).c_str());
+}
+
 Num
 solve2(const HailStones &hss) {
   z3::context ctx;
@@ -55,17 +60,12 @@ solve2(const HailStones &hss) {
   z3::expr dy = ctx.int_const("dy");
   z3::expr dz = ctx.int_const("dz");
   for (int i = 0; i < hss.size(); ++i) {
+    const auto &hs = hss[i];
     z3::expr ti = ctx.int_const(std::format("t{}", i).c_str());
     s.add(ti >= 0);
-    z3::expr xi = ctx.int_val(hss[i].x.get_str().c_str());
-    z3::expr yi = ctx.int_val(hss[i].y.get_str().c_str());
-    z3::expr zi = ctx.int_val(hss[i].z.get_str().c_str());
-    z3::expr dxi = ctx.int_val(hss[i].dx.get_str().c_str());
-    z3::expr dyi = ctx.int_val(hss[i].dy.get_str().c_str());
-    z3::expr dzi = ctx.int_val(hss[i].dz.get_str().c_str());
-    s.add((x + dx * ti) == (xi + dxi * ti));
-    s.add((y + dy * ti) == (yi + dyi * ti));
-    s.add((z + dz * ti) == (zi + dzi * ti));
+    s.add((x + dx * ti) == (val(ctx, hs.x) + val(ctx, hs.dx) * ti));
+    s.add((y + dy * ti) == (val(ctx, hs.y) + val(ctx, hs.dy) * ti));
+    s.add((z + dz * ti) == (val(ctx, hs.z) + val(ctx, hs.dz) * ti));
   }
   s.check();
   return Num(s.get_model().eval(x + y + z).to_string().c_str());
