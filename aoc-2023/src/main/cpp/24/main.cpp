@@ -1,7 +1,10 @@
 #include "../gmpxx.h"
 #include "../utils.h"
+#include <z3++.h>
 
 using Num = mpz_class;
+
+/* ------------------------------------------------------------------------ */
 
 struct Pos2d {
   Num x, y;
@@ -34,13 +37,52 @@ intersectInBounds(const Line2d &e, const Line2d &f, const Num &bmin, const Num &
 
 /* ------------------------------------------------------------------------ */
 
+struct HailStone {
+  Num x, y, z, dx, dy, dz;
+};
+
+using HailStones = std::vector<HailStone>;
+
+Num
+solve2(const HailStones &hss) {
+  z3::context ctx;
+  z3::solver s{ctx};
+
+  z3::expr x = ctx.int_const("x");
+  z3::expr y = ctx.int_const("y");
+  z3::expr z = ctx.int_const("z");
+  z3::expr dx = ctx.int_const("dx");
+  z3::expr dy = ctx.int_const("dy");
+  z3::expr dz = ctx.int_const("dz");
+  for (int i = 0; i < hss.size(); ++i) {
+    z3::expr ti = ctx.int_const(std::format("t{}", i).c_str());
+    s.add(ti >= 0);
+    z3::expr xi = ctx.int_val(hss[i].x.get_str().c_str());
+    z3::expr yi = ctx.int_val(hss[i].y.get_str().c_str());
+    z3::expr zi = ctx.int_val(hss[i].z.get_str().c_str());
+    z3::expr dxi = ctx.int_val(hss[i].dx.get_str().c_str());
+    z3::expr dyi = ctx.int_val(hss[i].dy.get_str().c_str());
+    z3::expr dzi = ctx.int_val(hss[i].dz.get_str().c_str());
+    s.add((x + dx * ti) == (xi + dxi * ti));
+    s.add((y + dy * ti) == (yi + dyi * ti));
+    s.add((z + dz * ti) == (zi + dzi * ti));
+  }
+  s.check();
+  return Num(s.get_model().eval(x + y + z).to_string().c_str());
+}
+
+/* ------------------------------------------------------------------------ */
+
 int
 main() {
   char ch;
-  Num x, y, z, dx, dy, dz;
+  HailStone hs;
   Lines2d lines2d;
-  while (std::cin >> x >> ch >> y >> ch >> z >> ch >> dx >> ch >> dy >> ch >> dz) {
-    lines2d.emplace_back(x, y, dx, dy);
+  HailStones hss;
+
+  while (std::cin >> hs.x >> ch >> hs.y >> ch >> hs.z >> ch >> hs.dx >> ch >> hs.dy >> ch >> hs.dz) {
+    lines2d.emplace_back(hs.x, hs.y, hs.dx, hs.dy);
+    hss.push_back(hs);
   }
 
   Num res1 = 0;
@@ -53,6 +95,7 @@ main() {
   }
 
   println("1: {}", res1);
+  println("2: {}", solve2(hss));
 
   return 0;
 }

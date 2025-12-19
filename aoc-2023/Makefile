@@ -8,7 +8,7 @@ CXXFLAGS+=-std=c++23 -stdlib=libc++ -Wall -Wno-deprecated-declarations -I/opt/ho
 LDFLAGS+=-L/opt/homebrew/lib
 
 cpp/11b/main: LDFLAGS+=-lgmpxx -lgmp
-cpp/24/main: LDFLAGS+=-lgmpxx -lgmp
+cpp/24/main: LDFLAGS+=-lgmpxx -lgmp -lz3
 
 clean:
 	rm -rf build
