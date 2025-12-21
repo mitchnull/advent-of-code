@@ -5,6 +5,7 @@ val mainClassName: String by project
 plugins {
   kotlin("jvm") version "1.6.10"
   application
+  "cpp-application"
   id("com.diffplug.spotless") version "6.4.2"
 }
 
