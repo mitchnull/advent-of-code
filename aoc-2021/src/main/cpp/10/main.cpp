@@ -7,7 +7,7 @@ using Num = int64_t;
 
 static char
 rev(char ch) {
-  switch (ch) { 
+  switch (ch) {
     case '(': return ')';
     case '[': return ']';
     case '{': return '}';
@@ -32,7 +32,7 @@ pop(std::vector<char> &stack, char expected) {
 
 static Num
 score(char ch) {
-  switch (ch) { 
+  switch (ch) {
     case '(': return 1;
     case '[': return 2;
     case '{': return 3;
@@ -45,16 +45,19 @@ score(char ch) {
   return 0;
 }
 
-
 static std::pair<Num, Num>
 solve(sv line) {
   std::vector<char> stack;
   for (char c : line) {
     switch (c) {
-      case '(': case '[': case '{': case '<':
-        stack.push_back(c);
-        break;
-      case ')': case ']': case '}': case '>':
+      case '(':
+      case '[':
+      case '{':
+      case '<': stack.push_back(c); break;
+      case ')':
+      case ']':
+      case '}':
+      case '>':
         if (!pop(stack, rev(c))) {
           return {score(c), 0};
         }
@@ -80,7 +83,8 @@ main() {
 
   auto v = lines | views::transform(solve);
   Num res1 = ranges::fold_left(v | views::transform(get<0>()), Num{0}, std::plus<>());
-  auto v2 = v | views::transform(get<1>()) | views::filter([](auto s) { return s > 0; }) | ranges::to<std::vector<Num>>();
+  auto v2 =
+      v | views::transform(get<1>()) | views::filter([](auto s) { return s > 0; }) | ranges::to<std::vector<Num>>();
   ranges::sort(v2);
   Num res2 = v2[v2.size() / 2];
   println("1: {}", res1);
