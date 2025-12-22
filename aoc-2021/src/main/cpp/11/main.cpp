@@ -18,38 +18,27 @@ flash(Board &b, int x, int y) {
   return res;
 }
 
-static Num
-solve1(Board b, Num iters) {
-  Num res = 0;
-  while (iters-- > 0) {
+static std::pair<Num, Num>
+solve(Board b, int iters) {
+  Num res1 = 0, res2 = 0;
+  for (int i = 1; i <= iters || res2 == 0; ++i) {
     for (int y = 0; y < b.h(); ++y) {
       for (int x = 0; x < b.w(); ++x) {
         if (b[x, y]++ == '9') {
-          res += flash(b, x, y);
+          if (i <= iters) {
+            res1 += flash(b, x, y);
+          } else {
+            flash(b, x, y);
+          }
         }
       }
     }
-    std::transform(b.begin(), b.end(), b.begin(), [](auto o) { return (o > '9') ? '0' : o; });
-  }
-  return res;
-}
-
-static Num
-solve2(Board b) {
-  for (int i = 1; ; ++i) {
-    for (int y = 0; y < b.h(); ++y) {
-      for (int x = 0; x < b.w(); ++x) {
-        if (b[x, y]++ == '9') {
-          flash(b, x, y);
-        }
-      }
-    }
-    if (std::find_if(b.begin(), b.end(), [](auto o) { return o <= '9'; }) == b.end()) {
-      return i;
+    if (res2 == 0 && std::find_if(b.begin(), b.end(), [](auto o) { return o <= '9'; }) == b.end()) {
+      res2 = i;
     }
     std::transform(b.begin(), b.end(), b.begin(), [](auto o) { return (o > '9') ? '0' : o; });
   }
-  return 0;
+  return {res1, res2};
 }
 
 /* ------------------------------------------------------------------------ */
@@ -58,8 +47,9 @@ int
 main() {
   Board board = Board::read();
 
-  println("1: {}", solve1(board, 100));
-  println("1: {}", solve2(board));
+  auto [res1, res2] = solve(board, 100);
+  println("1: {}", res1);
+  println("2: {}", res2);
 
   return 0;
 }
