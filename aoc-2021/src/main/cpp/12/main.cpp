@@ -8,16 +8,15 @@ using Graph = std::unordered_map<string, V>;
 /* ------------------------------------------------------------------------ */
 
 static Num
-solve(const Graph &g, V &path, int maxSmall = 1, string n = "start", string end = "end") {
+solve(const Graph &g, V &path, bool allowDup, string n = "start", string end = "end") {
   if (n == end) {
     return 1;
   }
   Num res = 0;
   for (auto v : g.at(n)) {
-    int count = 0;
-    if (std::isupper(v.front()) || (count = std::count(path.begin(), path.end(), v)) < maxSmall) {
+    if (bool dup = false; std::isupper(v.front()) || !(dup = std::find(path.begin(), path.end(), v) != path.end()) || allowDup) {
       path.push_back(v);
-      res += solve(g, path, count > 0 ? 1 : maxSmall, v, end);
+      res += solve(g, path, allowDup && !dup, v, end);
       path.pop_back();
     }
   }
@@ -42,8 +41,8 @@ main() {
 
   V path{"start"};
 
-  println("1: {}", solve(g, path, 1));
-  println("2: {}", solve(g, path, 2));
+  println("1: {}", solve(g, path, false));
+  println("2: {}", solve(g, path, true));
 
   return 0;
 }
