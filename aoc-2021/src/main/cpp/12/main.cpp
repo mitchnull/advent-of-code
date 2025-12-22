@@ -14,7 +14,8 @@ solve(const Graph &g, V &path, bool allowDup, string n = "start", string end = "
   }
   Num res = 0;
   for (auto v : g.at(n)) {
-    if (bool dup = false; std::isupper(v.front()) || !(dup = std::find(path.begin(), path.end(), v) != path.end()) || allowDup) {
+    if (bool dup = false;
+        std::isupper(v.front()) || !(dup = std::find(path.begin(), path.end(), v) != path.end()) || allowDup) {
       path.push_back(v);
       res += solve(g, path, allowDup && !dup, v, end);
       path.pop_back();

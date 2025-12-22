@@ -1,12 +1,11 @@
 #include "../utils.h"
-#include <unordered_set>
 #include <sstream>
+#include <unordered_set>
 
 using Num = int64_t;
 using Dots = std::unordered_set<Pos>;
 using Fold = std::pair<char, int>;
 using Folds = std::vector<Fold>;
-
 
 static Dots
 fold(const Dots &dots, const Fold &fold) {
