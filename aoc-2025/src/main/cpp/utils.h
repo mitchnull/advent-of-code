@@ -261,6 +261,22 @@ operator+=(std::pair<A, B> &a, const std::pair<A, B> &b) {
   return a = piecewise_apply(a, b, std::plus<>());
 }
 
+template <std::size_t N>
+struct get {
+  template <class T>
+  auto &operator()(T &t) const {
+    return std::get<N>(t);
+  }
+  template <class T>
+  const auto &operator()(const T &t) const {
+    return std::get<N>(t);
+  }
+  template <class T>
+  auto operator()(T &&t) const {
+    return std::get<N>(std::forward<T>(t));
+  }
+};
+
 /* ------------------------------------------------------------------------ */
 
 #endif /* AOC_UTILS_H */

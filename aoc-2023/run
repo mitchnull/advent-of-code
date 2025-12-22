@@ -2,7 +2,7 @@
 year=$(pwd | grep -o '[0-9]*$')
 if [ "$1" = "--asan" ]; then
   KIND=.asan
-  export CXXFLAGS="-Og -g -fsanitize=address"
+  export CXXFLAGS="-Og -g -fsanitize=address,undefined"
   shift
   rm -f build/cpp/$1/main
 elif [ "$1" = "--debug" ]; then
