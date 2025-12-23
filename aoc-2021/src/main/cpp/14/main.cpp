@@ -8,11 +8,6 @@ using PT = std::unordered_map<Pair, char>;
 using Hist = std::unordered_map<char, Num>;
 using Counts = std::unordered_map<Pair, Num>;
 
-template <>
-struct std::hash<Pair> {
-  std::size_t operator()(const Pair &p) const { return hashCombine(p.first, p.second); }
-};
-
 static Num
 result(const Counts &counts, string poly) {
   Hist h;
