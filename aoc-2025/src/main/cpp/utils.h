@@ -277,6 +277,11 @@ struct get {
   }
 };
 
+template <typename T, typename U>
+struct std::hash<std::pair<T, U>> {
+  std::size_t operator()(const std::pair<T, U> &p) const { return hashCombine(std::hash<T>{}(p.first), p.second); }
+};
+
 /* ------------------------------------------------------------------------ */
 
 #endif /* AOC_UTILS_H */
