@@ -1,6 +1,18 @@
 #include "../utils.h"
+#include <numeric>
 
 using Num = int64_t;
+
+enum Ops {
+  SUM,
+  MUL,
+  MIN,
+  MAX,
+  LIT,
+  GT,
+  LT,
+  EQ,
+};
 
 struct BitStream {
   string data;
@@ -12,8 +24,8 @@ struct BitStream {
     return std::stoi(string{data[ci]}, nullptr, 16) & mask;
   }
 
-  int read(int bits) {
-    int res = 0;
+  Num read(int bits) {
+    Num res = 0;
     for (int i = 0; i < bits; ++i) {
       res <<= 1;
       res |= read();
@@ -21,7 +33,7 @@ struct BitStream {
     return res;
   }
 
-  int readLiteral() {
+  Num readLiteral() {
     Num res = 0;
     bool cont;
     do {
@@ -33,32 +45,33 @@ struct BitStream {
   }
 };
 
-static Num
-solve1(BitStream &bs) {
-  Num res = 0;
-  auto v = bs.read(3);
-  res += v;
-  auto t = bs.read(3);
-  if (t == 4) {
+static std::pair<Num, Num>
+solve(BitStream &bs) {
+  auto ver = bs.read(3);
+  auto type = bs.read(3);
+  if (type == 4) {
     auto lit = bs.readLiteral();
-    println("@@@ v: {}, t: {}, lit: {}", v, t, lit);
+    return {ver, lit};
   } else {
+    std::vector<Num> vs;
     bool isNumSubPackets = bs.read();
-    if (isNumSubPackets) {
-      auto numSubPackets = bs.read(11);
-      println("@@@ v: {}, t: {}, numSub: {}", v, t, numSubPackets);
-      for (int i = 0; i < numSubPackets; ++i) {
-        res += solve1(bs);
-      }
-    } else {
-      auto subLen = bs.read(15);
-      println("@@@ v: {}, t: {}, subLen: {}", v, t, subLen);
-      for (auto end = bs.p + subLen; bs.p < end;) {
-        res += solve1(bs);
-      }
+    auto len = bs.read(isNumSubPackets ? 11 : 15);
+    for (Num end = bs.p + len, i = 0; isNumSubPackets ? i < len : bs.p < end; ++i) {
+      auto [vsum, v] = solve(bs);
+      ver += vsum;
+      vs.push_back(v);
+    }
+    switch (type) {
+      case SUM: return {ver, std::reduce(vs.begin(), vs.end(), Num{0}, std::plus<>{})};
+      case MUL: return {ver, std::reduce(vs.begin(), vs.end(), Num{1}, std::multiplies<>{})};
+      case MIN: return {ver, *std::min_element(vs.begin(), vs.end())};
+      case MAX: return {ver, *std::max_element(vs.begin(), vs.end())};
+      case GT: return {ver, vs[0] > vs[1]};
+      case LT: return {ver, vs[0] < vs[1]};
+      case EQ: return {ver, vs[0] == vs[1]};
     }
   }
-  return res;
+  return {-1, -1}; // never reached
 }
 
 /* ------------------------------------------------------------------------ */
@@ -69,7 +82,9 @@ main() {
   std::cin >> data;
 
   BitStream bs{data};
-  println("1: {}", solve1(bs));
+  auto [res1, res2] = solve(bs);
+  println("1: {}", res1);
+  println("2: {}", res2);
 
   return 0;
 }
