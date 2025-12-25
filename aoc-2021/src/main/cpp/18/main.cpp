@@ -114,6 +114,18 @@ solve1(const std::vector<SFN> &input) {
   return magnitude(sum);
 }
 
+static Num
+solve2(const std::vector<SFN> &input) {
+  Num res = 0;
+  for (int i = 0; i < input.size(); ++i) {
+    for (int j = i + 1; j < input.size(); ++j) {
+      res = std::max(res, magnitude(input[i] + input[j]));
+      res = std::max(res, magnitude(input[j] + input[i]));
+    }
+  }
+  return res;
+}
+
 /* ------------------------------------------------------------------------ */
 
 int
@@ -122,6 +134,7 @@ main() {
   std::copy(std::istream_iterator<string>(std::cin), std::istream_iterator<string>(), std::back_inserter(input));
 
   println("1: {}", solve1(input));
+  println("2: {}", solve2(input));
 
   return 0;
 }
