@@ -1,6 +1,7 @@
 #include "../utils.h"
 #include <algorithm>
 #include <sstream>
+#include <unordered_set>
 
 using Pos3d = std::array<int, 3>;
 using Beacons = std::vector<Pos3d>;
@@ -14,6 +15,11 @@ static Pos3d
 operator-(const Pos3d &a, const Pos3d &b) {
   return {a[0] - b[0], a[1] - b[1], a[2] - b[2]};
 }
+
+template <>
+struct std::hash<Pos3d> {
+  std::size_t operator()(const Pos3d &p) const { return hashCombine(p[0], hashCombine(p[1], p[2])); }
+};
 
 struct Sensor {
   Pos3d p;
@@ -47,24 +53,32 @@ spin(Sensor s, const Facing &f) {
   return s;
 }
 
-static Beacons
-combine(const Sensor &s1, const Sensor &s2) {
-  Beacons res;
-  res.reserve(s1.beacons.size() + s2.beacons.size());
-  auto b1 = s1.beacons | views::transform([&](const auto &b) { return s1.p + b; });
-  auto b2 = s2.beacons | views::transform([&](const auto &b) { return s2.p + b; });
-  ranges::set_union(b1, b2, std::back_inserter(res), {});
-  return res;
+static bool
+checkOverlap0(const Sensor &os, const Sensor &s) {
+  int matching = 0;
+  for (auto i = os.beacons.begin(), j = s.beacons.begin();
+      i != os.beacons.end() && j != s.beacons.end() && matching < 12;) {
+    auto ip = *i + os.p;
+    auto jp = *j + s.p;
+    if (ip < jp) {
+      ++i;
+    } else if (jp < ip) {
+      ++j;
+    } else {
+      ++i;
+      ++j;
+      ++matching;
+    }
+  }
+  return matching >= 12;
 }
 
 static bool
 checkOverlap(const Sensor &os, Sensor &s) {
-  const auto overlapSize = os.beacons.size() + s.beacons.size() - 12;
   for (const auto &i : os.beacons) {
     for (const auto &j : s.beacons) {
       s.p = i + os.p - j;
-      auto combined = combine(os, s);
-      if (combined.size() <= overlapSize) {
+      if (checkOverlap0(os, s)) {
         return true;
       }
     }
@@ -119,9 +133,11 @@ solve(Sensors sensors) {
       return {-1, -1};
     }
   }
-  Sensor all{};
+  std::unordered_set<Pos3d> all;
   for (const auto &s : sensors) {
-    all.beacons = combine(all, s);
+    for (const auto &b : s.beacons) {
+      all.insert(b + s.p);
+    }
   }
   int res2 = 0;
   for (auto i = sensors.begin(), end = sensors.end(); i != end; ++i) {
@@ -129,7 +145,7 @@ solve(Sensors sensors) {
       res2 = std::max(res2, md(i->p, j->p));
     }
   }
-  return {all.beacons.size(), res2};
+  return {all.size(), res2};
 }
 
 /* ------------------------------------------------------------------------ */
