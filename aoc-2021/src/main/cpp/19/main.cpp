@@ -1,6 +1,7 @@
 #include "../utils.h"
 #include <algorithm>
 #include <iterator>
+#include <optional>
 #include <sstream>
 #include <unordered_map>
 #include <unordered_set>
@@ -55,7 +56,7 @@ spin(Sensor s, const Facing &f) {
   return s;
 }
 
-static std::pair<bool, Pos3d>
+static std::optional<Pos3d>
 findPlace(const Sensor &s, Pos3dSet &all) {
   Facing f;
   do {
@@ -68,12 +69,12 @@ findPlace(const Sensor &s, Pos3dSet &all) {
           std::transform(ss.beacons.begin(), ss.beacons.end(), std::inserter(all, all.end()), [&](const auto &b) {
             return b + d;
           });
-          return {true, d};
+          return d;
         }
       }
     }
   } while (next(f));
-  return {false, {}};
+  return {};
 }
 
 static int
@@ -92,11 +93,11 @@ solve(Sensors sensors) {
   sensors.erase(sensors.begin());
   while (!sensors.empty()) {
     std::erase_if(sensors, [&](const auto &s) {
-      auto [found, p] = findPlace(s, all);
-      if (found) {
-        sps.push_back(p);
+      auto p = findPlace(s, all);
+      if (p) {
+        sps.push_back(*p);
       }
-      return found;
+      return p;
     });
   }
   int res2 = 0;
