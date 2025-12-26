@@ -1,6 +1,7 @@
 #include "../utils.h"
 #include <algorithm>
 #include <sstream>
+#include <unordered_map>
 #include <unordered_set>
 
 using Pos3d = std::array<int, 3>;
@@ -49,38 +50,16 @@ spin(const Pos3d &p, const Facing &f) {
 static Sensor
 spin(Sensor s, const Facing &f) {
   std::transform(s.beacons.begin(), s.beacons.end(), s.beacons.begin(), [&](auto p) { return spin(p, f); });
-  ranges::sort(s.beacons);
   return s;
 }
 
 static bool
-checkOverlap(const Beacons &b1, const Pos3d &p1, const Beacons &b2, const Pos3d &p2) {
-  int matching = 0;
-  for (auto i = b1.begin(), j = b2.begin();
-      i != b1.end() && j != b2.end() && (b1.end() - i) >= (12 - matching) && (b2.end() - j) >= (12 - matching);) {
-    auto ip = *i + p1;
-    auto jp = *j + p2;
-    if (ip < jp) {
-      ++i;
-    } else if (jp < ip) {
-      ++j;
-    } else {
-      ++i;
-      ++j;
-      if (++matching >= 12) {
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-static bool
 checkOverlap(const Sensor &os, Sensor &s) {
+  std::unordered_map<Pos3d, int> diffs;
   for (const auto &i : os.beacons) {
     for (const auto &j : s.beacons) {
-      s.p = i + os.p - j;
-      if (checkOverlap(os.beacons, os.p, s.beacons, s.p)) {
+      if (++diffs[i - j] >= 12) {
+        s.p = os.p + i - j;
         return true;
       }
     }
@@ -90,15 +69,15 @@ checkOverlap(const Sensor &os, Sensor &s) {
 
 static std::pair<bool, Sensor>
 findPlace(auto b, auto e, const Sensor &s) {
-  for (auto it = b; it < e; ++it) {
-    Facing f;
-    do {
-      Sensor ss = spin(s, f);
+  Facing f;
+  do {
+    Sensor ss = spin(s, f);
+    for (auto it = b; it < e; ++it) {
       if (checkOverlap(*it, ss)) {
         return {true, ss};
       }
-    } while (next(f));
-  }
+    }
+  } while (next(f));
   return {false, s};
 }
 
@@ -129,7 +108,6 @@ md(const Pos3d &a, const Pos3d &b) {
 static std::pair<int, int>
 solve(Sensors sensors) {
   sensors.front().p = {};
-  ranges::sort(sensors.front().beacons);
   for (auto i = sensors.begin() + 1; i < sensors.end(); ++i) {
     if (!findPlace(sensors, i)) {
       return {-1, -1};
