@@ -42,15 +42,13 @@ spin(const Pos3d &p, const Facing &f) {
 
 static Sensor
 spin(Sensor s, const Facing &f) {
-  std::transform(s.beacons.begin(), s.beacons.end(), s.beacons.begin(), [&](auto p) {
-    return spin(p, f);
-  });
+  std::transform(s.beacons.begin(), s.beacons.end(), s.beacons.begin(), [&](auto p) { return spin(p, f); });
   ranges::sort(s.beacons);
   return s;
 }
 
 static Beacons
-combine(const Sensor& s1, const Sensor &s2) {
+combine(const Sensor &s1, const Sensor &s2) {
   Beacons res;
   res.reserve(s1.beacons.size() + s2.beacons.size());
   auto b1 = s1.beacons | views::transform([&](const auto &b) { return s1.p + b; });
@@ -88,29 +86,50 @@ findPlace(auto b, auto e, const Sensor &s) {
   return {false, s};
 }
 
+static bool
+findPlace(Sensors &sensors, auto i) {
+  for (auto j = i; j < sensors.end(); ++j) {
+    auto [found, s] = findPlace(sensors.begin(), i, *j);
+    if (found) {
+      if (i != j) {
+        *j = std::move(*i);
+      }
+      *i = std::move(s);
+      return true;
+    }
+  }
+  return false;
+}
+
 static int
-solve1(Sensors sensors) {
+md(const Pos3d &a, const Pos3d &b) {
+  int res = 0;
+  for (int i = 0; i < 3; ++i) {
+    res += std::abs(a[i] - b[i]);
+  }
+  return res;
+}
+
+static std::pair<int, int>
+solve(Sensors sensors) {
   sensors.front().p = {};
   ranges::sort(sensors.front().beacons);
   for (auto i = sensors.begin() + 1; i < sensors.end(); ++i) {
-    for (auto j = i; j < sensors.end(); ++j) {
-      auto [found, s] = findPlace(sensors.begin(), i, *j);
-      if (found) {
-        if (i != j) {
-          *j = std::move(*i);
-        }
-        *i = std::move(s);
-        goto found;
-      }
+    if (!findPlace(sensors, i)) {
+      return {-1, -1};
     }
-    abort();
-found:
   }
   Sensor all{};
-  for (const auto &s: sensors) {
+  for (const auto &s : sensors) {
     all.beacons = combine(all, s);
   }
-  return all.beacons.size();
+  int res2 = 0;
+  for (auto i = sensors.begin(), end = sensors.end(); i != end; ++i) {
+    for (auto j = i + 1; j != end; ++j) {
+      res2 = std::max(res2, md(i->p, j->p));
+    }
+  }
+  return {all.beacons.size(), res2};
 }
 
 /* ------------------------------------------------------------------------ */
@@ -130,6 +149,8 @@ main() {
     }
     sensors.push_back(std::move(s));
   }
-  std::println("1: {}", solve1(sensors));
+  auto [res1, res2] = solve(sensors);
+  std::println("1: {}", res1);
+  std::println("2: {}", res2);
   return 0;
 }
