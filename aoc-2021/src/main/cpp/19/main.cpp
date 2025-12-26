@@ -76,21 +76,6 @@ findPlace(const Sensor &s, Pos3dSet &all) {
   return {false, {}};
 }
 
-static bool
-findPlace(Sensors &sensors, auto i, Pos3dSet &all) {
-  for (auto j = i; j < sensors.end(); ++j) {
-    auto [found, p] = findPlace(*j, all);
-    if (found) {
-      if (i != j) {
-        std::swap(*i, *j);
-      }
-      i->p = p;
-      return true;
-    }
-  }
-  return false;
-}
-
 static int
 md(const Pos3d &a, const Pos3d &b) {
   int res = 0;
@@ -102,18 +87,22 @@ md(const Pos3d &a, const Pos3d &b) {
 
 static std::pair<int, int>
 solve(Sensors sensors) {
-  sensors.front().p = {};
+  Beacons sps{{}};
   Pos3dSet all{sensors.front().beacons.begin(), sensors.front().beacons.end()};
-
-  for (auto i = sensors.begin() + 1; i < sensors.end(); ++i) {
-    if (!findPlace(sensors, i, all)) {
-      return {-1, -1};
-    }
+  sensors.erase(sensors.begin());
+  while (!sensors.empty()) {
+    std::erase_if(sensors, [&](const auto &s) {
+      auto [found, p] = findPlace(s, all);
+      if (found) {
+        sps.push_back(p);
+      }
+      return found;
+    });
   }
   int res2 = 0;
-  for (auto i = sensors.begin(), end = sensors.end(); i != end; ++i) {
+  for (auto i = sps.begin(), end = sps.end(); i != end; ++i) {
     for (auto j = i + 1; j != end; ++j) {
-      res2 = std::max(res2, md(i->p, j->p));
+      res2 = std::max(res2, md(*i, *j));
     }
   }
   return {all.size(), res2};
