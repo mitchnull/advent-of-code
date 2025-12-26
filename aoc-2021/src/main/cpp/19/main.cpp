@@ -4,7 +4,7 @@
 #include <unordered_set>
 
 using Pos3d = std::array<int, 3>;
-using Beacons = std::unordered_set<Pos3d>;
+using Beacons = std::vector<Pos3d>;
 
 static Pos3d
 operator+(const Pos3d &a, const Pos3d &b) {
@@ -46,59 +46,71 @@ spin(const Pos3d &p, const Facing &f) {
   return res;
 }
 
+static Sensor
+spin(Sensor s, const Facing &f) {
+  std::transform(s.beacons.begin(), s.beacons.end(), s.beacons.begin(), [&](auto p) { return spin(p, f); });
+  ranges::sort(s.beacons);
+  return s;
+}
+
 static bool
-checkOverlap(const Beacons &b1, const Beacons &b2, const Pos3d &p2, const Facing &f) {
+checkOverlap(const Beacons &b1, const Pos3d &p1, const Beacons &b2, const Pos3d &p2) {
   int matching = 0;
-  int remaining = b2.size();
-  for (auto it = b2.begin(), end = b2.end(); it != end && remaining-- >= (12 - matching); ++it) {
-    if (b1.contains(spin(*it, f) + p2) && ++matching >= 12) {
-      return true;
+  for (auto i = b1.begin(), j = b2.begin();
+      i != b1.end() && j != b2.end() && (b1.end() - i) >= (12 - matching) && (b2.end() - j) >= (12 - matching);) {
+    auto ip = *i + p1;
+    auto jp = *j + p2;
+    if (ip < jp) {
+      ++i;
+    } else if (jp < ip) {
+      ++j;
+    } else {
+      ++i;
+      ++j;
+      if (++matching >= 12) {
+        return true;
+      }
     }
   }
   return false;
 }
 
-static std::pair<bool, Pos3d>
-checkOverlap(const Sensor &os, const Sensor &s, const Facing &f) {
+static bool
+checkOverlap(const Sensor &os, Sensor &s) {
   for (const auto &i : os.beacons) {
     for (const auto &j : s.beacons) {
-      auto p = i - spin(j, f);
-      if (checkOverlap(os.beacons, s.beacons, p, f)) {
-        return {true, p};
+      s.p = i + os.p - j;
+      if (checkOverlap(os.beacons, os.p, s.beacons, s.p)) {
+        return true;
       }
     }
   }
-  return {false, {}};
+  return false;
 };
 
-static std::tuple<bool, Pos3d, Facing>
+static std::pair<bool, Sensor>
 findPlace(auto b, auto e, const Sensor &s) {
   for (auto it = b; it < e; ++it) {
     Facing f;
     do {
-      auto [check, p] = checkOverlap(*it, s, f);
-      if (check) {
-        return {true, p, f};
+      Sensor ss = spin(s, f);
+      if (checkOverlap(*it, ss)) {
+        return {true, ss};
       }
     } while (next(f));
   }
-  return {false, {}, {}};
+  return {false, s};
 }
 
 static bool
 findPlace(Sensors &sensors, auto i) {
   for (auto j = i; j < sensors.end(); ++j) {
-    auto [found, p, f] = findPlace(sensors.begin(), i, *j);
+    auto [found, s] = findPlace(sensors.begin(), i, *j);
     if (found) {
       if (i != j) {
-        std::swap(*i, *j);
+        *j = std::move(*i);
       }
-      Beacons bs;
-      for (const auto &b : i->beacons) {
-        bs.insert(spin(b, f) + p);
-      }
-      i->p = p;
-      i->beacons = std::move(bs);
+      *i = std::move(s);
       return true;
     }
   }
@@ -117,6 +129,7 @@ md(const Pos3d &a, const Pos3d &b) {
 static std::pair<int, int>
 solve(Sensors sensors) {
   sensors.front().p = {};
+  ranges::sort(sensors.front().beacons);
   for (auto i = sensors.begin() + 1; i < sensors.end(); ++i) {
     if (!findPlace(sensors, i)) {
       return {-1, -1};
@@ -125,7 +138,7 @@ solve(Sensors sensors) {
   std::unordered_set<Pos3d> all;
   for (const auto &s : sensors) {
     for (const auto &b : s.beacons) {
-      all.insert(b);
+      all.insert(b + s.p);
     }
   }
   int res2 = 0;
@@ -150,7 +163,7 @@ main() {
       int x, y, z;
       std::istringstream ss{line};
       ss >> x >> ch >> y >> ch >> z;
-      s.beacons.insert({x, y, z});
+      s.beacons.push_back({x, y, z});
     }
     sensors.push_back(std::move(s));
   }
