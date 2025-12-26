@@ -54,12 +54,12 @@ spin(Sensor s, const Facing &f) {
 }
 
 static bool
-checkOverlap0(const Sensor &os, const Sensor &s) {
+checkOverlap(const Beacons &b1, const Pos3d &p1, const Beacons &b2, const Pos3d &p2) {
   int matching = 0;
-  for (auto i = os.beacons.begin(), j = s.beacons.begin();
-      i != os.beacons.end() && j != s.beacons.end() && matching < 12;) {
-    auto ip = *i + os.p;
-    auto jp = *j + s.p;
+  for (auto i = b1.begin(), j = b2.begin();
+      i != b1.end() && j != b2.end() && (b1.end() - i) >= (12 - matching) && (b2.end() - j) >= (12 - matching);) {
+    auto ip = *i + p1;
+    auto jp = *j + p2;
     if (ip < jp) {
       ++i;
     } else if (jp < ip) {
@@ -67,10 +67,12 @@ checkOverlap0(const Sensor &os, const Sensor &s) {
     } else {
       ++i;
       ++j;
-      ++matching;
+      if (++matching >= 12) {
+        return true;
+      }
     }
   }
-  return matching >= 12;
+  return false;
 }
 
 static bool
@@ -78,7 +80,7 @@ checkOverlap(const Sensor &os, Sensor &s) {
   for (const auto &i : os.beacons) {
     for (const auto &j : s.beacons) {
       s.p = i + os.p - j;
-      if (checkOverlap0(os, s)) {
+      if (checkOverlap(os.beacons, os.p, s.beacons, s.p)) {
         return true;
       }
     }
