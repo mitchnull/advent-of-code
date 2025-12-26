@@ -1,10 +1,12 @@
 #include "../utils.h"
 #include <algorithm>
+#include <iterator>
 #include <sstream>
 #include <unordered_map>
 #include <unordered_set>
 
 using Pos3d = std::array<int, 3>;
+using Pos3dSet = std::unordered_set<Pos3d>;
 using Beacons = std::vector<Pos3d>;
 
 static Pos3d
@@ -53,43 +55,36 @@ spin(Sensor s, const Facing &f) {
   return s;
 }
 
-static bool
-checkOverlap(const Sensor &os, Sensor &s) {
-  std::unordered_map<Pos3d, int> diffs;
-  for (const auto &i : os.beacons) {
-    for (const auto &j : s.beacons) {
-      if (++diffs[i - j] >= 12) {
-        s.p = os.p + i - j;
-        return true;
-      }
-    }
-  }
-  return false;
-};
-
-static std::pair<bool, Sensor>
-findPlace(auto b, auto e, const Sensor &s) {
+static std::pair<bool, Pos3d>
+findPlace(const Sensor &s, Pos3dSet &all) {
   Facing f;
   do {
     Sensor ss = spin(s, f);
-    for (auto it = b; it < e; ++it) {
-      if (checkOverlap(*it, ss)) {
-        return {true, ss};
+    std::unordered_map<Pos3d, int> diffs;
+    for (const auto &sb : ss.beacons) {
+      for (const auto &ab : all) {
+        auto d = ab - sb;
+        if (++diffs[d] >= 12) {
+          std::transform(ss.beacons.begin(), ss.beacons.end(), std::inserter(all, all.end()), [&](const auto &b) {
+            return b + d;
+          });
+          return {true, d};
+        }
       }
     }
   } while (next(f));
-  return {false, s};
+  return {false, {}};
 }
 
 static bool
-findPlace(Sensors &sensors, auto i) {
+findPlace(Sensors &sensors, auto i, Pos3dSet &all) {
   for (auto j = i; j < sensors.end(); ++j) {
-    auto [found, s] = findPlace(sensors.begin(), i, *j);
+    auto [found, p] = findPlace(*j, all);
     if (found) {
       if (i != j) {
-        *j = std::move(*i);
+        std::swap(*i, *j);
       }
-      *i = std::move(s);
+      i->p = p;
       return true;
     }
   }
@@ -108,15 +103,11 @@ md(const Pos3d &a, const Pos3d &b) {
 static std::pair<int, int>
 solve(Sensors sensors) {
   sensors.front().p = {};
+  Pos3dSet all{sensors.front().beacons.begin(), sensors.front().beacons.end()};
+
   for (auto i = sensors.begin() + 1; i < sensors.end(); ++i) {
-    if (!findPlace(sensors, i)) {
+    if (!findPlace(sensors, i, all)) {
       return {-1, -1};
-    }
-  }
-  std::unordered_set<Pos3d> all;
-  for (const auto &s : sensors) {
-    for (const auto &b : s.beacons) {
-      all.insert(b + s.p);
     }
   }
   int res2 = 0;
