@@ -25,11 +25,7 @@ struct std::hash<Pos3d> {
   std::size_t operator()(const Pos3d &p) const { return hashCombine(p[0], hashCombine(p[1], p[2])); }
 };
 
-struct Sensor {
-  Pos3d p;
-  Beacons beacons;
-};
-using Sensors = std::vector<Sensor>;
+using Sensors = std::vector<Beacons>;
 
 struct Facing {
   std::array<int, 3> perm = {0, 1, 2};
@@ -50,25 +46,23 @@ spin(const Pos3d &p, const Facing &f) {
   return res;
 }
 
-static Sensor
-spin(Sensor s, const Facing &f) {
-  std::transform(s.beacons.begin(), s.beacons.end(), s.beacons.begin(), [&](auto p) { return spin(p, f); });
+static Beacons
+spin(Beacons s, const Facing &f) {
+  std::transform(s.begin(), s.end(), s.begin(), [&](auto p) { return spin(p, f); });
   return s;
 }
 
 static std::optional<Pos3d>
-findPlace(const Sensor &s, Pos3dSet &all) {
+findPlace(const Beacons &s, Pos3dSet &all) {
   Facing f;
   do {
-    Sensor ss = spin(s, f);
+    Beacons ss = spin(s, f);
     std::unordered_map<Pos3d, int> diffs;
-    for (const auto &sb : ss.beacons) {
+    for (const auto &sb : ss) {
       for (const auto &ab : all) {
         auto d = ab - sb;
         if (++diffs[d] >= 12) {
-          std::transform(ss.beacons.begin(), ss.beacons.end(), std::inserter(all, all.end()), [&](const auto &b) {
-            return b + d;
-          });
+          std::transform(ss.begin(), ss.end(), std::inserter(all, all.end()), [&](const auto &b) { return b + d; });
           return d;
         }
       }
@@ -89,7 +83,7 @@ md(const Pos3d &a, const Pos3d &b) {
 static std::pair<int, int>
 solve(Sensors sensors) {
   Beacons sps{{}};
-  Pos3dSet all{sensors.front().beacons.begin(), sensors.front().beacons.end()};
+  Pos3dSet all{sensors.front().begin(), sensors.front().end()};
   sensors.erase(sensors.begin());
   while (!sensors.empty()) {
     std::erase_if(sensors, [&](const auto &s) {
@@ -116,13 +110,13 @@ main() {
   std::string line;
   Sensors sensors;
   while (std::getline(std::cin, line)) {
-    Sensor s;
+    Beacons s;
     while (std::getline(std::cin, line) && !line.empty()) {
       char ch;
       int x, y, z;
       std::istringstream ss{line};
       ss >> x >> ch >> y >> ch >> z;
-      s.beacons.push_back({x, y, z});
+      s.push_back({x, y, z});
     }
     sensors.push_back(std::move(s));
   }
