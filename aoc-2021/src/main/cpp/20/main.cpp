@@ -5,7 +5,7 @@ using Num = int64_t;
 using Image = Grid<>;
 
 static Num
-solve1(Image image, const string &mapping, int count) {
+solve(Image image, const string &mapping, int count) {
   for (int i = 0; i < count; ++i) {
     Image next = Image(image.w() + 2, image.h() + 2, {}, image[-1, -1] == '.' ? mapping.front() : mapping.back());
     for (int y = 0; y < next.h(); ++y) {
@@ -35,7 +35,8 @@ main() {
   }
   Image image = Image::read(std::cin, '.');
 
-  println("1: {}", solve1(image, mapping, 2));
+  println("1: {}", solve(image, mapping, 2));
+  println("2: {}", solve(image, mapping, 50));
 
   return 0;
 }
