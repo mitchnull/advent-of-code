@@ -1,4 +1,5 @@
 #include "../utils.h"
+#include <algorithm>
 #include <queue>
 #include <unordered_map>
 
@@ -9,9 +10,9 @@ static const auto Costs = std::vector<Num>{1, 10, 100, 1000};
 static const auto HallwayPlaces =
     std::vector<Pos>{Pos{1, 1}, Pos{2, 1}, Pos{4, 1}, Pos{6, 1}, Pos{8, 1}, Pos{10, 1}, Pos{10, 1}, Pos{11, 1}};
 static const auto HomePlaces = std::vector<std::vector<Pos>>{
-    {Pos{3, 3}, Pos{3, 2}}, {Pos{5, 3}, Pos{5, 2}}, {Pos{7, 3}, Pos{7, 2}}, {Pos{9, 3}, Pos{9, 2}}};
+    {Pos{3, 2}, Pos{3, 3}}, {Pos{5, 2}, Pos{5, 3}}, {Pos{7, 2}, Pos{7, 3}}, {Pos{9, 2}, Pos{9, 3}}};
 
-using Places = std::array<Pos, 8>;
+using Places = std::vector<Pos>;
 template <>
 struct std::hash<Places> {
   std::size_t operator()(const Places &p) const {
@@ -99,10 +100,9 @@ moveCost(const Places &places, int i, Pos to) {
 
 static void
 sort(Places &places, int i) {
-  i = (i / 2) * 2;
-  if (places[i] > places[i + 1]) {
-    std::swap(places[i], places[i + 1]);
-  }
+  int hp = places.size() / 4;
+  int i0 = (i / hp) * hp;
+  std::sort(begin(places) + i0, begin(places) + i0 + hp);
 }
 
 static bool
@@ -123,7 +123,7 @@ tryMove(Queue &q, Dists &dists, Num dist, Places &p, int i, Pos to) {
 }
 
 static Num
-solve1(const Places &start) {
+solve(const Places &start) {
   // Dijkstra
   Dists dists;
 
@@ -142,9 +142,9 @@ solve1(const Places &start) {
     }
     for (int i = 0; i < p.size(); ++i) {
       if (isHallway(p[i])) {
-        if (!tryMove(q, dists, dist, p, i, HomePlaces[i / 2].front())) {
-          if (at(p, HomePlaces[i / 2].front()) == i / 2) {
-            tryMove(q, dists, dist, p, i, HomePlaces[i / 2].back());
+        if (!tryMove(q, dists, dist, p, i, HomePlaces[i / 2].back())) {
+          if (at(p, HomePlaces[i / 2].back()) == i / 2) {
+            tryMove(q, dists, dist, p, i, HomePlaces[i / 2].front());
           }
         }
       } else {
@@ -163,7 +163,7 @@ int
 main() {
   Board board = Board::read(std::cin, ' ');
 
-  Places p = {};
+  Places p{8};
   for (auto [x, y, v] : board.iter()) {
     if ('A' <= v && v <= 'D') {
       int i = v - 'A';
@@ -176,6 +176,6 @@ main() {
     }
   }
 
-  println("1: {}", solve1(p));
+  println("1: {}", solve(p));
   return 0;
 }
