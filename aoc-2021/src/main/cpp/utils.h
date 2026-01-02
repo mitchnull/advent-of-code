@@ -127,6 +127,7 @@ struct Grid {
       for (char c : line) {
         data_.push_back(tr(c));
       }
+      data_.insert(data_.end(), w_ - line.length(), off_);
     }
   }
 
