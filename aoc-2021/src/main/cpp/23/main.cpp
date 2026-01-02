@@ -24,7 +24,6 @@ struct std::hash<Places> {
 };
 
 using Dists = std::unordered_map<Places, Num>;
-using Prevs = std::unordered_map<Places, Places>;
 
 struct Node {
   Places p;
@@ -107,7 +106,7 @@ sort(Places &places, int i) {
 }
 
 static bool
-tryMove(Queue &q, Dists &dists, Num dist, Prevs &prevs, const Places &p, int i, Pos to) {
+tryMove(Queue &q, Dists &dists, Num dist, Places &p, int i, Pos to) {
   auto cost = moveCost(p, i, to);
   if (cost > 0) {
     auto np = p;
@@ -116,8 +115,6 @@ tryMove(Queue &q, Dists &dists, Num dist, Prevs &prevs, const Places &p, int i, 
     auto nd = dist + cost;
     if (auto it = dists.find(np); it == dists.end() || nd < it->second) {
       dists[np] = nd;
-      prevs[np] = p;
-      println("@@@ move {}: {} -> {}, cost: {}", static_cast<char>('A' + (i / 2)), p, np, cost);
       q.emplace(np, nd);
       return true;
     }
@@ -125,19 +122,10 @@ tryMove(Queue &q, Dists &dists, Num dist, Prevs &prevs, const Places &p, int i, 
   return false;
 }
 
-static void
-print(const Places &p, const Dists &dists, Board b) {
-  for (int i = 0; i < p.size(); ++i) {
-    b[p[i]] = 'A' + (i / 2);
-  }
-  println("@@@ cost: {}\n{}", dists.at(p), b);
-}
-
 static Num
-solve1(const Places &start, const Board &b) {
+solve1(const Places &start) {
   // Dijkstra
   Dists dists;
-  Prevs prevs;
 
   auto q = Queue{};
   q.emplace(start, 0);
@@ -150,23 +138,18 @@ solve1(const Places &start, const Board &b) {
       continue;
     }
     if (isFinal(p)) {
-      print(p, dists, b);
-      for (auto it = prevs.find(p); it != prevs.end(); it = prevs.find(p)) {
-        p = it->second;
-        print(p, dists, b);
-      }
       return dist;
     }
     for (int i = 0; i < p.size(); ++i) {
       if (isHallway(p[i])) {
-        if (!tryMove(q, dists, dist, prevs, p, i, HomePlaces[i / 2].front())) {
+        if (!tryMove(q, dists, dist, p, i, HomePlaces[i / 2].front())) {
           if (at(p, HomePlaces[i / 2].front()) == i / 2) {
-            tryMove(q, dists, dist, prevs, p, i, HomePlaces[i / 2].back());
+            tryMove(q, dists, dist, p, i, HomePlaces[i / 2].back());
           }
         }
       } else {
         for (auto np : HallwayPlaces) {
-          tryMove(q, dists, dist, prevs, p, i, np);
+          tryMove(q, dists, dist, p, i, np);
         }
       }
     }
@@ -190,25 +173,9 @@ main() {
         p[i * 2 + 1] = Pos{x, y};
         sort(p, i);
       }
-      board[x, y] = '.';
     }
   }
 
-  { // @@@
-    Board b = board;
-    for (int i = 0; i < HallwayPlaces.size(); ++i) {
-      b[HallwayPlaces[i]] = '0' + i;
-    }
-    for (int i = 0; i < HomePlaces.size(); ++i) {
-      for (auto p : HomePlaces[i]) {
-        b[p] = 'A' + i;
-      }
-    }
-    println("@@@ places:\n{}", b);
-  }
-
-  println("{}", board);
-  println("{}", p);
-  println("1: {}", solve1(p, board));
+  println("1: {}", solve1(p));
   return 0;
 }
