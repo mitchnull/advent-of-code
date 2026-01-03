@@ -131,6 +131,18 @@ struct Grid {
     }
   }
 
+  template <typename It, typename Tr = std::identity>
+  Grid(It b, It e, value_type off = {}, Tr tr = {})
+      : w_(b->size()), h_(e - b), data_{}, off_(off) {
+    data_.reserve(w_ * h_);
+    for (; b != e; ++b) {
+      for (char c : *b) {
+        data_.push_back(tr(c));
+      }
+      data_.insert(data_.end(), w_ - b->length(), off_);
+    }
+  }
+
   Grid(int w, int h, T init = {}, T off = {}) : w_(w), h_(h), data_(w_ * h_, init), off_(off) {}
 
   Grid &operator=(const Grid &other) = default;

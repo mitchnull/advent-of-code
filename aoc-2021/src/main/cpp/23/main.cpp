@@ -7,7 +7,7 @@ using Num = int;
 
 static const auto Costs = std::vector<Num>{1, 10, 100, 1000};
 static const auto HallwayPlaces =
-    std::vector<Pos>{Pos{1, 1}, Pos{2, 1}, Pos{4, 1}, Pos{6, 1}, Pos{8, 1}, Pos{10, 1}, Pos{10, 1}, Pos{11, 1}};
+    std::vector<Pos>{Pos{1, 1}, Pos{2, 1}, Pos{4, 1}, Pos{6, 1}, Pos{8, 1}, Pos{10, 1}, Pos{11, 1}};
 static const auto ExtraLines = std::vector<string>{
     "  #D#C#B#A#  ",
     "  #D#B#A#C#  ",
