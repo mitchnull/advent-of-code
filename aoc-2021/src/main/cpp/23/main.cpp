@@ -11,6 +11,10 @@ static const auto HallwayPlaces =
     std::vector<Pos>{Pos{1, 1}, Pos{2, 1}, Pos{4, 1}, Pos{6, 1}, Pos{8, 1}, Pos{10, 1}, Pos{10, 1}, Pos{11, 1}};
 static const auto HomePlaces = std::vector<std::vector<Pos>>{
     {Pos{3, 2}, Pos{3, 3}}, {Pos{5, 2}, Pos{5, 3}}, {Pos{7, 2}, Pos{7, 3}}, {Pos{9, 2}, Pos{9, 3}}};
+// #D#C#B#A#
+// #D#B#A#C#
+static const auto ExtraStartPlaces =
+    std::vector<std::vector<Pos>>{{{7, 4}, {9, 3}}, {{5, 4}, {7, 3}}, {{5, 3}, {9, 4}}, {{3, 3}, {3, 4}}};
 
 using Places = std::vector<Pos>;
 template <>
@@ -180,5 +184,11 @@ main() {
   }
 
   println("1: {}", solve(p));
+
+  for (int i = 0; i < 4; ++i) {
+    p.insert(begin(p) + (4 * i + 1), begin(ExtraStartPlaces[i]), end(ExtraStartPlaces[i]));
+    p[4 * i + 3].y += 2;
+  }
+  println("2: {}", solve(p));
   return 0;
 }
