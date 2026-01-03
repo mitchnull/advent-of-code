@@ -188,28 +188,27 @@ solve(std::vector<string> lines) {
     }
     for (auto hwp : HallwayPlaces) {
       char i = b[hwp];
-      if (i != -1) {
-        Pos hp{i * 2 + 2, b.h() - 1};
-        if (!tryMove(q, dists, dist, b, hwp, hp)) {
-          while (hp.y > 1 && b[hp] == i) {
-            --hp.y;
-            if (tryMove(q, dists, dist, b, hwp, hp)) {
+      if (i == -1) {
+        for (int i = 0; i < 4; ++i) {
+          for (int y = 1; y < b.h(); ++y) {
+            Pos hop{i * 2 + 2, y};
+            if (b[hop] != -1) {
+              if (!isAllHome(b, hop)) {
+                tryMove(q, dists, dist, b, hop, hwp);
+              }
               break;
             }
           }
         }
-      }
-    }
-    for (int i = 0; i < 4; ++i) {
-      for (int y = 1; y < b.h(); ++y) {
-        Pos hop{i * 2 + 2, y};
-        if (b[hop] != -1) {
-          if (!isAllHome(b, hop)) {
-            for (auto hwp : HallwayPlaces) {
-              tryMove(q, dists, dist, b, hop, hwp);
-            }
+      } else {
+        for (int y = b.h() - 1; y > 0; --y) {
+          Pos hop{i * 2 + 2, y};
+          if (b[hop] == -1) {
+            tryMove(q, dists, dist, b, hwp, hop);
+            break;
+          } else if (b[hop] != i) {
+            break;
           }
-          break;
         }
       }
     }
