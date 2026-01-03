@@ -39,23 +39,6 @@ struct std::hash<State> {
 
 using Dists = std::unordered_map<State, Num>;
 
-static Board
-deser(const State &s, int n) {
-  Board b{11, n + 1, -1};
-  for (int i = 0; i < HallwayPlaces.size(); ++i) {
-    b[HallwayPlaces[i]] = (s.hwEmpty & (0x01 << i)) ? -1 : ((s.hwDwellers & (0x03 << (2 * i))) >> (i * 2));
-  }
-  for (int i = 0; i < 4; ++i) {
-    for (int j = 0; j < s.homesFree[i] && j < n; ++j) {
-      b[i * 2 + 2, j + 1] = -1;
-    }
-    for (int j = 0; j < n - s.homesFree[i]; ++j) {
-      b[i * 2 + 2, j + s.homesFree[i] + 1] = ((s.homes[i] & (0x03 << (j * 2))) >> (j * 2));
-    }
-  }
-  return b;
-}
-
 static State
 ser(const Board &b, int n) {
   State s = {};
@@ -75,6 +58,23 @@ ser(const Board &b, int n) {
     }
   }
   return s;
+}
+
+static Board
+deser(const State &s, int n) {
+  Board b{11, n + 1, -1};
+  for (int i = 0; i < HallwayPlaces.size(); ++i) {
+    b[HallwayPlaces[i]] = (s.hwEmpty & (0x01 << i)) ? -1 : ((s.hwDwellers & (0x03 << (2 * i))) >> (i * 2));
+  }
+  for (int i = 0; i < 4; ++i) {
+    for (int j = 0; j < s.homesFree[i] && j < n; ++j) {
+      b[i * 2 + 2, j + 1] = -1;
+    }
+    for (int j = 0; j < n - s.homesFree[i]; ++j) {
+      b[i * 2 + 2, j + s.homesFree[i] + 1] = ((s.homes[i] & (0x03 << (j * 2))) >> (j * 2));
+    }
+  }
+  return b;
 }
 
 struct Node {
