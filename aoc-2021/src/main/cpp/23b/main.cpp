@@ -7,8 +7,7 @@ using Num = int;
 using Board = Grid<>;
 
 static const auto Costs = std::vector<Num>{1, 10, 100, 1000};
-static const auto HallwayPlaces =
-    std::vector<Pos>{{1, 1}, {2, 1}, {4, 1}, {6, 1}, {8, 1}, {10, 1}, {11, 1}};
+static const auto HallwayPlaces = std::vector<Pos>{{1, 1}, {2, 1}, {4, 1}, {6, 1}, {8, 1}, {10, 1}, {11, 1}};
 static const auto ExtraLines = std::vector<string>{
     "  #D#C#B#A#  ",
     "  #D#B#A#C#  ",
@@ -34,6 +33,16 @@ isFinal(const Board &b) {
       if (b[i * 2 + 3, y] != 'A' + i) {
         return false;
       }
+    }
+  }
+  return true;
+}
+
+static bool
+isAllHome(const Board &b, Pos p) {
+  for (; p.y < b.h(); ++p.y) {
+    if ((b[p] - 'A') * 2 + 3 != p.x) {
+      return false;
     }
   }
   return true;
@@ -130,9 +139,12 @@ solve(const std::vector<string> lines) {
       for (int y = 2; y < b.h() - 1; ++y) {
         Pos hop{i * 2 + 3, y};
         if (b[hop] != '.') {
-          for (auto hwp : HallwayPlaces) {
-            tryMove(q, dists, dist, b, hop, hwp);
+          if (!isAllHome(b, hop)) {
+            for (auto hwp : HallwayPlaces) {
+              tryMove(q, dists, dist, b, hop, hwp);
+            }
           }
+          break;
         }
       }
     }

@@ -120,20 +120,10 @@ struct Grid {
   using value_type = std::conditional<std::is_same<T, bool>::value, char, T>::type;
 
   template <typename Tr = std::identity>
-  Grid(std::vector<std::string> lines, value_type off = {}, Tr tr = {})
-      : w_(lines[0].size()), h_(lines.size()), data_{}, off_(off) {
-    data_.reserve(w_ * h_);
-    for (const auto &line : lines) {
-      for (char c : line) {
-        data_.push_back(tr(c));
-      }
-      data_.insert(data_.end(), w_ - line.length(), off_);
-    }
-  }
+  Grid(std::vector<std::string> lines, value_type off = {}, Tr tr = {}) : Grid(lines.begin(), lines.end(), off, tr) {}
 
   template <typename It, typename Tr = std::identity>
-  Grid(It b, It e, value_type off = {}, Tr tr = {})
-      : w_(b->size()), h_(e - b), data_{}, off_(off) {
+  Grid(It b, It e, value_type off = {}, Tr tr = {}) : w_(b->size()), h_(e - b), data_{}, off_(off) {
     data_.reserve(w_ * h_);
     for (; b != e; ++b) {
       for (char c : *b) {
