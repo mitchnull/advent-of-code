@@ -41,16 +41,16 @@ using Dists = std::unordered_map<State, Num>;
 
 static Board
 deser(const State &s, int n) {
-  Board b{11, n + 1, '.'};
+  Board b{11, n + 1, -1};
   for (int i = 0; i < HallwayPlaces.size(); ++i) {
-    b[HallwayPlaces[i]] = (s.hwEmpty & (0x01 << i)) ? '.' : 'A' + ((s.hwDwellers & (0x03 << (2 * i))) >> (i * 2));
+    b[HallwayPlaces[i]] = (s.hwEmpty & (0x01 << i)) ? -1 : ((s.hwDwellers & (0x03 << (2 * i))) >> (i * 2));
   }
   for (int i = 0; i < 4; ++i) {
     for (int j = 0; j < s.homesFree[i] && j < n; ++j) {
-      b[i * 2 + 2, j + 1] = '.';
+      b[i * 2 + 2, j + 1] = -1;
     }
     for (int j = 0; j < n - s.homesFree[i]; ++j) {
-      b[i * 2 + 2, j + s.homesFree[i] + 1] = 'A' + ((s.homes[i] & (0x03 << (j * 2))) >> (j * 2));
+      b[i * 2 + 2, j + s.homesFree[i] + 1] = ((s.homes[i] & (0x03 << (j * 2))) >> (j * 2));
     }
   }
   return b;
@@ -60,18 +60,18 @@ static State
 ser(const Board &b, int n) {
   State s = {};
   for (int i = 0; i < HallwayPlaces.size(); ++i) {
-    if (b[HallwayPlaces[i]] == '.') {
+    if (b[HallwayPlaces[i]] == -1) {
       s.hwEmpty |= (1 << i);
     } else {
-      s.hwDwellers |= ((b[HallwayPlaces[i]] - 'A') << (i * 2));
+      s.hwDwellers |= (b[HallwayPlaces[i]] << (i * 2));
     }
   }
   for (int i = 0; i < 4; ++i) {
-    for (int j = 0; j < n && b[i * 2 + 2, j + 1] == '.'; ++j) {
+    for (int j = 0; j < n && b[i * 2 + 2, j + 1] == -1; ++j) {
       ++s.homesFree[i];
     }
     for (int j = 0; j < n - s.homesFree[i]; ++j) {
-      s.homes[i] |= (b[i * 2 + 2, j + s.homesFree[i] + 1] - 'A') << (j * 2);
+      s.homes[i] |= b[i * 2 + 2, j + s.homesFree[i] + 1] << (j * 2);
     }
   }
   return s;
@@ -92,7 +92,7 @@ static bool
 isFinal(const Board &b) {
   for (int y = 1; y < b.h(); ++y) {
     for (int i = 0; i < 4; ++i) {
-      if (b[i * 2 + 2, y] != 'A' + i) {
+      if (b[i * 2 + 2, y] != i) {
         return false;
       }
     }
@@ -103,7 +103,7 @@ isFinal(const Board &b) {
 static bool
 isAllHome(const Board &b, Pos p) {
   for (; p.y < b.h(); ++p.y) {
-    if ((b[p] - 'A') * 2 + 2 != p.x) {
+    if (b[p] * 2 + 2 != p.x) {
       return false;
     }
   }
@@ -117,29 +117,29 @@ isHallway(Pos pos) {
 
 static Num
 moveCost(const Board &b, Pos p, Pos to) {
-  Num cost = Costs[b[p] - 'A'] * (std::abs(to.x - p.x) + std::abs(to.y - p.y));
+  Num cost = Costs[b[p]] * (std::abs(to.x - p.x) + std::abs(to.y - p.y));
   auto dx = sgn(to.x - p.x);
   if (isHallway(p)) {
     while ((p.x += dx) != to.x) {
-      if (b[p] != '.') {
+      if (b[p] != -1) {
         return -1;
       }
     }
     while (p.y != to.y) {
       ++p.y;
-      if (b[p] != '.') {
+      if (b[p] != -1) {
         return -1;
       }
     }
   } else {
     while (--p.y != to.y) {
-      if (b[p] != '.') {
+      if (b[p] != -1) {
         return -1;
       }
     }
     while (p.x != to.x) {
       p.x += dx;
-      if (b[p] != '.') {
+      if (b[p] != -1) {
         return -1;
       }
     }
@@ -168,7 +168,7 @@ static Num
 solve(std::vector<string> lines) {
   // Dijkstra
   std::transform(lines.begin(), lines.end(), lines.begin(), [](auto line) { return line.substr(1, line.size() - 2); });
-  Board start{lines.begin() + 1, lines.end() - 1, ' '};
+  Board start{lines.begin() + 1, lines.end() - 1, ' ', [](char c) { return ('A' <= c && c <= 'D') ? c - 'A' : -1; }};
   int n = start.h() - 1;
   Dists dists;
   auto q = Queue{};
@@ -187,12 +187,11 @@ solve(std::vector<string> lines) {
       return dist;
     }
     for (auto hwp : HallwayPlaces) {
-      char a = b[hwp];
-      if (a != '.') {
-        int i = a - 'A';
+      char i = b[hwp];
+      if (i != -1) {
         Pos hp{i * 2 + 2, b.h() - 1};
         if (!tryMove(q, dists, dist, b, hwp, hp)) {
-          while (hp.y > 1 && b[hp] == a) {
+          while (hp.y > 1 && b[hp] == i) {
             --hp.y;
             if (tryMove(q, dists, dist, b, hwp, hp)) {
               break;
@@ -204,7 +203,7 @@ solve(std::vector<string> lines) {
     for (int i = 0; i < 4; ++i) {
       for (int y = 1; y < b.h(); ++y) {
         Pos hop{i * 2 + 2, y};
-        if (b[hop] != '.') {
+        if (b[hop] != -1) {
           if (!isAllHome(b, hop)) {
             for (auto hwp : HallwayPlaces) {
               tryMove(q, dists, dist, b, hop, hwp);
