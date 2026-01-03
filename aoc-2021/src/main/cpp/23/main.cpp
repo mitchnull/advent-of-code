@@ -142,9 +142,12 @@ solve(const Places &start) {
     }
     for (int i = 0; i < p.size(); ++i) {
       if (isHallway(p[i])) {
-        if (!tryMove(q, dists, dist, p, i, HomePlaces[i / 2].back())) {
-          if (at(p, HomePlaces[i / 2].back()) == i / 2) {
-            tryMove(q, dists, dist, p, i, HomePlaces[i / 2].front());
+        int hpi = i / (p.size() / 4);
+        if (!tryMove(q, dists, dist, p, i, HomePlaces[hpi].back())) {
+          for (int j = p.size() / 4 - 1; j > 0; --j) {
+            if (at(p, HomePlaces[hpi][j]) != hpi || tryMove(q, dists, dist, p, i, HomePlaces[hpi][j - 1])) {
+              break;
+            }
           }
         }
       } else {
