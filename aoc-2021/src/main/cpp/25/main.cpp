@@ -1,43 +1,31 @@
 #include "../utils.h"
 
-using Num = int64_t;
 using Board = Grid<>;
 
 static int
 move(Board &b, char cuc, Dir d) {
-  int moves = 0;
+  std::vector<Pos> moving;
   for (int y = 0; y < b.h(); ++y) {
     for (int x = 0; x < b.w(); ++x) {
       if (b[x, y] == cuc) {
-        int nx = (x + d.dx) % b.w();
-        int ny = (y + d.dy) % b.h();
-        if (b[nx, ny] == '.') {
-          b[x, y] = '@';
-          ++moves;
+        if (b[(x + d.dx) % b.w(), (y + d.dy) % b.h()] == '.') {
+          moving.emplace_back(x, y);
         }
       }
     }
   }
-  if (!moves) {
-    return false;
+  for (const auto &p : moving) {
+    b[p] = '.';
+    b[(p.x + d.dx) % b.w(), (p.y + d.dy) % b.h()] = cuc;
   }
-  for (int y = 0; y < b.h(); ++y) {
-    for (int x = 0; x < b.w(); ++x) {
-      if (b[x, y] == '@') {
-        int nx = (x + d.dx) % b.w();
-        int ny = (y + d.dy) % b.h();
-        b[nx, ny] = cuc;
-        b[x, y] = '.';
-      }
-    }
-  }
-  return moves;
+  return moving.size();
 }
 
-static Num
-solve1(Board b) {
-  for (Num moves = 1;; ++moves) {
-    if (move(b, '>', Dir{1, 0}) + move(b, 'v', Dir{0, 1}) == 0) {
+static int
+solve(Board b) {
+  for (int moves = 1;; ++moves) {
+    int east = move(b, '>', Dir{1, 0});
+    if (east + move(b, 'v', Dir{0, 1}) == 0) {
       return moves;
     }
   }
@@ -48,8 +36,6 @@ solve1(Board b) {
 int
 main() {
   Board b = Board::read();
-
-  println("1: {}", solve1(b));
-
+  println("1: {}", solve(b));
   return 0;
 }
