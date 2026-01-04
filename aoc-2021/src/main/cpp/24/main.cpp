@@ -9,19 +9,18 @@ struct Block {
 using Blocks = std::vector<Block>;
 
 static Num
-solve1(const Blocks &blocks, Num n = 0, int z = 0, int i = 0) {
+solve(const Blocks &blocks, bool rev, Num n = 0, int z = 0, int i = 0) {
   if (i >= blocks.size()) {
-    // println("@@@ n={}, z={}", n, z);
     return z == 0 ? n : -1;
   }
   auto [div, dx, dy] = blocks[i];
-  for (int d = 9; d > 0; --d) {
+  for (int j = 1; j < 10; ++j) {
+    int d = rev ? (10 - j) : j;
     if (div == 26 && (z % 26 + dx) != d) {
-      // println("@@@ n={}, z={}, div={}, d={}, dx={}, (z % 26 +dx)={}", n, z, div, d, dx, (z % 26 + dx));
       continue;
     }
     int nz = (div == 1) ? (z * 26 + dy + d) : (z / 26);
-    auto res = solve1(blocks, n * 10 + d, nz, i + 1);
+    auto res = solve(blocks, rev, n * 10 + d, nz, i + 1);
     if (res != -1) {
       return res;
     }
@@ -53,7 +52,8 @@ main() {
     }
   }
 
-  println("1: {}", solve1(blocks));
+  println("1: {}", solve(blocks, true));
+  println("2: {}", solve(blocks, false));
 
   return 0;
 }
