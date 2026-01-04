@@ -4,6 +4,25 @@
 
 using Num = int64_t;
 
+struct Block {
+  int div, dx, dy;
+};
+
+template <>
+struct std::formatter<Block> {
+  template <typename FormatContext>
+  constexpr auto parse(FormatContext &ctx) {
+    return ctx.begin();
+  }
+
+  template <typename FormatContext>
+  constexpr auto format(const Block &b, FormatContext &ctx) const {
+    return format_to(ctx.out(), "{{div={}, dx={}, dy={}}}", b.div, b.dx, b.dy);
+  }
+};
+
+using Blocks = std::vector<Block>;
+
 enum Mnemoic {
   INP,
   ADD,
@@ -47,32 +66,33 @@ eval(const Prog &prog, Num n) {
   auto it = input.begin();
   for (const auto &i : prog) {
     switch (i.m) {
-      case INP:
-        r[i.op1] = *it++; break;
-      case ADD:
-        r[i.op1] += v(r, i.op2); break;
-      case MUL:
-        r[i.op1] *= v(r, i.op2); break;
-      case DIV:
-        r[i.op1] /= v(r, i.op2); break;
-      case MOD:
-        r[i.op1] %= v(r, i.op2); break;
-      case EQL:
-        r[i.op1] = r[i.op1] == v(r, i.op2); break;
+      case INP: r[i.op1] = *it++; break;
+      case ADD: r[i.op1] += v(r, i.op2); break;
+      case MUL: r[i.op1] *= v(r, i.op2); break;
+      case DIV: r[i.op1] /= v(r, i.op2); break;
+      case MOD: r[i.op1] %= v(r, i.op2); break;
+      case EQL: r[i.op1] = r[i.op1] == v(r, i.op2); break;
     }
   }
   return !r['z'];
 }
 
 static Num
-solve1(const Prog &prog) {
-  Num watch = 0;
-  for (Num n = 99999999999999L; n >= 11111111111111; --n) {
-    if (++watch % 1000000 == 0) {
-      println("@@@ {}", n);
+solve1(const Blocks &blocks, Num n = 0, int z = 0, int i = 0) {
+  if (i >= blocks.size()) {
+    // println("@@@ n={}, z={}", n, z);
+    return z == 0 ? n : -1;
+  }
+  auto [div, dx, dy] = blocks[i];
+  for (int d = 9; d > 0; --d) {
+    if (div == 26 && (z % 26 + dx) != d) {
+      // println("@@@ n={}, z={}, div={}, d={}, dx={}, (z % 26 +dx)={}", n, z, div, d, dx, (z % 26 + dx));
+      continue;
     }
-    if (eval(prog, n)) {
-      return n;
+    int nz = (div == 1) ? (z * 26 + dy + d) : (z / 26);
+    auto res = solve1(blocks, n * 10 + d, nz, i + 1);
+    if (res != -1) {
+      return res;
     }
   }
   return -1;
@@ -82,13 +102,26 @@ solve1(const Prog &prog) {
 
 int
 main() {
+  auto blocks = Blocks{};
   auto prog = Prog{};
   string line;
+  Block b;
   while (std::getline(std::cin, line)) {
     auto ss = std::istringstream{line};
     string inst, op2;
     char op1;
     ss >> inst >> op1 >> op2;
+
+    if (inst == "div" && op1 == 'z') {
+      b.div = std::stoi(op2);
+    } else if (inst == "add") {
+      switch (op1) {
+        case 'x': b.dx = std::atoi(op2.c_str()); break;
+        case 'y': b.dy = std::atoi(op2.c_str()); break;
+        case 'z': blocks.push_back(b); break;
+      }
+    }
+
     if (inst == "inp") {
       prog.emplace_back(INP, op1, op1);
     } else if (inst == "add") {
@@ -104,7 +137,8 @@ main() {
     }
   }
 
-  println("1: {}", solve1(prog));
+  println("@@@ {}", blocks);
+  println("1: {}", solve1(blocks));
 
   return 0;
 }
