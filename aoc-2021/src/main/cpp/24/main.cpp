@@ -32,7 +32,24 @@ enum Mnemoic {
   EQL,
 };
 
+static string
+name(Mnemoic m) {
+  switch (m) {
+    case INP: return "inp";
+    case ADD: return "add";
+    case MUL: return "mul";
+    case DIV: return "div";
+    case MOD: return "mod";
+    case EQL: return "eql";
+  }
+}
+
 using Op = std::variant<char, Num>;
+
+static string
+to_string(Op op) {
+  return std::holds_alternative<Num>(op) ? std::to_string(std::get<Num>(op)) : string{std::get<char>(op)};
+}
 
 struct Inst {
   Mnemoic m;
@@ -45,7 +62,7 @@ using Regs = std::vector<Num>;
 
 static Op
 op(string v) {
-  return std::isalpha(v[0]) ? v[0] : std::stol(v);
+  return std::isalpha(v[0]) ? Op(v[0]) : std::stol(v);
 }
 
 static Num
@@ -66,15 +83,15 @@ eval(const Prog &prog, Num n) {
   auto it = input.begin();
   for (const auto &i : prog) {
     switch (i.m) {
-      case INP: r[i.op1] = *it++; break;
+      case INP: r[i.op1] = (*it++ - '0'); break;
       case ADD: r[i.op1] += v(r, i.op2); break;
       case MUL: r[i.op1] *= v(r, i.op2); break;
       case DIV: r[i.op1] /= v(r, i.op2); break;
       case MOD: r[i.op1] %= v(r, i.op2); break;
-      case EQL: r[i.op1] = r[i.op1] == v(r, i.op2); break;
+      case EQL: r[i.op1] = (r[i.op1] == v(r, i.op2)); break;
     }
   }
-  return !r['z'];
+  return r['z'] == 0;
 }
 
 static Num
@@ -133,12 +150,16 @@ main() {
     } else if (inst == "mod") {
       prog.emplace_back(MOD, op1, op(op2));
     } else if (inst == "eql") {
-      prog.emplace_back(MOD, op1, op(op2));
+      prog.emplace_back(EQL, op1, op(op2));
+    } else {
+      println("@@@ FAIL: {}", line);
     }
+    println("{} {} {}", name(prog.back().m), prog.back().op1, to_string(prog.back().op2));
   }
 
   println("@@@ {}", blocks);
   println("1: {}", solve1(blocks));
+  println("eval: {}", eval(prog, solve1(blocks)));
 
   return 0;
 }
