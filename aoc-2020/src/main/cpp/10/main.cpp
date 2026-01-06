@@ -1,6 +1,7 @@
 #include "../utils.h"
 #include <algorithm>
 #include <iterator>
+#include <numeric>
 
 using Num = int64_t;
 using Nums = std::vector<Num>;
@@ -16,6 +17,16 @@ solve1(const Nums &nums) {
   return diffs[1] * diffs[3];
 }
 
+static Num
+solve2(const Nums &nums) {
+  auto r = Nums(nums.back() + 1, 0);
+  r[0] = 1;
+  for (auto n : nums) {
+    r[n] = std::reduce(r.begin() + std::max(Num{0}, n - 3), r.begin() + n);
+  }
+  return r.back();
+}
+
 /* ------------------------------------------------------------------------ */
 
 int
@@ -25,6 +36,7 @@ main() {
   ranges::sort(nums);
   nums.push_back(nums.back() + 3);
   println("1: {}", solve1(nums));
+  println("1: {}", solve2(nums));
 
   return 0;
 }
