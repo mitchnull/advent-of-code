@@ -35,6 +35,19 @@ solve1(const G &g, string bag, SSet &visited) {
   return visited.size();
 }
 
+static Num
+solve2(const G &g, string bag) {
+  auto it = g.find(bag);
+  if (it == g.end()) {
+    return 0;
+  }
+  Num res = 0;
+  for (const auto &bs : it->second) {
+    res += bs.count * (1 + solve2(g, bs.name));
+  }
+  return res;
+}
+
 /* ------------------------------------------------------------------------ */
 
 int
@@ -57,5 +70,6 @@ main() {
 
   SSet canContain;
   println("1: {}", solve1(r, "shiny gold", canContain));
+  println("2: {}", solve2(g, "shiny gold"));
   return 0;
 }
