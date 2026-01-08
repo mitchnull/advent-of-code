@@ -1,7 +1,8 @@
 #include "../utils.h"
+#include "../gmpxx.h"
 #include <regex>
 
-using Num = int64_t;
+using Num = mpz_class;
 
 struct Offset {
   Num m, a;
@@ -25,9 +26,9 @@ egcd(Num a, Num b) {
   Num pr = a, r = b, ps = 1, s = 0, pt = 0, t = 1;
   while (r != 0) {
     Num q = pr / r;
-    std::tie(pr, r) = std::make_pair(r, pr - q * r);
-    std::tie(ps, s) = std::make_pair(s, ps - q * s);
-    std::tie(pt, t) = std::make_pair(t, pt - q * t);
+    std::tie(pr, r) = std::make_pair(r, Num{pr - q * r});
+    std::tie(ps, s) = std::make_pair(s, Num{ps - q * s});
+    std::tie(pt, t) = std::make_pair(t, Num{pt - q * t});
   }
   return {pr, ps, pt};
 }
@@ -46,7 +47,7 @@ crt(Offset a, Offset b) {
 int
 main() {
   Num ts;
-  Num minId = -1, minDelay = std::numeric_limits<Num>::max();
+  Num minId = -1, minDelay = std::numeric_limits<int>::max();
   string line;
   std::cin >> ts >> line;
   std::vector<Offset> offsets;
@@ -66,20 +67,8 @@ main() {
       minId = id;
     }
   }
-  println("1: {}", minDelay * minId);
+  println("1: {}", Num{minDelay * minId});
   println("@@@ {}", offsets);
-
-#if 0
-  Num x = offsets.front().m;
-  Num m = 1;
-  for (auto o : offsets) {
-    while (x % o.m != ((o.a + o.m) % o.m)) {
-      x += m;
-    }
-    m *= o.m;
-    println("@@@ {} -> m={}, x={}", o, m, x);
-  }
-#endif
 
   Offset r{1, 0};
   for (auto o : offsets) {
@@ -87,7 +76,7 @@ main() {
     r = crt(r, o);
   }
   for (auto o : offsets) {
-    println("@@@ {} -> {}", o, (((r.a / o.m) + 1) * o.m) - r.a);
+    println("@@@ {} -> {}", o, Num{(((r.a / o.m) + 1) * o.m) - r.a});
   }
   println("2: {}", r.a);
 
