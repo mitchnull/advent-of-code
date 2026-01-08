@@ -62,21 +62,15 @@ main() {
     offsets.emplace_back(id, -d);
     Num delay = (((ts + id - 1) / id) * id) - ts;
     if (delay < minDelay) {
-      println("@@@ ts={}, id={}, delay={}", ts, id, delay);
       minDelay = delay;
       minId = id;
     }
   }
   println("1: {}", Num{minDelay * minId});
-  println("@@@ {}", offsets);
 
   Offset r{1, 0};
   for (auto o : offsets) {
-    println("@@@ crt({}, {}) = {}", r, o, crt(r, o));
     r = crt(r, o);
-  }
-  for (auto o : offsets) {
-    println("@@@ {} -> {}", o, Num{(((r.a / o.m) + 1) * o.m) - r.a});
   }
   println("2: {}", r.a);
 
